@@ -1,0 +1,88 @@
+{
+  "id": "adult-4",
+  "status": "live",
+  "population": "adult",
+  "title": "48-year-old woman with abdominal pain",
+  "age": "48 years",
+  "sex": "Female",
+  "domain": "Abdominal pain with fever (adult)",
+  "focusTags": [
+    "adult"
+  ],
+  "image": "adult-4",
+  "ageBandRef": null,
+  "arrival": "A 48-year-old woman presents with mild, generalized abdominal pain that began this morning. She rates the pain 4/10. She has mild nausea but no vomiting, diarrhoea, bleeding, fainting, urinary retention, or recent trauma. She is not pregnant and can drink normally. She is alert, calm, and walking independently. Her abdomen is soft without guarding. Her peripheral pulse is strong, and capillary refill is 2 seconds.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no",
+      "why": "She is alert."
+    },
+    {
+      "g": "airway_red",
+      "correct": "no",
+      "why": "No stridor, respiratory distress, or central cyanosis."
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "112 bpm"
+      },
+      "correct": "no",
+      "reveal": true,
+      "why": "Her pulse is strong and capillary refill is 2 seconds, with no bleeding."
+    },
+    {
+      "g": "disability_red",
+      "correct": "no",
+      "why": "She has no convulsions, and she is alert with normal mental status, so a glucose is not needed here."
+    },
+    {
+      "g": "other_red",
+      "correct": "no",
+      "why": "Acute abdominal pain is a red criterion only in patients over 50 years old — she is 48, and has no other high-risk feature."
+    },
+    {
+      "g": "airway_yellow",
+      "correct": "no",
+      "why": "No swelling of the mouth, throat, or neck, and no wheezing."
+    },
+    {
+      "g": "circulation_yellow",
+      "correct": "no",
+      "why": "Mild nausea only, drinking normally, and no diarrhoea, bleeding, or fainting."
+    },
+    {
+      "g": "disability_yellow",
+      "correct": "no",
+      "why": "Alert and calm, walking independently, and her pain is 4 out of 10."
+    },
+    {
+      "g": "other_yellow",
+      "correct": "no",
+      "why": "No rash, deformity, fracture, dislocation, or surgical diagnosis."
+    },
+    {
+      "g": "vitals",
+      "chips": {
+        "HR": "112 bpm",
+        "RR": "18 breaths/min",
+        "SpO2": "98%",
+        "Temp": "39.4°C",
+        "AVPU": "A"
+      },
+      "correct": "yes",
+      "reveal": true,
+      "why": "Her temperature is 39.4°C, above the 39° threshold. Her heart rate of 112 is within range, as are her respiratory rate, oxygen saturation, and AVPU."
+    }
+  ],
+  "correct": "uptriage",
+  "keyCriterion": "High-risk vital sign — temperature 39.4°C (threshold >39°C)",
+  "feedbackWhy": "This patient does not meet any red or yellow criteria. However, her temperature is above the high-risk threshold of 39°C.",
+  "teachingPoint": "She should not be moved directly to the low-acuity or waiting area without immediate review by a supervising clinician. This is exactly what the high-risk vital signs step is for.",
+  "reassessment": null,
+  "sourceDeck": "Adult — IITT Slide Deck 2",
+  "sourceSlides": "43–54",
+  "needsReview": true,
+  "reviewNote": "This case's source-defined outcome is “Up-triage / immediate review by a supervising clinician,” distinct from a plain Yellow or Green. Confirm the scoring convention used for this against learner answers of Yellow or Green (currently: Green = under-triage, Yellow/Red = over-triage)."
+}

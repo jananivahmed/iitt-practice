@@ -1,0 +1,76 @@
+# Publishes the website.
+#   main branch    -> the live site          https://jananivahmed.github.io/iitt-practice/
+#   preview branch -> the preview site       https://jananivahmed.github.io/iitt-practice/preview/
+# Runs when main changes, when you press "Run workflow", or when the
+# preview branch changes (see preview-trigger.yml).
+name: Publish site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Get the main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: live-src
+
+      - name: Get the preview branch (if there is one)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git ls-remote --exit-code --heads "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" preview >/dev/null 2>&1; then
+            git clone --depth 1 --branch preview "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" preview-src
+          else
+            echo "No preview branch yet. Publishing the live site only."
+          fi
+
+      - name: Check the live cases
+        run: node live-src/tools/validate.js live-src
+
+      - name: Build the site folder
+        run: |
+          set -e
+          copy_site () {
+            tar -C "$1" --exclude=./.git --exclude=./.github --exclude=./tools --exclude=./docs --exclude=./SETUP-workflows --exclude=./README.md --exclude=./config.json -cf - . | tar -C "$2" -xf -
+          }
+          mkdir -p _site
+          copy_site live-src _site
+          printf '{"env":"live","build":"%s"}\n' "$(git -C live-src rev-parse --short HEAD)" > _site/config.json
+          touch _site/.nojekyll
+          if [ -d preview-src ]; then
+            if node preview-src/tools/validate.js preview-src; then
+              mkdir -p _site/preview
+              copy_site preview-src _site/preview
+              printf '{"env":"preview","build":"%s"}\n' "$(git -C preview-src rev-parse --short HEAD)" > _site/preview/config.json
+              sed -i 's#<head>#<head>\n<meta name="robots" content="noindex">#' _site/preview/index.html
+            else
+              echo "::warning::The preview branch has errors (listed above), so the preview site was NOT updated. The live site was published normally."
+            fi
+          fi
+
+      - name: Upload
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Publish
+        id: deploy
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,37 @@
+{
+  "id": "peds-1",
+  "status": "live",
+  "population": "pediatric",
+  "title": "9-year-old boy with fever",
+  "age": "9 years",
+  "sex": "Male",
+  "domain": "Respiratory distress (pediatric)",
+  "focusTags": [
+    "pediatric"
+  ],
+  "image": "peds-1",
+  "ageBandRef": null,
+  "arrival": "A 9-year-old boy is brought in by his father for three days of fever. He has become increasingly tired and has worsening cough and difficulty breathing.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no",
+      "why": "He is alert and interactive."
+    },
+    {
+      "g": "airway_red",
+      "correct": "yes",
+      "reveal": true,
+      "why": "His chest draws inward when he breathes. Chest indrawing is accessory muscle use, which meets the definition of respiratory distress."
+    }
+  ],
+  "correct": "red",
+  "keyCriterion": "Red — Airway & breathing: respiratory distress (chest indrawing)",
+  "feedbackWhy": "Chest indrawing indicates accessory muscle use and respiratory distress.",
+  "teachingPoint": "He requires immediate evaluation.",
+  "reassessment": null,
+  "sourceDeck": "Paediatric — IITT Slide Deck 3",
+  "sourceSlides": "27–30",
+  "needsReview": false,
+  "reviewNote": ""
+}

@@ -1,0 +1,15 @@
+{
+  "_note": "The list of focus tags a case may use in its focusTags field. Add a tag here before using it on a case. 'adult' and 'pediatric' are used by the current cases; the others are suggestions to edit or delete.",
+  "tags": [
+    "adult",
+    "pediatric",
+    "vital-signs",
+    "age-band-vitals",
+    "up-triage",
+    "under-triage",
+    "over-triage",
+    "trauma",
+    "burns",
+    "behavioural"
+  ]
+}

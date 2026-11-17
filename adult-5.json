@@ -1,0 +1,88 @@
+{
+  "id": "adult-5",
+  "status": "live",
+  "population": "adult",
+  "title": "25-year-old man with a forearm abrasion",
+  "age": "25 years",
+  "sex": "Male",
+  "domain": "Minor trauma / wound care",
+  "focusTags": [
+    "adult"
+  ],
+  "image": "adult-5",
+  "ageBandRef": null,
+  "arrival": "A 25-year-old man scraped his forearm against a wooden door earlier today. He has a small, superficial abrasion with no active bleeding, swelling, deformity, severe pain, or loss of movement or sensation. He is alert, comfortable, and otherwise feels well.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no",
+      "why": "He is alert and comfortable."
+    },
+    {
+      "g": "airway_red",
+      "correct": "no",
+      "why": "No stridor, respiratory distress, or central cyanosis."
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "78 bpm"
+      },
+      "correct": "no",
+      "reveal": true,
+      "why": "His heart rate of 78 is well within range, and there is no bleeding or circulatory compromise."
+    },
+    {
+      "g": "disability_red",
+      "correct": "no",
+      "why": "He has no convulsions, and he is alert with normal mental status, so a glucose is not needed here."
+    },
+    {
+      "g": "other_red",
+      "correct": "no",
+      "why": "A superficial abrasion is not high-risk trauma, and the limb is not threatened."
+    },
+    {
+      "g": "airway_yellow",
+      "correct": "no",
+      "why": "No swelling and no wheezing."
+    },
+    {
+      "g": "circulation_yellow",
+      "correct": "no",
+      "why": "He is drinking normally, with no vomiting, diarrhoea, or bleeding."
+    },
+    {
+      "g": "disability_yellow",
+      "correct": "no",
+      "why": "Alert and comfortable, with no weakness and no severe pain."
+    },
+    {
+      "g": "other_yellow",
+      "correct": "no",
+      "why": "The wound is superficial, and a wooden door is not an exposure requiring time-sensitive prophylaxis."
+    },
+    {
+      "g": "vitals",
+      "chips": {
+        "HR": "78 bpm",
+        "RR": "16 breaths/min",
+        "SpO2": "99%",
+        "Temp": "36.8°C",
+        "AVPU": "A"
+      },
+      "correct": "no",
+      "reveal": true,
+      "why": "No value crosses a high-risk threshold, and he is alert on AVPU."
+    }
+  ],
+  "correct": "green",
+  "keyCriterion": "No red, yellow, or high-risk vital sign criteria met",
+  "feedbackWhy": "This patient does not meet any red or yellow criteria and has no high-risk vital signs. He can safely wait for evaluation in the low-acuity area.",
+  "teachingPoint": null,
+  "reassessment": "As with all patients in the waiting area, he should undergo reassessment because a patient's condition can change while waiting.",
+  "sourceDeck": "Adult — IITT Slide Deck 2",
+  "sourceSlides": "55–66",
+  "needsReview": false,
+  "reviewNote": ""
+}

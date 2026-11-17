@@ -1,0 +1,60 @@
+{
+  "id": "adult-1",
+  "status": "live",
+  "population": "adult",
+  "title": "33-year-old woman with difficulty breathing",
+  "age": "33 years",
+  "sex": "Female",
+  "domain": "Respiratory (asthma exacerbation)",
+  "focusTags": [
+    "adult"
+  ],
+  "image": "adult-1",
+  "ageBandRef": null,
+  "arrival": "A 33-year-old woman with a history of asthma presents with difficulty breathing and wheezing for three days. She is alert and able to speak in clear sentences. She occasionally pauses to catch her breath but has no signs of severe respiratory distress or central cyanosis.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no",
+      "why": "She is alert and speaking."
+    },
+    {
+      "g": "airway_red",
+      "correct": "no",
+      "why": "She speaks in clear sentences, has no accessory muscle use, and no central cyanosis."
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "110 bpm"
+      },
+      "correct": "no",
+      "reveal": true,
+      "why": "Her heart rate of 110 does not cross 50 or 150, and there is no heavy bleeding or weak, fast pulse."
+    },
+    {
+      "g": "disability_red",
+      "correct": "no",
+      "why": "She has no convulsions, and she is alert with normal mental status, so a glucose is not needed here."
+    },
+    {
+      "g": "other_red",
+      "correct": "no",
+      "why": "No trauma, poisoning, threatened limb, or chest pain, and she is not aggressive."
+    },
+    {
+      "g": "airway_yellow",
+      "correct": "yes",
+      "why": "She has audible wheezing and does not meet any red criteria."
+    }
+  ],
+  "correct": "yellow",
+  "keyCriterion": "Yellow — Airway & breathing: wheezing (no red criteria)",
+  "feedbackWhy": "She has audible wheezing but does not meet any high-risk red criteria.",
+  "teachingPoint": "She does not need emergent evaluation but is at risk of decompensation, and should be reassessed within two hours if not yet evaluated in the treatment area by that target time.",
+  "reassessment": null,
+  "sourceDeck": "Adult — IITT Slide Deck 2",
+  "sourceSlides": "25–32",
+  "needsReview": false,
+  "reviewNote": ""
+}
