@@ -1,6 +1,6 @@
 # Publishes the website.
-#   main branch    -> the live site          https://jananivahmed.github.io/iitt-practice/
-#   preview branch -> the preview site       https://jananivahmed.github.io/iitt-practice/preview/
+#   main branch    -> the live site     https://jananivahmed.github.io/iitt-practice/
+#   preview branch -> the preview site  https://jananivahmed.github.io/iitt-practice/preview/
 # Runs when main changes, when you press "Run workflow", or when the
 # preview branch changes (see preview-trigger.yml).
 name: Publish site
@@ -43,21 +43,26 @@ jobs:
           fi
 
       - name: Check the live cases
-        run: node live-src/tools/validate.js live-src
+        run: node live-src/validate.js live-src
 
       - name: Build the site folder
         run: |
           set -e
           copy_site () {
-            tar -C "$1" --exclude=./.git --exclude=./.github --exclude=./tools --exclude=./docs --exclude=./SETUP-workflows --exclude=./README.md --exclude=./config.json -cf - . | tar -C "$2" -xf -
+            mkdir -p "$2"
+            for f in "$1"/*; do
+              name=$(basename "$f")
+              case "$name" in
+                README.md|RUNBOOK.md|CASE_BLUEPRINT.md|validate.js|config.json|case-_template.json) ;;
+                *) [ -f "$f" ] && cp "$f" "$2/" ;;
+              esac
+            done
           }
-          mkdir -p _site
           copy_site live-src _site
           printf '{"env":"live","build":"%s"}\n' "$(git -C live-src rev-parse --short HEAD)" > _site/config.json
           touch _site/.nojekyll
           if [ -d preview-src ]; then
-            if node preview-src/tools/validate.js preview-src; then
-              mkdir -p _site/preview
+            if node preview-src/validate.js preview-src; then
               copy_site preview-src _site/preview
               printf '{"env":"preview","build":"%s"}\n' "$(git -C preview-src rev-parse --short HEAD)" > _site/preview/config.json
               sed -i 's#<head>#<head>\n<meta name="robots" content="noindex">#' _site/preview/index.html
