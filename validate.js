@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Checks the case files before the site is published.
    Reports problems only; it never changes a file.
-   Usage:  node tools/validate.js [folder]      (default: current folder)
+   Usage:  node validate.js [folder]      (default: current folder)
    Exit code 1 if there is any ERROR (the publish step then stops).
    WARNINGs are shown but do not stop publishing. */
 const fs = require("fs");
@@ -23,13 +23,13 @@ const REQUIRED = ["id", "status", "population", "title", "age", "sex", "domain",
 // Checkpoint group names come from the app itself so the two can never drift apart.
 let groups = [];
 try {
-  const app = read("assets/app.js");
+  const app = read("app.js");
   const block = app.match(/var GROUP_META = \{([\s\S]*?)\n\};/);
   groups = [...block[1].matchAll(/^\s{2}(\w+):/gm)].map((m) => m[1]);
-} catch (e) { err("Could not read the checkpoint group names from assets/app.js"); }
+} catch (e) { err("Could not read the checkpoint group names from app.js"); }
 const groupLevel = {};
 try {
-  const block = read("assets/app.js").match(/var GROUP_META = \{([\s\S]*?)\n\};/)[1];
+  const block = read("app.js").match(/var GROUP_META = \{([\s\S]*?)\n\};/)[1];
   for (const m of block.matchAll(/^\s{2}(\w+):.*?level:\s*"(\w+)"/gm)) groupLevel[m[1]] = m[2];
 } catch (e) {}
 
@@ -40,26 +40,26 @@ const version = json("version.json");
 if (version && !version.version) err('version.json: missing "version"');
 
 // Manifest
-const manifest = json("cases/index.json");
+const manifest = json("cases.json");
 const listed = (manifest && manifest.cases) || [];
-if (manifest && !Array.isArray(manifest.cases)) err('cases/index.json: "cases" must be a list');
+if (manifest && !Array.isArray(manifest.cases)) err('cases.json: "cases" must be a list');
 const seen = new Set();
 for (const id of listed) {
-  if (seen.has(id)) err(`cases/index.json: "${id}" is listed twice`);
+  if (seen.has(id)) err(`cases.json: "${id}" is listed twice`);
   seen.add(id);
 }
-const onDisk = fs.readdirSync(path.join(root, "cases"))
-  .filter((f) => f.endsWith(".json") && f !== "index.json" && !f.startsWith("_"))
-  .map((f) => f.replace(/\.json$/, ""));
-for (const id of onDisk) if (!seen.has(id)) warn(`cases/${id}.json exists but is not listed in cases/index.json, so it will not appear`);
+const onDisk = fs.readdirSync(root)
+  .filter((f) => /^case-.+\.json$/.test(f) && !f.startsWith("case-_"))
+  .map((f) => f.replace(/^case-/, "").replace(/\.json$/, ""));
+for (const id of onDisk) if (!seen.has(id)) warn(`case-${id}.json exists but is not listed in cases.json, so it will not appear`);
 
 const tagFile = json("tags.json");
 const knownTags = tagFile && Array.isArray(tagFile.tags) ? tagFile.tags : null;
 
 let liveCount = 0;
 for (const id of listed) {
-  const file = `cases/${id}.json`;
-  if (!fs.existsSync(path.join(root, file))) { err(`${file}: listed in cases/index.json but the file does not exist`); continue; }
+  const file = `case-${id}.json`;
+  if (!fs.existsSync(path.join(root, file))) { err(`${file}: listed in cases.json but the file does not exist`); continue; }
   const c = json(file);
   if (!c) continue;
   const E = (m) => err(`${file}: ${m}`), W = (m) => warn(`${file}: ${m}`);
@@ -72,7 +72,7 @@ for (const id of listed) {
   if (c.focusTags !== undefined && !Array.isArray(c.focusTags)) E('"focusTags" must be a list');
   else for (const t of c.focusTags || []) if (knownTags && !knownTags.includes(t)) W(`focus tag "${t}" is not in tags.json. Add it there first so tags stay consistent`);
   for (const kind of ["cases", "faces"]) {
-    if (c.image && !fs.existsSync(path.join(root, `images/${kind}/${c.image}.jpg`))) E(`picture images/${kind}/${c.image}.jpg not found`);
+    if (c.image && !fs.existsSync(path.join(root, `${kind === "cases" ? "picture" : "portrait"}-${c.image}.jpg`))) E(`picture ${kind === "cases" ? "picture" : "portrait"}-${c.image}.jpg not found`);
   }
   if (Array.isArray(c.checkpoints)) {
     if (!c.checkpoints.length) E("has no checkpoints");
