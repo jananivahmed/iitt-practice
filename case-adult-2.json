@@ -1,0 +1,59 @@
+{
+  "id": "adult-2",
+  "status": "live",
+  "population": "adult",
+  "title": "40-year-old man with alcohol use and agitation",
+  "age": "40 years",
+  "sex": "Male",
+  "domain": "Behavioural / safety",
+  "focusTags": [
+    "adult"
+  ],
+  "image": "adult-2",
+  "ageBandRef": null,
+  "arrival": "A 40-year-old man smells strongly of alcohol. He is yelling at and threatening another patient. He states that he would like to see a doctor. However, when asked for more information, he screams and threatens staff.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no",
+      "why": "He is awake, shouting, and speaking."
+    },
+    {
+      "g": "airway_red",
+      "correct": "no",
+      "why": "He is breathing without distress."
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "Not obtained — unsafe to approach"
+      },
+      "correct": "no",
+      "reveal": true,
+      "why": "It is not safe to palpate his pulse because of his agitation. For this exercise an unassessable group is treated as “no” so the walkthrough can continue — but being unable to assess a criterion is not the same as the criterion being absent; it is checked once it is safe."
+    },
+    {
+      "g": "disability_red",
+      "chips": {
+        "Glucose": "Not obtained — unsafe to approach"
+      },
+      "correct": "no",
+      "reveal": true,
+      "why": "He is not convulsing, but his glucose cannot be safely checked right now for the same reason. This is treated as “no” for the exercise, not as confirmed absence."
+    },
+    {
+      "g": "other_red",
+      "correct": "yes",
+      "why": "He is violent and aggressive, threatening both another patient and staff."
+    }
+  ],
+  "correct": "red",
+  "keyCriterion": "Red — Other: violent or aggressive",
+  "feedbackWhy": "He is violent and threatening other patients and staff. His behaviour poses an immediate safety risk.",
+  "teachingPoint": "Vital signs do not affect this patient's triage decision and should be obtained only once it is safe to do so.",
+  "reassessment": null,
+  "sourceDeck": "Adult — IITT Slide Deck 2",
+  "sourceSlides": "33–39",
+  "needsReview": true,
+  "reviewNote": "The source case marks Circulation and Disability as “unable to assess” rather than a clean No (unsafe to approach). This prototype forces both to “No” so the yes/no walkthrough can continue, and explains the nuance in the rationale text. Confirm whether a distinct “cannot assess” answer option should be added instead."
+}

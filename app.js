@@ -9,11 +9,11 @@
    rather than silently resolved.
    ============================================================ */
 
-var IMAGES = {"adult-1": "images/cases/adult-1.jpg", "adult-2": "images/cases/adult-2.jpg", "adult-3": "images/cases/adult-3.jpg", "adult-4": "images/cases/adult-4.jpg", "adult-5": "images/cases/adult-5.jpg", "peds-1": "images/cases/peds-1.jpg", "peds-2": "images/cases/peds-2.jpg", "peds-3": "images/cases/peds-3.jpg", "peds-4": "images/cases/peds-4.jpg", "peds-5": "images/cases/peds-5.jpg"};
-var FACE_IMAGES = {"adult-1": "images/faces/adult-1.jpg", "adult-2": "images/faces/adult-2.jpg", "adult-3": "images/faces/adult-3.jpg", "adult-4": "images/faces/adult-4.jpg", "adult-5": "images/faces/adult-5.jpg", "peds-1": "images/faces/peds-1.jpg", "peds-2": "images/faces/peds-2.jpg", "peds-3": "images/faces/peds-3.jpg", "peds-4": "images/faces/peds-4.jpg", "peds-5": "images/faces/peds-5.jpg"};
-var PDF_REFS = {"adult": "images/reference-cards/adult.png", "pediatric": "images/reference-cards/pediatric.png", "reference": "images/reference-cards/reference.png"};
-var MODE_ICONS = {"guided": "images/ui/mode-guided.png", "triage": "images/ui/mode-triage.png"};
-var LOGIN_AVATAR = "images/ui/login-avatar.jpg";
+var IMAGES = {"adult-1": "picture-adult-1.jpg", "adult-2": "picture-adult-2.jpg", "adult-3": "picture-adult-3.jpg", "adult-4": "picture-adult-4.jpg", "adult-5": "picture-adult-5.jpg", "peds-1": "picture-peds-1.jpg", "peds-2": "picture-peds-2.jpg", "peds-3": "picture-peds-3.jpg", "peds-4": "picture-peds-4.jpg", "peds-5": "picture-peds-5.jpg"};
+var FACE_IMAGES = {"adult-1": "portrait-adult-1.jpg", "adult-2": "portrait-adult-2.jpg", "adult-3": "portrait-adult-3.jpg", "adult-4": "portrait-adult-4.jpg", "adult-5": "portrait-adult-5.jpg", "peds-1": "portrait-peds-1.jpg", "peds-2": "portrait-peds-2.jpg", "peds-3": "portrait-peds-3.jpg", "peds-4": "portrait-peds-4.jpg", "peds-5": "portrait-peds-5.jpg"};
+var PDF_REFS = {"adult": "refcard-adult.png", "pediatric": "refcard-pediatric.png", "reference": "refcard-reference.png"};
+var MODE_ICONS = {"guided": "ui-mode-guided.png", "triage": "ui-mode-triage.png"};
+var LOGIN_AVATAR = "ui-login-avatar.jpg";
 
 /* ---------------- fixed IITT criteria & question text ---------------- */
 /* These are the tool's own criteria lists (constant per population),
@@ -556,7 +556,7 @@ function renderPracticeHome() {
   appEl.innerHTML =
     (name ? '<div class="learner-bar"><span>👤 Practicing as <b>' + esc(name) + '</b></span><button type="button" class="learner-bar-link" onclick="openResetConfirm()">Switch user</button></div>' : '') +
     '<div class="card empty-hero" style="padding-bottom:6px;">' +
-    '<img class="hero-image" src="images/ui/hero.jpg" alt="Nurse registering a patient at a triage desk">' +
+    '<img class="hero-image" src="ui-hero.jpg" alt="Nurse registering a patient at a triage desk">' +
     '<h2 class="section-title">Interagency Integrated Triage Tool Practice Companion</h2>' +
     '<p>Choose how you want to practice.</p>' +
     '</div>' +
@@ -1403,7 +1403,7 @@ function renderCoverage() {
    status.json is the pause switch: set "paused": true and the live site
    shows a message instead of the app. If status.json can't be fetched the
    app stays open (a network hiccup should not lock learners out).
-   Cases are separate files listed in cases/index.json. */
+   Cases are separate files listed in cases.json. */
 var SITE = { env: "live", build: "", version: "" };
 var STATUS_RECHECK_MS = 5 * 60 * 1000;
 
@@ -1469,9 +1469,9 @@ function boot() {
       showPausedScreen(status.message);
       return null;
     }
-    return fetchJson("cases/index.json").then(function (manifest) {
+    return fetchJson("cases.json").then(function (manifest) {
       return Promise.all((manifest.cases || []).map(function (id) {
-        return fetchJson("cases/" + id + ".json");
+        return fetchJson("case-" + id + ".json");
       }));
     }).then(function (loaded) {
       CASES = loaded.filter(caseVisibleHere);

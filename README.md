@@ -11,18 +11,23 @@ For educational and training purposes only. It is not clinical decision support.
 
 ## What is in this folder
 
-| Path | What it is |
+All files sit at the top level (no folders), so they can be dragged into GitHub in one go.
+
+| File | What it is |
 |---|---|
-| `index.html`, `assets/` | The app (page, styles, code). Does not change when cases change |
-| `cases/` | One file per case, plus `index.json` (the list and order of cases) and `_template.json` |
-| `images/` | Case pictures, portraits, interface pictures and the three reference cards |
+| `index.html`, `app.js`, `styles.css` | The app (page, code, styles). Does not change when cases change |
+| `case-<id>.json` | One file per case, e.g. `case-adult-1.json` |
+| `cases.json` | The list and order of cases |
+| `case-_template.json` | Blank template for a new case (never published) |
+| `picture-<id>.jpg`, `portrait-<id>.jpg` | The large case picture and the small portrait for each case |
+| `refcard-*.png`, `ui-*.jpg/png` | The three reference cards and the interface pictures |
 | `status.json` | The pause switch |
 | `version.json` | The version number shown in About |
 | `tags.json` | The list of allowed case focus tags |
-| `tools/validate.js` | Checks the cases before every publish |
+| `validate.js` | Checks the cases before every publish |
 | `.github/workflows/` | The automation that publishes the live and preview sites |
-| `docs/RUNBOOK.md` | How to do everyday jobs: preview, go live, pause, shut down |
-| `docs/CASE_BLUEPRINT.md` | How to design and write a new case |
+| `RUNBOOK.md` | How to do everyday jobs: preview, go live, pause, shut down |
+| `CASE_BLUEPRINT.md` | How to design and write a new case |
 
 ## How it fits together
 

@@ -1,0 +1,83 @@
+{
+  "id": "peds-2",
+  "status": "live",
+  "population": "pediatric",
+  "title": "10-day-old boy with vomiting",
+  "age": "10 days",
+  "sex": "Male",
+  "domain": "Neonatal / gastrointestinal",
+  "focusTags": [
+    "pediatric"
+  ],
+  "image": "peds-2",
+  "ageBandRef": {
+    "band": "< 1 year",
+    "hr": "90–180 bpm",
+    "rr": "25–50 breaths/min"
+  },
+  "arrival": "A 10-day-old boy is brought in by his mother. He was born without complications following a normal pregnancy. His mother reports that he vomited once earlier today but has otherwise been feeding well. He is alert and well appearing.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no",
+      "why": "He is alert and well appearing."
+    },
+    {
+      "g": "airway_red",
+      "correct": "no",
+      "why": "No stridor, central cyanosis, or respiratory distress."
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "138 bpm"
+      },
+      "correct": "no",
+      "reveal": true,
+      "why": "His pulse is strong, extremities are warm, and capillary refill is normal. His heart rate does not cross the high-risk threshold for his age band."
+    },
+    {
+      "g": "disability_red",
+      "correct": "no",
+      "why": "No convulsions, and no altered mental status with stiff neck or fever."
+    },
+    {
+      "g": "other_red",
+      "chips": {
+        "Temp": "37.1°C"
+      },
+      "correct": "no",
+      "reveal": true,
+      "why": "He is 10 days old, so the under-8-days criterion does not apply, and his temperature of 37.1°C is within range."
+    },
+    {
+      "g": "airway_yellow",
+      "correct": "no",
+      "why": "No swelling of the mouth, throat, or neck, and no wheezing."
+    },
+    {
+      "g": "circulation_yellow",
+      "correct": "no",
+      "why": "He is feeding well, with no dehydration, ongoing diarrhoea, or severe pallor."
+    },
+    {
+      "g": "disability_yellow",
+      "correct": "no",
+      "why": "He is settled, not irritable or lethargic, and not in severe pain."
+    },
+    {
+      "g": "other_yellow",
+      "correct": "yes",
+      "why": "He is 10 days old, which falls within the 8-days-to-6-months band. Age alone meets yellow criteria."
+    }
+  ],
+  "correct": "yellow",
+  "keyCriterion": "Yellow — Other: any infant 8 days to 6 months old (age alone)",
+  "feedbackWhy": "He is 10 days old, which falls within the 8-days-to-6-months band. Age alone meets yellow criteria, even though he is well appearing and has no high-risk vital signs.",
+  "teachingPoint": "He requires urgent evaluation and should be reassessed within two hours if he has not yet been evaluated in the treatment area.",
+  "reassessment": null,
+  "sourceDeck": "Paediatric — IITT Slide Deck 3",
+  "sourceSlides": "31–41",
+  "needsReview": false,
+  "reviewNote": ""
+}

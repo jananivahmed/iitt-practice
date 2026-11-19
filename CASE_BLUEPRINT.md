@@ -29,7 +29,7 @@ Every finding, vital sign, threshold and triage category in a case must come fro
 | `title` | yes | Age, sex and presenting problem |
 | `age`, `sex`, `domain` | yes | Shown in the header and case bank |
 | `focusTags` | no | Tags from `tags.json` |
-| `image` | yes | Picture name. Needs `images/cases/<name>.jpg` and `images/faces/<name>.jpg` |
+| `image` | yes | Picture name. Needs `picture-<name>.jpg` and `portrait-<name>.jpg` |
 | `ageBandRef` | no | For pediatric cases: `{ "band", "hr", "rr" }` from the source. Shown in the age-band reference |
 | `arrival` | yes | The case info the learner reads first |
 | `checkpoints` | yes | The step-by-step criteria (section 4) |
@@ -86,8 +86,8 @@ Only change a case to `live` after the clinician review is done. The checker war
 - Every checkpoint has a `why` a learner can follow.
 - The `arrival` text does not give away the answer, and does not contradict a checkpoint.
 - Pediatric cases: the age band and its thresholds are from the source.
-- Pictures added, id added to `cases/index.json`, tags exist in `tags.json`.
-- Checker (`tools/validate.js`) shows no errors, and every warning has been read.
+- Pictures added (`picture-<name>.jpg` and `portrait-<name>.jpg`), id added to `cases.json`, tags exist in `tags.json`.
+- Checker (`validate.js`) shows no errors, and every warning has been read.
 
 ## 7. Targeted sets (later)
 

@@ -1,0 +1,63 @@
+{
+  "id": "peds-3",
+  "status": "live",
+  "population": "pediatric",
+  "title": "40-day-old girl with seizure",
+  "age": "40 days",
+  "sex": "Female",
+  "domain": "Neonatal fever with seizure",
+  "focusTags": [
+    "pediatric"
+  ],
+  "image": "peds-3",
+  "ageBandRef": {
+    "band": "< 1 year",
+    "hr": "90–180 bpm",
+    "rr": "25–50 breaths/min"
+  },
+  "arrival": "A 40-day-old girl is brought in by her parents after a seizure at home. She has had fever, cough, and a runny nose for three days. During the triage assessment, she is crying and feels warm to the touch. She is not actively convulsing.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no",
+      "why": "She is crying and interactive."
+    },
+    {
+      "g": "airway_red",
+      "correct": "no",
+      "why": "No stridor, central cyanosis, or respiratory distress."
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "165 bpm"
+      },
+      "correct": "no",
+      "reveal": true,
+      "why": "Her extremities are warm and capillary refill is normal. Her heart rate does not cross the high-risk threshold for her age band."
+    },
+    {
+      "g": "disability_red",
+      "correct": "no",
+      "why": "The seizure happened at home and she is not having active convulsions. She is consolable and interactive, with no altered mental status."
+    },
+    {
+      "g": "other_red",
+      "chips": {
+        "Temp": "40.5°C"
+      },
+      "correct": "yes",
+      "reveal": true,
+      "why": "She is 40 days old — younger than 2 months — with a temperature of 40.5°C, above the 39° threshold."
+    }
+  ],
+  "correct": "red",
+  "keyCriterion": "Red — Other: age <2 months with temperature <36° or >39°C",
+  "feedbackWhy": "She is 40 days old — younger than 2 months — with a temperature of 40.5°C, above the 39° threshold.",
+  "teachingPoint": "She requires immediate evaluation.",
+  "reassessment": null,
+  "sourceDeck": "Paediatric — IITT Slide Deck 3",
+  "sourceSlides": "42–48",
+  "needsReview": false,
+  "reviewNote": ""
+}

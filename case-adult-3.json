@@ -1,0 +1,32 @@
+{
+  "id": "adult-3",
+  "status": "live",
+  "population": "adult",
+  "title": "28-year-old woman, 39 weeks pregnant, who collapsed",
+  "age": "28 years",
+  "sex": "Female",
+  "domain": "Obstetric emergency / altered consciousness",
+  "focusTags": [
+    "adult"
+  ],
+  "image": "adult-3",
+  "ageBandRef": null,
+  "arrival": "A 28-year-old woman initially collapsed while shopping. She is 39 weeks pregnant. During the triage assessment, she reports feeling tired and weak.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "yes",
+      "reveal": true,
+      "why": "She becomes unresponsive during the assessment. This is the first red criterion, and no further assessment is needed before escalating."
+    }
+  ],
+  "correct": "red",
+  "keyCriterion": "Red — Unresponsive",
+  "feedbackWhy": "She becomes unresponsive during the assessment.",
+  "teachingPoint": "Her pregnancy at 39 weeks means the obstetric team should be involved early, but the RED category is already determined by her unresponsiveness alone.",
+  "reassessment": null,
+  "sourceDeck": "Adult — IITT Slide Deck 2",
+  "sourceSlides": "40–42",
+  "needsReview": false,
+  "reviewNote": ""
+}
