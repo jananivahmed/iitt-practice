@@ -90,6 +90,18 @@ for (const id of listed) {
       W(`the first "yes" checkpoint points to ${expected} but "correct" is ${c.correct}. Please have a clinician confirm this is intended`);
     }
   }
+  // Findings shown in Triage Practice when a learner checks a section of the card.
+  if (c.findings === undefined) W('no "findings" for Triage Practice: every section will say "No additional findings recorded"');
+  else if (typeof c.findings !== "object" || Array.isArray(c.findings)) E('"findings" must be a set of group names with their findings');
+  else {
+    for (const g of Object.keys(c.findings)) {
+      const f = c.findings[g];
+      if (!groups.includes(g)) E(`findings: unknown group "${g}" (allowed: ${groups.join(", ")})`);
+      else if (!f || typeof f !== "object" || (!f.text && !f.chips)) E(`findings.${g}: needs "text" and/or "chips"`);
+      else if (f.chips !== undefined && (typeof f.chips !== "object" || Array.isArray(f.chips))) E(`findings.${g}: "chips" must be label/value pairs`);
+    }
+    if (c.status === "live" && c.findingsReviewed !== true) W('findings have not been reviewed by a clinician ("findingsReviewed" is not true). Findings must be neutral observations that never state the answer');
+  }
   if (c.needsReview === true && c.status === "live") W('status is "live" but needsReview is true. Confirm the clinician review is done before leaving it live');
   if (c.needsReview === true && !c.reviewNote) W('needsReview is true but reviewNote is empty');
 }

@@ -21,7 +21,6 @@
     {
       "g": "airway_red",
       "correct": "yes",
-      "reveal": true,
       "why": "His chest draws inward when he breathes. Chest indrawing is accessory muscle use, which meets the definition of respiratory distress."
     }
   ],
@@ -33,5 +32,14 @@
   "sourceDeck": "Paediatric — IITT Slide Deck 3",
   "sourceSlides": "27–30",
   "needsReview": false,
-  "reviewNote": ""
+  "reviewNote": "",
+  "findings": {
+    "unresponsive": {
+      "text": "Alert and interactive."
+    },
+    "airway_red": {
+      "text": "His chest draws inward when he breathes."
+    }
+  },
+  "findingsReviewed": false
 }

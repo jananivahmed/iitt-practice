@@ -29,7 +29,6 @@
         "HR": "112 bpm"
       },
       "correct": "no",
-      "reveal": true,
       "why": "Her pulse is strong and capillary refill is 2 seconds, with no bleeding."
     },
     {
@@ -72,7 +71,6 @@
         "AVPU": "A"
       },
       "correct": "yes",
-      "reveal": true,
       "why": "Her temperature is 39.4°C, above the 39° threshold. Her heart rate of 112 is within range, as are her respiratory rate, oxygen saturation, and AVPU."
     }
   ],
@@ -84,5 +82,47 @@
   "sourceDeck": "Adult — IITT Slide Deck 2",
   "sourceSlides": "43–54",
   "needsReview": true,
-  "reviewNote": "This case's source-defined outcome is “Up-triage / immediate review by a supervising clinician,” distinct from a plain Yellow or Green. Confirm the scoring convention used for this against learner answers of Yellow or Green (currently: Green = under-triage, Yellow/Red = over-triage)."
+  "reviewNote": "This case's source-defined outcome is “Up-triage / immediate review by a supervising clinician,” distinct from a plain Yellow or Green. Confirm the scoring convention used for this against learner answers of Yellow or Green (currently: Green = under-triage, Yellow/Red = over-triage).",
+  "findings": {
+    "unresponsive": {
+      "text": "Alert."
+    },
+    "airway_red": {
+      "text": "No stridor. No respiratory distress. No central cyanosis."
+    },
+    "circulation_red": {
+      "chips": {
+        "HR": "112 bpm"
+      },
+      "text": "Peripheral pulse strong. Capillary refill 2 seconds. No bleeding."
+    },
+    "disability_red": {
+      "text": "No convulsions. Alert with normal mental status."
+    },
+    "other_red": {
+      "text": "Age 48. Mild, generalized abdominal pain that began this morning."
+    },
+    "airway_yellow": {
+      "text": "No swelling of the mouth, throat or neck. No wheezing."
+    },
+    "circulation_yellow": {
+      "text": "Mild nausea only. Drinking normally. No diarrhoea, bleeding or fainting."
+    },
+    "disability_yellow": {
+      "text": "Alert and calm. Walking independently. Pain 4 out of 10."
+    },
+    "other_yellow": {
+      "text": "No rash, deformity, fracture, dislocation or surgical diagnosis."
+    },
+    "vitals": {
+      "chips": {
+        "HR": "112 bpm",
+        "RR": "18 breaths/min",
+        "SpO2": "98%",
+        "Temp": "39.4°C",
+        "AVPU": "A"
+      }
+    }
+  },
+  "findingsReviewed": false
 }

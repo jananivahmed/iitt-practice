@@ -33,7 +33,6 @@
         "HR": "165 bpm"
       },
       "correct": "no",
-      "reveal": true,
       "why": "Her extremities are warm and capillary refill is normal. Her heart rate does not cross the high-risk threshold for her age band."
     },
     {
@@ -47,7 +46,6 @@
         "Temp": "40.5°C"
       },
       "correct": "yes",
-      "reveal": true,
       "why": "She is 40 days old — younger than 2 months — with a temperature of 40.5°C, above the 39° threshold."
     }
   ],
@@ -59,5 +57,29 @@
   "sourceDeck": "Paediatric — IITT Slide Deck 3",
   "sourceSlides": "42–48",
   "needsReview": false,
-  "reviewNote": ""
+  "reviewNote": "",
+  "findings": {
+    "unresponsive": {
+      "text": "Crying and interactive."
+    },
+    "airway_red": {
+      "text": "No stridor. No central cyanosis. No respiratory distress."
+    },
+    "circulation_red": {
+      "chips": {
+        "HR": "165 bpm"
+      },
+      "text": "Warm extremities. Normal capillary refill."
+    },
+    "disability_red": {
+      "text": "Seizure at home. Not having active convulsions. Consolable and interactive. No altered mental status."
+    },
+    "other_red": {
+      "chips": {
+        "Temp": "40.5°C"
+      },
+      "text": "Age 40 days."
+    }
+  },
+  "findingsReviewed": false
 }

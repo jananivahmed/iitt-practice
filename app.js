@@ -236,9 +236,7 @@ var state = {
   cpSelected: null,
   cpLocked: false,
   cpLog: [],
-  viewedKnown: [],
-  viewedUnassessed: [],
-  gatherLog: [],
+  checked: [],
   caseAttemptId: null,
   caseAttemptStart: null,
   gatherSeq: 0,
@@ -285,9 +283,7 @@ function resetCaseState() {
   state.cpSelected = null;
   state.cpLocked = false;
   state.cpLog = [];
-  state.viewedKnown = [];
-  state.viewedUnassessed = [];
-  state.gatherLog = [];
+  state.checked = [];
   state.caseAttemptId = null;
   state.caseAttemptStart = null;
   state.gatherSeq = 0;
@@ -459,14 +455,6 @@ function renderCaseInfo(c) {
   html += '<div class="stage-tag">Case info</div>';
   html += '<h3 class="case-title">' + esc(c.title) + '</h3>';
   html += '<p class="vignette">' + esc(c.arrival) + '</p>';
-  var checked = checkedCheckpoints(c);
-  if (checked.length) {
-    html += '<div class="finding-block">';
-    html += '<h4 style="font-size:12.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin:0 0 10px; font-weight:700;">What you\u2019ve checked so far</h4>';
-    html += '<div class="gather-list">';
-    checked.forEach(function (cp) { html += renderCheckedItemCard(cp); });
-    html += '</div></div>';
-  }
   html += '<div class="cta-row"><button class="btn btn-primary" onclick="toggleCaseInfo()">Back to assessment</button></div>';
   html += '</div>';
   appEl.innerHTML = html;
@@ -567,7 +555,7 @@ function renderPracticeHome() {
     '</div>' +
     '<div class="card mode-card">' +
     '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.triage + '" alt=""> Triage Practice</h3>' +
-    '<p>You will decide when you have enough information to make a triage decision. Use the official reference cards to guide you and ask for more information if needed.</p>' +
+    '<p>Work through the IITT card in any order, check the parts you want to know more about, and choose a triage category when you have enough information.</p>' +
     '<button class="btn btn-primary" onclick="startPractice(\'decide\')">Start</button>' +
     '</div>' +
     '<div class="restart-row" style="margin-top:2px;"><button class="btn btn-ghost" onclick="openProgress()">📊 My progress</button></div>' +
@@ -635,32 +623,6 @@ function renderProgress() {
     if (walkB.n) html += '<tr><td>Guided triage practice</td><td>' + walkB.n + '</td><td>' + walkB.correct + '</td>' + (totalUnsupported ? '<td>' + walkB.unsupported + '</td>' : '') + '<td>' + walkB.under + '</td><td>' + walkB.over + '</td></tr>';
     if (decideB.n) html += '<tr><td>Triage practice</td><td>' + decideB.n + '</td><td>' + decideB.correct + '</td>' + (totalUnsupported ? '<td>' + decideB.unsupported + '</td>' : '') + '<td>' + decideB.under + '</td><td>' + decideB.over + '</td></tr>';
     html += '</tbody></table>';
-  }
-
-  var missTally = {};
-  all.forEach(function (r) {
-    (r.missing_gather_groups || []).forEach(function (g) {
-      missTally[g] = (missTally[g] || 0) + 1;
-    });
-  });
-  var missKeys = Object.keys(missTally).sort(function (a, b) { return missTally[b] - missTally[a]; });
-  if (missKeys.length) {
-    var maxMiss = missTally[missKeys[0]];
-    html += '<h4 style="font-size:12.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin:18px 0 8px; font-weight:700;">Criteria you most often hadn’t checked yet</h4>';
-    missKeys.slice(0, 5).forEach(function (g) {
-      var label = (GROUP_META[g] || {}).label || g;
-      var count = missTally[g];
-      var pct = Math.round((count / maxMiss) * 100);
-      html += '<div class="missed-row"><span class="missed-label">' + esc(label) + '</span><div class="missed-bar-track"><div class="missed-bar-fill" style="width:' + pct + '%"></div></div><span class="missed-count">' + count + '</span></div>';
-    });
-    html += '<p style="font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin-top:8px;">These are cases where you picked the right triage category in Triage practice mode without having checked the specific finding that determines it.</p>';
-  }
-
-  var decideResults = all.filter(function (r) { return r.practice_mode === "decide"; });
-  var totalOvercheck = decideResults.reduce(function (sum, r) { return sum + (r.overcheck_count || 0); }, 0);
-  if (decideResults.length && totalOvercheck > 0) {
-    var avgOvercheck = Math.round((totalOvercheck / decideResults.length) * 10) / 10;
-    html += '<div class="reassess-note" style="margin-top:14px;"><span>⏱️</span><span>In Triage practice, you’ve averaged ' + avgOvercheck + ' extra check' + (avgOvercheck === 1 ? "" : "s") + ' per case after already having enough to decide.</span></div>';
   }
 
   var recent = all.slice().sort(function (a, b) { return new Date(b.timestamp) - new Date(a.timestamp); }).slice(0, 8);
@@ -830,110 +792,45 @@ function advanceCheckpoint() {
   renderPractice();
 }
 
-/* ---- "Triage practice" phases ---- */
-function getRevealCheckpoints(c) {
-  return c.checkpoints.filter(function (cp) { return cp.reveal; });
+/* ---- "Triage practice" ----
+   The learner works through the IITT card in any order. Tapping a section of
+   the card shows the findings recorded for this case (neutral observations,
+   never a yes/no verdict). Checking is never penalised, and a triage category
+   can be chosen at any time. */
+var TIERS = [
+  { level: "red",    title: "Red criteria",           all: "Check all red" },
+  { level: "yellow", title: "Yellow criteria",        all: "Check all yellow" },
+  { level: "vitals", title: "High-risk vital signs",  all: "" }
+];
+function groupsInTier(level) {
+  return Object.keys(GROUP_META).filter(function (g) { return GROUP_META[g].level === level; });
 }
-
-/* Which checkpoint(s) actually determine the case's correct category.
-   Red/Yellow/Up-triage: the single criterion whose answer is "yes" — that finding
-   is what tips the case out of Green. Green: nothing is "yes", so every genuinely
-   new piece of information (reveal checkpoint) needs to have been ruled out. */
-function pivotalCheckpoints(c) {
-  if (c.correct === "green") return getRevealCheckpoints(c);
-  return c.checkpoints.filter(function (cp) { return cp.correct === "yes"; });
+function isChecked(g) {
+  return state.checked.some(function (e) { return e.g === g; });
 }
-/* Of those pivotal checkpoints, only the ones flagged reveal:true require an active
-   check in Triage practice — anything not reveal-flagged is already evident from
-   the arrival vignette, so no separate gather step exists for it. */
-function requiredGatherGroups(c) {
-  return pivotalCheckpoints(c).filter(function (cp) { return cp.reveal; }).map(function (cp) { return cp.g; });
+/* The card section whose finding decides the case (the first "yes"). A green
+   case has none: nothing on the card applies. */
+function decidingGroup(c) {
+  for (var i = 0; i < c.checkpoints.length; i++) if (c.checkpoints[i].correct === "yes") return c.checkpoints[i].g;
+  return null;
 }
-function hasSufficientBasis(c) {
-  var required = requiredGatherGroups(c);
-  if (!required.length) return true;
-  var gathered = state.cpLog.map(function (l) { return l.g; });
-  return required.every(function (g) { return gathered.indexOf(g) !== -1; });
-}
-function missingGatherLabels(c) {
-  var gathered = state.cpLog.map(function (l) { return l.g; });
-  return requiredGatherGroups(c)
-    .filter(function (g) { return gathered.indexOf(g) === -1; })
-    .map(function (g) { return GROUP_META[g].label; });
-}
-/* The gather-order position (see checkItem's seq) at which the required set was
-   completed — i.e. the moment a supported decision first became possible.
-   Returns 0 when nothing needed gathering at all, or null when the case was
-   never actually made sufficient before the learner moved to a decision. */
-function sufficiencySeq(c) {
-  var required = requiredGatherGroups(c);
-  if (!required.length) return 0;
-  var seqByGroup = {};
-  state.cpLog.forEach(function (l) { seqByGroup[l.g] = l.seq; });
-  var allPresent = required.every(function (g) { return seqByGroup.hasOwnProperty(g); });
-  if (!allPresent) return null;
-  return Math.max.apply(Math, required.map(function (g) { return seqByGroup[g]; }));
-}
-/* How many further checks (of any kind) a learner made after they already had
-   what they needed to decide. Over-checking costs nothing in the scoring itself
-   — it's reported as a coaching signal, not a penalty — because in real triage
-   it's assessment time spent, not a wrong answer. */
-function extraChecksAfterSufficiency(c) {
-  var suffSeq = sufficiencySeq(c);
-  if (suffSeq === null) return 0;
-  return state.gatherLog.filter(function (e) { return e.seq > suffSeq; }).length;
-}
-
-function renderCheckedItemCard(cp) {
-  var gm = GROUP_META[cp.g];
-  var itemC = caseById(state.queue[state.qIndex]);
-  var html = '<div class="gather-item-checked">' +
-    '<div class="gather-item-checked-head"><span class="gather-check">\u2713</span>' +
-    '<span class="gather-item-checked-label">' + esc(gm.label) + '</span>' +
-    '<span class="info-option-tag ' + gm.level + '">' + gm.level + '</span></div>';
-  if (cp.chips) {
-    html += '<div class="vitals-grid" style="margin-top:10px;">';
-    Object.keys(cp.chips).forEach(function (k) {
-      html += '<div class="vital"><div class="v-label">' + esc(k) + '</div><div class="v-value">' + esc(cp.chips[k]) + '</div></div>';
-    });
-    html += '</div>';
+function renderFindings(c, g) {
+  var f = (c.findings || {})[g];
+  var html = '<div class="tp-find">';
+  if (!f) {
+    html += '<p class="tp-none">No additional findings recorded for this case.</p>';
+  } else {
+    if (f.chips) {
+      html += '<div class="vitals-grid">';
+      Object.keys(f.chips).forEach(function (k) {
+        html += '<div class="vital"><div class="v-label">' + esc(k) + '</div><div class="v-value">' + esc(f.chips[k]) + '</div></div>';
+      });
+      html += '</div>';
+    }
+    if (f.text) html += '<p>' + esc(f.text) + '</p>';
   }
-  if (cp.g === "vitals" && itemC.ageBandRef) {
-    html += '<div class="age-ref">High-risk thresholds for <b>' + esc(itemC.ageBandRef.band) + '</b>: heart rate outside <b>' + esc(itemC.ageBandRef.hr) + '</b>, respiratory rate outside <b>' + esc(itemC.ageBandRef.rr) + '</b>.</div>';
-  }
-  html += '<p class="gather-item-checked-why">' + esc(cp.why) + '</p>';
-  html += '</div>';
-  return html;
-}
-function checkedCheckpoints(c) {
-  var reveals = getRevealCheckpoints(c);
-  var byGroup = {};
-  reveals.forEach(function (cp) { byGroup[cp.g] = cp; });
-  return state.cpLog.map(function (l) { return byGroup[l.g]; }).filter(Boolean);
-}
-
-function renderKnownItemCard(cp) {
-  var gm = GROUP_META[cp.g];
-  var html = '<div class="gather-item-known">' +
-    '<div class="gather-item-checked-head"><span class="gather-check gather-check-known">\u2713</span>' +
-    '<span class="gather-item-checked-label">' + esc(gm.label) + '</span>' +
-    '<span class="info-option-tag ' + gm.level + '">' + gm.level + '</span></div>' +
-    '<p class="gather-item-checked-why"><span class="gather-known-flag">Already known from the case info.</span> ' + esc(cp.why) + '</p>' +
-    '</div>';
-  return html;
-}
-function renderUnassessedItemCard(g, c) {
-  var gm = GROUP_META[g];
-  var critList = CRITERIA[c.population] && CRITERIA[c.population][g];
-  var html = '<div class="gather-item-known">' +
-    '<div class="gather-item-checked-head"><span class="gather-check gather-check-known">\u2013</span>' +
-    '<span class="gather-item-checked-label">' + esc(gm.label) + '</span>' +
-    '<span class="info-option-tag ' + gm.level + '">' + gm.level + '</span></div>' +
-    '<p class="gather-item-checked-why"><span class="gather-known-flag">Not documented for this case.</span> The source teaching material doesn\u2019t record a specific finding here \u2014 often because the assessment had already reached its answer by this point.</p>';
-  if (critList && critList.length) {
-    html += '<ul class="criteria-list" style="margin:8px 0 0; padding-left:18px;">';
-    critList.forEach(function (item) { html += '<li>' + esc(item) + '</li>'; });
-    html += '</ul>';
+  if (g === "vitals" && c.ageBandRef) {
+    html += '<div class="age-ref">High-risk thresholds for <b>' + esc(c.ageBandRef.band) + '</b>: heart rate outside <b>' + esc(c.ageBandRef.hr) + '</b>, respiratory rate outside <b>' + esc(c.ageBandRef.rr) + '</b>.</div>';
   }
   html += '</div>';
   return html;
@@ -941,10 +838,7 @@ function renderUnassessedItemCard(g, c) {
 
 function renderReady(c) {
   var num = state.qIndex + 1;
-  var reveals = getRevealCheckpoints(c);
-  var checkedGs = state.cpLog.map(function (l) { return l.g; });
-  var pct = Math.round((num - 1) / state.queue.length * 100 + (reveals.length ? (1 / state.queue.length) * (checkedGs.length / reveals.length) * 100 : 0));
-
+  var pct = Math.round((num - 1) / state.queue.length * 100);
   var html = '<div class="card">';
   html += caseHeader(c, num, pct);
   html += miniImageRow(c, false, true);
@@ -954,78 +848,53 @@ function renderReady(c) {
   html += '<div class="divider"></div>';
   html += '<div class="stage-tag">Work through the card</div>';
   html += renderReferenceLinks();
-  html += '<p style="font-size:13.5px; color:var(--ink-soft); margin:0 0 4px;">These choices represent all the actions on the full IITT card. Only select an item if checking it could give you new information that would change your triage decision. You can select a triage category whenever you feel you have enough information.</p>';
+  html += '<p class="tp-howto">Check any part of the IITT card to see what you find. Choose a triage category whenever you feel you have enough information.</p>';
 
-html += '<div class="gather-list">';
-  var lastLevel = null;
-  Object.keys(GROUP_META).forEach(function (g) {
-    var gm = GROUP_META[g];
-    if (gm.level !== lastLevel) {
-      var sectionLabel = gm.level === "red" ? "Red criteria" : gm.level === "yellow" ? "Yellow criteria" : "High-risk vital signs";
-      html += '<div class="gather-section-label">' + sectionLabel + '</div>';
-      lastLevel = gm.level;
-    }
-    var cp = null;
-    for (var i = 0; i < c.checkpoints.length; i++) { if (c.checkpoints[i].g === g) { cp = c.checkpoints[i]; break; } }
-    if (cp) {
-      var isChecked = cp.reveal ? (checkedGs.indexOf(g) !== -1) : (state.viewedKnown.indexOf(g) !== -1);
-      if (isChecked) {
-        html += cp.reveal ? renderCheckedItemCard(cp) : renderKnownItemCard(cp);
-      } else {
-        html += '<button type="button" class="info-option-btn" onclick="checkItem(\'' + g + '\')">' +
-          '<span class="info-option-label">Check ' + esc(gm.label.toLowerCase()) + '</span>' +
-          '</button>';
-      }
-    } else {
-      var isViewed = state.viewedUnassessed.indexOf(g) !== -1;
-      if (isViewed) {
-        html += renderUnassessedItemCard(g, c);
-      } else {
-        html += '<button type="button" class="info-option-btn" onclick="checkItem(\'' + g + '\')">' +
-          '<span class="info-option-label">Check ' + esc(gm.label.toLowerCase()) + '</span>' +
-          '</button>';
-      }
-    }
+  TIERS.forEach(function (t) {
+    var groups = groupsInTier(t.level);
+    html += '<div class="tp-tier tp-' + t.level + '"><div class="tp-tier-head"><h4>' + t.title + '</h4>';
+    if (groups.length > 1) html += '<button type="button" class="tp-allbtn" onclick="checkTier(\'' + t.level + '\')">' + t.all + '</button>';
+    html += '</div>';
+    groups.forEach(function (g) {
+      var open = isChecked(g);
+      html += '<div class="tp-sec' + (open ? ' open' : '') + '">' +
+        '<button type="button" class="tp-sec-btn" aria-expanded="' + open + '" onclick="checkItem(\'' + g + '\')">' +
+        '<span>' + esc(GROUP_META[g].label) + '</span><span class="tp-state">' + (open ? '✓ Checked' : 'Tap to check') + '</span></button>' +
+        (open ? renderFindings(c, g) : '') + '</div>';
+    });
+    html += '</div>';
   });
-  html += '</div>';
 
-  html += '<div class="cta-row"><button class="btn btn-primary" onclick="goToDecision()">I\u2019m ready to triage</button></div>';
+  html += '<div class="tp-pick"><h4>Your triage category</h4><div class="decision-grid">';
+  ["red", "yellow", "green", "uptriage"].forEach(function (k) {
+    var m = CATEGORY_META[k];
+    var sel = state.selected === k ? " selected" : "";
+    html += '<button class="decision-btn ' + k + sel + '" onclick="selectAnswer(\'' + k + '\')" aria-pressed="' + (state.selected === k) + '">' +
+      '<span class="d-emoji">' + m.emoji + '</span><span class="d-label">' + m.label + '</span></button>';
+  });
+  html += '</div><div class="submit-row"><button class="btn btn-primary" ' + (state.selected ? '' : 'disabled') + ' onclick="submitDecision()">Submit decision</button></div></div>';
   html += '</div>';
   appEl.innerHTML = html;
 }
 
-function checkItem(g) {
-  var c = caseById(state.queue[state.qIndex]);
-  var cp = null;
-  for (var i = 0; i < c.checkpoints.length; i++) { if (c.checkpoints[i].g === g) { cp = c.checkpoints[i]; break; } }
-  var itemKind, alreadySeen;
+function markChecked(g) {
+  if (isChecked(g)) return;
   var seq = nextGatherSeq();
-  if (cp) {
-    if (cp.reveal) {
-      itemKind = "reveal";
-      alreadySeen = state.cpLog.some(function (l) { return l.g === g; });
-      if (!alreadySeen) state.cpLog.push({ g: g, seq: seq });
-    } else {
-      itemKind = "known";
-      alreadySeen = state.viewedKnown.indexOf(g) !== -1;
-      if (!alreadySeen) state.viewedKnown.push(g);
-    }
-  } else {
-    itemKind = "unassessed";
-    alreadySeen = state.viewedUnassessed.indexOf(g) !== -1;
-    if (!alreadySeen) state.viewedUnassessed.push(g);
-  }
-  if (!alreadySeen) {
-    state.gatherLog.push({ g: g, seq: seq, kind: itemKind });
-    logEvent("item_checked", { group: g, item_kind: itemKind, seq: seq });
-  }
-  renderPractice();
+  state.checked.push({ g: g, seq: seq });
+  logEvent("item_checked", { group: g, seq: seq, has_findings: !!((caseById(state.queue[state.qIndex]).findings || {})[g]) });
 }
-
-function goToDecision() {
-  logEvent("ready_to_triage", { items_gathered: state.cpLog.length });
-  state.phase = "decision";
+function renderKeepingScroll() {
+  var y = window.pageYOffset;
   renderPractice();
+  window.scrollTo(0, y);
+}
+function checkItem(g) {
+  markChecked(g);
+  renderKeepingScroll();
+}
+function checkTier(level) {
+  groupsInTier(level).forEach(markChecked);
+  renderKeepingScroll();
 }
 
 function renderDecision(c) {
@@ -1033,13 +902,9 @@ function renderDecision(c) {
   var pct = Math.round(num / state.queue.length * 100 - (5 / state.queue.length));
   var html = '<div class="card">';
   html += caseHeader(c, num, pct);
-  html += miniImageRow(c, !isFreeMode());
-  if (isFreeMode() && !state.locked) {
-    html += '<button type="button" class="back-link" onclick="backToReady()">\u2190 Back</button>';
-  }
+  html += miniImageRow(c, true);
   html += '<div class="stage-tag">Triage decision</div>';
   html += '<h3 class="case-title" style="font-size:16px;">' + esc(c.title) + '</h3>';
-  if (isFreeMode()) html += renderReferenceLinks();
   html += renderCheckpointTrail(c);
   html += '<div class="decision-prompt">Based on everything you found, what is the appropriate IITT triage category?</div>';
   html += '<div class="decision-grid">';
@@ -1058,24 +923,15 @@ function renderDecision(c) {
 function selectAnswer(k) {
   if (state.locked) return;
   state.selected = k;
-  renderPractice();
-}
-function backToReady() {
-  if (state.locked) return;
-  state.selected = null;
-  state.phase = "ready";
-  logEvent("returned_to_gathering", {});
-  renderPractice();
+  renderKeepingScroll();
 }
 function submitDecision() {
   if (!state.selected || state.locked) return;
   state.locked = true;
   var c = caseById(state.queue[state.qIndex]);
   var result = classify(c.correct, state.selected);
-  if (isFreeMode() && result === "correct" && !hasSufficientBasis(c)) {
-    result = "correct_unsupported";
-  }
-  var overcheckCount = isFreeMode() ? extraChecksAfterSufficiency(c) : 0;
+  var deciding = decidingGroup(c);
+  var checkedGroups = state.checked.map(function (e) { return e.g; });
   var responseTimeMs = state.answerStart ? (Date.now() - state.answerStart) : null;
   var rec = {
     anonymous_session_id: getSessionId(),
@@ -1088,10 +944,11 @@ function submitDecision() {
     response_time_ms: responseTimeMs,
     case_position: state.qIndex + 1,
     practice_mode: state.practiceMode,
-    info_items_gathered: state.cpLog.length,
-    info_items_available: isFreeMode() ? getRevealCheckpoints(c).length : c.checkpoints.length,
-    missing_gather_groups: (result === "correct_unsupported") ? requiredGatherGroups(c).filter(function (g) { return state.cpLog.map(function (l) { return l.g; }).indexOf(g) === -1; }) : [],
-    overcheck_count: overcheckCount,
+    info_items_gathered: isFreeMode() ? checkedGroups.length : state.cpLog.length,
+    info_items_available: isFreeMode() ? Object.keys(GROUP_META).length : c.checkpoints.length,
+    checked_groups: isFreeMode() ? checkedGroups : null,
+    deciding_group: deciding,
+    deciding_group_checked: isFreeMode() ? (deciding ? checkedGroups.indexOf(deciding) !== -1 : null) : null,
     timestamp: new Date().toISOString()
   };
   addResponse(rec);
@@ -1103,8 +960,9 @@ function submitDecision() {
     response_time_ms: responseTimeMs,
     info_items_gathered: rec.info_items_gathered,
     info_items_available: rec.info_items_available,
-    missing_gather_groups: rec.missing_gather_groups,
-    overcheck_count: overcheckCount
+    checked_groups: rec.checked_groups,
+    deciding_group: rec.deciding_group,
+    deciding_group_checked: rec.deciding_group_checked
   });
   state.phase = "feedback";
   renderPractice();
@@ -1116,19 +974,18 @@ function renderFeedback(c) {
   var result = rec.response_classification;
   var meta = CATEGORY_META[c.correct];
   var selMeta = CATEGORY_META[state.selected];
-  var bannerClass = result === "correct" ? "correct" : (result === "correct_unsupported" ? "neutral" : (result === "under" ? "under" : "over"));
+  var bannerClass = result === "correct" ? "correct" : (result === "under" ? "under" : "over");
   var bannerTitle = result === "correct" ? "Correct" : (result === "correct_unsupported" ? "Right category \u2014 not enough basis yet" : (result === "under" ? "Under-triage" : "Over-triage"));
   var bannerEmoji = result === "correct" ? "\u2705" : (result === "correct_unsupported" ? "\u2753" : (result === "under" ? "\u26A0\uFE0F" : "\u2139\uFE0F"));
 
-  var rightCount = isFreeMode() ? 0 : state.cpLog.filter(function (l) { return l.isRight; }).length;
-  var revealsCount = isFreeMode() ? getRevealCheckpoints(c).length : c.checkpoints.length;
+  var rightCount = state.cpLog.filter(function (l) { return l.isRight; }).length;
   var infoLine;
   if (isFreeMode()) {
-    infoLine = state.cpLog.length === 0
-      ? 'You decided right away, without checking anything beyond the case info you started with.'
-      : 'You checked ' + state.cpLog.length + ' of ' + revealsCount + ' available item' + (revealsCount === 1 ? "" : "s") + ' before deciding.';
+    var dg = rec.deciding_group;
+    infoLine = 'You checked ' + rec.info_items_gathered + ' of ' + rec.info_items_available + ' parts of the card.';
+    if (dg) infoLine += ' The finding that decides this case is under <b>' + esc(GROUP_META[dg].label) + ' (' + GROUP_META[dg].level + ')</b>. ' + (rec.deciding_group_checked ? 'You looked at it.' : 'You did not open it this time.');
   } else {
-    infoLine = 'You correctly identified ' + rightCount + ' of ' + revealsCount + ' criteria checks along the way.';
+    infoLine = 'You correctly identified ' + rightCount + ' of ' + c.checkpoints.length + ' criteria checks along the way.';
   }
 
   var html = '<div class="card">';
@@ -1140,13 +997,6 @@ function renderFeedback(c) {
   html += '<div class="feedback-banner ' + bannerClass + '"><span class="f-emoji">' + bannerEmoji + '</span><div><div class="f-title">' + bannerTitle + '</div><div class="f-sub">' + bannerSub + '</div></div></div>';
 
   html += '<span class="answer-chip ' + meta.chip + '">' + meta.emoji + ' Correct IITT category: ' + meta.label + '</span>';
-  if (result === "correct_unsupported") {
-    var missingLabels = missingGatherLabels(c);
-    html += '<div class="reassess-note" style="margin-top:10px;"><span>\u2753</span><span>You landed on the right category, but you hadn\u2019t checked <b>' + esc(missingLabels.join(", ")) + '</b> \u2014 the finding that actually determines it here. Picking the right answer without the information that supports it isn\u2019t a confirmed triage decision in real practice.</span></div>';
-  }
-  if (rec.overcheck_count > 0) {
-    html += '<div class="reassess-note" style="margin-top:10px;"><span>\u23F1\uFE0F</span><span>You already had enough to decide, then checked ' + rec.overcheck_count + ' more item' + (rec.overcheck_count === 1 ? "" : "s") + ' before triaging. Not wrong \u2014 but in practice that\u2019s assessment time you didn\u2019t need to spend.</span></div>';
-  }
   html += '<div class="reassess-note" style="margin-top:10px;"><span>\uD83D\uDCCB</span><span>' + infoLine + '</span></div>';
 
   html += '<div class="detail-section"><h4>Why</h4><p><b>' + esc(c.keyCriterion) + '.</b> ' + esc(c.feedbackWhy) + '</p></div>';
@@ -1217,11 +1067,6 @@ function renderPracticeSummary() {
     var totalAvailable = results.reduce(function (sum, r) { return sum + (r.info_items_available || 0); }, 0);
     var avgPct = totalAvailable ? Math.round((totalGathered / totalAvailable) * 100) : 0;
     html += '<div class="reassess-note" style="margin-top:10px;"><span>\uD83D\uDCCA</span><span>On average, you gathered ' + avgPct + '% of the available checks per case before deciding.</span></div>';
-    var totalOvercheck = results.reduce(function (sum, r) { return sum + (r.overcheck_count || 0); }, 0);
-    if (totalOvercheck > 0) {
-      var avgOvercheck = Math.round((totalOvercheck / results.length) * 10) / 10;
-      html += '<div class="reassess-note" style="margin-top:10px;"><span>\u23F1\uFE0F</span><span>On average, you kept checking ' + avgOvercheck + ' extra item' + (avgOvercheck === 1 ? "" : "s") + ' per case after you already had enough to decide.</span></div>';
-    }
   }
 
   html += '<div class="restart-row"><button class="btn btn-primary" onclick="restartPractice()">Restart (same mode)</button></div>';

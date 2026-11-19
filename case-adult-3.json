@@ -16,7 +16,6 @@
     {
       "g": "unresponsive",
       "correct": "yes",
-      "reveal": true,
       "why": "She becomes unresponsive during the assessment. This is the first red criterion, and no further assessment is needed before escalating."
     }
   ],
@@ -28,5 +27,11 @@
   "sourceDeck": "Adult — IITT Slide Deck 2",
   "sourceSlides": "40–42",
   "needsReview": false,
-  "reviewNote": ""
+  "reviewNote": "",
+  "findings": {
+    "unresponsive": {
+      "text": "Becomes unresponsive during the triage assessment."
+    }
+  },
+  "findingsReviewed": false
 }

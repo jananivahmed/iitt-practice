@@ -6,14 +6,31 @@
   "age": "REPLACE: e.g. 33 years",
   "sex": "REPLACE: Female or Male",
   "domain": "REPLACE: clinical domain",
-  "focusTags": ["adult"],
+  "focusTags": [
+    "adult"
+  ],
   "image": "REPLACE: picture name without .jpg, matching files in images/cases and images/faces",
   "ageBandRef": null,
   "arrival": "REPLACE: the case info the learner reads on arrival",
   "checkpoints": [
-    { "g": "unresponsive", "correct": "no", "why": "REPLACE: why the answer is no, in plain words" },
-    { "g": "airway_red", "correct": "no", "why": "REPLACE" },
-    { "g": "circulation_red", "chips": { "HR": "REPLACE: value" }, "correct": "no", "reveal": true, "why": "REPLACE" }
+    {
+      "g": "unresponsive",
+      "correct": "no",
+      "why": "REPLACE: why the answer is no, in plain words"
+    },
+    {
+      "g": "airway_red",
+      "correct": "no",
+      "why": "REPLACE"
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "REPLACE: value"
+      },
+      "correct": "no",
+      "why": "REPLACE"
+    }
   ],
   "correct": "green",
   "keyCriterion": "REPLACE: the criterion that decides the category",
@@ -31,5 +48,17 @@
     "predictedWrongCategory": "REPLACE: red, yellow, green or uptriage",
     "criterionType": "REPLACE",
     "caseSubtlety": "REPLACE: how obvious or subtle the deciding finding is"
-  }
+  },
+  "findings": {
+    "unresponsive": {
+      "text": "REPLACE: what the learner finds, as an observation (never yes or no)"
+    },
+    "circulation_red": {
+      "chips": {
+        "HR": "REPLACE: value"
+      },
+      "text": "REPLACE: other findings for this section"
+    }
+  },
+  "findingsReviewed": false
 }

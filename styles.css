@@ -416,3 +416,26 @@
 .preview-banner{background:#7a3e00; color:#fff; text-align:center; font-size:12.5px; font-weight:700; padding:6px 10px; letter-spacing:.03em;}
 .paused-card{text-align:center; padding:28px 20px;}
 .about-box .about-version{font-size:11.5px; color:var(--ink-faint, var(--ink-soft)); margin-top:8px;}
+
+/* ---- Triage practice: card sections ---- */
+.tp-howto{font-size:13.5px;color:var(--ink-soft);margin:0 0 12px;line-height:1.5}
+.tp-tier{margin-bottom:14px}
+.tp-tier-head{display:flex;align-items:center;justify-content:space-between;margin:0 2px 6px;min-height:30px}
+.tp-tier-head h4{margin:0;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase}
+.tp-red .tp-tier-head h4{color:var(--red)}
+.tp-yellow .tp-tier-head h4{color:var(--yellow)}
+.tp-vitals .tp-tier-head h4{color:var(--primary)}
+.tp-allbtn{font:inherit;font-size:12.5px;border:1px solid var(--border);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer}
+.tp-sec{background:var(--surface);border:1px solid var(--border);border-left-width:5px;border-radius:10px;margin-bottom:6px;overflow:hidden}
+.tp-red .tp-sec{border-left-color:var(--red)}
+.tp-yellow .tp-sec{border-left-color:var(--yellow)}
+.tp-vitals .tp-sec{border-left-color:var(--primary)}
+.tp-sec-btn{all:unset;box-sizing:border-box;width:100%;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:15px;font-weight:600;color:var(--ink)}
+.tp-sec-btn:focus-visible{outline:2px solid var(--primary);outline-offset:-2px}
+.tp-state{font-size:12px;font-weight:500;color:var(--ink-faint)}
+.tp-sec.open .tp-state{color:var(--green)}
+.tp-find{padding:0 14px 12px;font-size:14.5px;line-height:1.5}
+.tp-find p{margin:0 0 6px}
+.tp-none{color:var(--ink-soft);font-style:italic}
+.tp-pick{margin-top:16px;padding-top:12px;border-top:1px solid var(--border)}
+.tp-pick h4{margin:0 0 8px;font-size:14px}

@@ -29,7 +29,6 @@
         "HR": "78 bpm"
       },
       "correct": "no",
-      "reveal": true,
       "why": "His heart rate of 78 is well within range, and there is no bleeding or circulatory compromise."
     },
     {
@@ -72,7 +71,6 @@
         "AVPU": "A"
       },
       "correct": "no",
-      "reveal": true,
       "why": "No value crosses a high-risk threshold, and he is alert on AVPU."
     }
   ],
@@ -84,5 +82,47 @@
   "sourceDeck": "Adult — IITT Slide Deck 2",
   "sourceSlides": "55–66",
   "needsReview": false,
-  "reviewNote": ""
+  "reviewNote": "",
+  "findings": {
+    "unresponsive": {
+      "text": "Alert and comfortable."
+    },
+    "airway_red": {
+      "text": "No stridor. No respiratory distress. No central cyanosis."
+    },
+    "circulation_red": {
+      "chips": {
+        "HR": "78 bpm"
+      },
+      "text": "No bleeding."
+    },
+    "disability_red": {
+      "text": "No convulsions. Alert with normal mental status."
+    },
+    "other_red": {
+      "text": "Small, superficial abrasion on the forearm. Limb not threatened."
+    },
+    "airway_yellow": {
+      "text": "No swelling. No wheezing."
+    },
+    "circulation_yellow": {
+      "text": "Drinking normally. No vomiting, diarrhoea or bleeding."
+    },
+    "disability_yellow": {
+      "text": "Alert and comfortable. No weakness. No severe pain."
+    },
+    "other_yellow": {
+      "text": "Superficial wound from a wooden door."
+    },
+    "vitals": {
+      "chips": {
+        "HR": "78 bpm",
+        "RR": "16 breaths/min",
+        "SpO2": "99%",
+        "Temp": "36.8°C",
+        "AVPU": "A"
+      }
+    }
+  },
+  "findingsReviewed": false
 }

@@ -29,7 +29,6 @@
         "HR": "110 bpm"
       },
       "correct": "no",
-      "reveal": true,
       "why": "Her heart rate of 110 does not cross 50 or 150, and there is no heavy bleeding or weak, fast pulse."
     },
     {
@@ -56,5 +55,29 @@
   "sourceDeck": "Adult — IITT Slide Deck 2",
   "sourceSlides": "25–32",
   "needsReview": false,
-  "reviewNote": ""
+  "reviewNote": "",
+  "findings": {
+    "unresponsive": {
+      "text": "Alert and speaking."
+    },
+    "airway_red": {
+      "text": "Speaks in clear sentences. No accessory muscle use. No central cyanosis."
+    },
+    "circulation_red": {
+      "chips": {
+        "HR": "110 bpm"
+      },
+      "text": "No heavy bleeding. No weak, fast pulse."
+    },
+    "disability_red": {
+      "text": "No convulsions. Alert with normal mental status."
+    },
+    "other_red": {
+      "text": "No trauma, poisoning, threatened limb or chest pain. Not aggressive."
+    },
+    "airway_yellow": {
+      "text": "Audible wheezing."
+    }
+  },
+  "findingsReviewed": false
 }

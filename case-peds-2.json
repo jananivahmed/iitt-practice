@@ -33,7 +33,6 @@
         "HR": "138 bpm"
       },
       "correct": "no",
-      "reveal": true,
       "why": "His pulse is strong, extremities are warm, and capillary refill is normal. His heart rate does not cross the high-risk threshold for his age band."
     },
     {
@@ -47,7 +46,6 @@
         "Temp": "37.1°C"
       },
       "correct": "no",
-      "reveal": true,
       "why": "He is 10 days old, so the under-8-days criterion does not apply, and his temperature of 37.1°C is within range."
     },
     {
@@ -79,5 +77,41 @@
   "sourceDeck": "Paediatric — IITT Slide Deck 3",
   "sourceSlides": "31–41",
   "needsReview": false,
-  "reviewNote": ""
+  "reviewNote": "",
+  "findings": {
+    "unresponsive": {
+      "text": "Alert and well appearing."
+    },
+    "airway_red": {
+      "text": "No stridor. No central cyanosis. No respiratory distress."
+    },
+    "circulation_red": {
+      "chips": {
+        "HR": "138 bpm"
+      },
+      "text": "Strong pulse. Warm extremities. Normal capillary refill."
+    },
+    "disability_red": {
+      "text": "No convulsions. No altered mental status, stiff neck or fever."
+    },
+    "other_red": {
+      "chips": {
+        "Temp": "37.1°C"
+      },
+      "text": "Age 10 days."
+    },
+    "airway_yellow": {
+      "text": "No swelling of the mouth, throat or neck. No wheezing."
+    },
+    "circulation_yellow": {
+      "text": "Feeding well. No dehydration, ongoing diarrhoea or severe pallor."
+    },
+    "disability_yellow": {
+      "text": "Settled. Not irritable or lethargic. Not in severe pain."
+    },
+    "other_yellow": {
+      "text": "Age 10 days."
+    }
+  },
+  "findingsReviewed": false
 }

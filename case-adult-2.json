@@ -29,7 +29,6 @@
         "HR": "Not obtained — unsafe to approach"
       },
       "correct": "no",
-      "reveal": true,
       "why": "It is not safe to palpate his pulse because of his agitation. For this exercise an unassessable group is treated as “no” so the walkthrough can continue — but being unable to assess a criterion is not the same as the criterion being absent; it is checked once it is safe."
     },
     {
@@ -38,7 +37,6 @@
         "Glucose": "Not obtained — unsafe to approach"
       },
       "correct": "no",
-      "reveal": true,
       "why": "He is not convulsing, but his glucose cannot be safely checked right now for the same reason. This is treated as “no” for the exercise, not as confirmed absence."
     },
     {
@@ -55,5 +53,29 @@
   "sourceDeck": "Adult — IITT Slide Deck 2",
   "sourceSlides": "33–39",
   "needsReview": true,
-  "reviewNote": "The source case marks Circulation and Disability as “unable to assess” rather than a clean No (unsafe to approach). This prototype forces both to “No” so the yes/no walkthrough can continue, and explains the nuance in the rationale text. Confirm whether a distinct “cannot assess” answer option should be added instead."
+  "reviewNote": "The source case marks Circulation and Disability as “unable to assess” rather than a clean No (unsafe to approach). This prototype forces both to “No” so the yes/no walkthrough can continue, and explains the nuance in the rationale text. Confirm whether a distinct “cannot assess” answer option should be added instead.",
+  "findings": {
+    "unresponsive": {
+      "text": "Awake, shouting and speaking."
+    },
+    "airway_red": {
+      "text": "Breathing without distress."
+    },
+    "circulation_red": {
+      "chips": {
+        "HR": "Not obtained — unsafe to approach"
+      },
+      "text": "Pulse not checked: it is not safe to palpate his pulse because of his agitation."
+    },
+    "disability_red": {
+      "chips": {
+        "Glucose": "Not obtained — unsafe to approach"
+      },
+      "text": "Not convulsing. Glucose not checked: it cannot be done safely because of his agitation."
+    },
+    "other_red": {
+      "text": "Violent and aggressive. Threatening both another patient and staff."
+    }
+  },
+  "findingsReviewed": false
 }

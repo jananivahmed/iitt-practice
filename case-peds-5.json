@@ -33,7 +33,6 @@
         "HR": "92 bpm"
       },
       "correct": "no",
-      "reveal": true,
       "why": "No bleeding, cold extremities, or signs of dehydration. His heart rate does not cross the high-risk threshold for his age band."
     },
     {
@@ -76,7 +75,6 @@
         "AVPU": "A"
       },
       "correct": "no",
-      "reveal": true,
       "why": "No value crosses a high-risk threshold for his age band, and he is alert on AVPU."
     }
   ],
@@ -88,5 +86,47 @@
   "sourceDeck": "Paediatric — IITT Slide Deck 3",
   "sourceSlides": "61–72",
   "needsReview": false,
-  "reviewNote": ""
+  "reviewNote": "",
+  "findings": {
+    "unresponsive": {
+      "text": "Alert and interacting normally."
+    },
+    "airway_red": {
+      "text": "No stridor. No central cyanosis. No respiratory distress."
+    },
+    "circulation_red": {
+      "chips": {
+        "HR": "92 bpm"
+      },
+      "text": "No bleeding. No cold extremities. No signs of dehydration."
+    },
+    "disability_red": {
+      "text": "No convulsions. No altered mental status, stiff neck or fever."
+    },
+    "other_red": {
+      "text": "No trauma, poisoning, threatened limb or surgical diagnosis."
+    },
+    "airway_yellow": {
+      "text": "No swelling of the mouth, throat or neck. No wheezing."
+    },
+    "circulation_yellow": {
+      "text": "Eating and drinking normally. No vomiting or diarrhoea."
+    },
+    "disability_yellow": {
+      "text": "Comfortable. Not irritable or lethargic. Not in severe pain."
+    },
+    "other_yellow": {
+      "text": "No rash, trauma, malnutrition or exposure requiring prophylaxis."
+    },
+    "vitals": {
+      "chips": {
+        "HR": "92 bpm",
+        "RR": "20 breaths/min",
+        "SpO2": "99%",
+        "Temp": "37.3°C",
+        "AVPU": "A"
+      }
+    }
+  },
+  "findingsReviewed": false
 }
