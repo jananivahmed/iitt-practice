@@ -83,8 +83,6 @@
   "feedbackWhy": "This patient does not meet any red or yellow criteria. However, her heart rate is above the high-risk threshold of 160 beats/min for children aged 1–4 years.",
   "teachingPoint": "She should not be moved directly to the low-acuity or waiting area without immediate review by a supervising clinician. The supervising clinician or local protocol should determine her final triage category.",
   "reassessment": null,
-  "sourceDeck": "Paediatric — IITT Slide Deck 3",
-  "sourceSlides": "49–60",
   "needsReview": true,
   "reviewNote": "This case's source-defined outcome is “Up-triage / immediate review by a supervising clinician,” distinct from a plain Yellow or Green. Confirm the scoring convention used for this against learner answers of Yellow or Green (currently: Green = under-triage, Yellow/Red = over-triage).",
   "findings": {

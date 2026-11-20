@@ -51,7 +51,7 @@ This is the strongest option because it does not depend on the app. If a publish
 
 ## 6. Add a new case
 
-See `CASE_BLUEPRINT.md` for how to design it. Mechanically:
+Authors use the Case Blueprint and Case Worksheet Docs; see `DEVELOPER_NOTES.md` for the fields. Mechanically:
 
 1. Copy `case-_template.json` to `case-<new-id>.json` (for example `case-adult-6.json`) and fill it in.
 2. Add the pictures: `picture-<image>.jpg` and `portrait-<image>.jpg`.

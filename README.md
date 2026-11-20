@@ -27,7 +27,7 @@ All files sit at the top level (no folders), so they can be dragged into GitHub 
 | `validate.js` | Checks the cases before every publish |
 | `.github/workflows/` | The automation that publishes the live and preview sites |
 | `RUNBOOK.md` | How to do everyday jobs: preview, go live, pause, shut down |
-| `CASE_BLUEPRINT.md` | How to design and write a new case |
+| `DEVELOPER_NOTES.md` | Case-file fields, how a worksheet becomes a case file, what the checker does |
 
 ## How it fits together
 

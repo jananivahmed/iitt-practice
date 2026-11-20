@@ -1132,7 +1132,6 @@ function renderReviewDetail(id) {
   html += '<h3 class="case-title">' + esc(c.title) + '</h3>';
   html += '<div class="kv"><span><b>Population:</b> ' + (c.population === "adult" ? "Adult" : "Paediatric") + '</span><span><b>Age:</b> ' + esc(c.age) + '</span><span><b>Sex:</b> ' + esc(c.sex) + '</span></div>';
   html += '<div class="kv" style="margin-top:6px;"><span><b>Clinical domain:</b> ' + esc(c.domain) + '</span></div>';
-  html += '<div class="kv" style="margin-top:6px;"><span><b>Source:</b> ' + esc(c.sourceDeck) + ', slides ' + esc(c.sourceSlides) + '</span></div>';
 
   html += '<div class="detail-section"><h4>Case info</h4><p>' + esc(c.arrival) + '</p></div>';
 

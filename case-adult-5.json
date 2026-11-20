@@ -79,8 +79,6 @@
   "feedbackWhy": "This patient does not meet any red or yellow criteria and has no high-risk vital signs. He can safely wait for evaluation in the low-acuity area.",
   "teachingPoint": null,
   "reassessment": "As with all patients in the waiting area, he should undergo reassessment because a patient's condition can change while waiting.",
-  "sourceDeck": "Adult — IITT Slide Deck 2",
-  "sourceSlides": "55–66",
   "needsReview": false,
   "reviewNote": "",
   "findings": {

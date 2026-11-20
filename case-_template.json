@@ -37,8 +37,6 @@
   "feedbackWhy": "REPLACE: why this is the correct category",
   "teachingPoint": null,
   "reassessment": null,
-  "sourceDeck": "REPLACE: where this case comes from",
-  "sourceSlides": "REPLACE or leave empty",
   "needsReview": true,
   "reviewNote": "REPLACE: what a clinician should confirm",
   "author": "REPLACE: who wrote it",

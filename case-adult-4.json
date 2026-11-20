@@ -79,8 +79,6 @@
   "feedbackWhy": "This patient does not meet any red or yellow criteria. However, her temperature is above the high-risk threshold of 39°C.",
   "teachingPoint": "She should not be moved directly to the low-acuity or waiting area without immediate review by a supervising clinician. This is exactly what the high-risk vital signs step is for.",
   "reassessment": null,
-  "sourceDeck": "Adult — IITT Slide Deck 2",
-  "sourceSlides": "43–54",
   "needsReview": true,
   "reviewNote": "This case's source-defined outcome is “Up-triage / immediate review by a supervising clinician,” distinct from a plain Yellow or Green. Confirm the scoring convention used for this against learner answers of Yellow or Green (currently: Green = under-triage, Yellow/Red = over-triage).",
   "findings": {

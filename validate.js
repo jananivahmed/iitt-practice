@@ -100,6 +100,8 @@ for (const id of listed) {
       else if (!f || typeof f !== "object" || (!f.text && !f.chips)) E(`findings.${g}: needs "text" and/or "chips"`);
       else if (f.chips !== undefined && (typeof f.chips !== "object" || Array.isArray(f.chips))) E(`findings.${g}: "chips" must be label/value pairs`);
     }
+    const missing = groups.filter((g) => !c.findings[g]);
+    if (missing.length) W(`findings are missing for ${missing.length} card section(s) (${missing.join(", ")}). A learner can tell where the decision was made when later sections are empty, so fill in every section`);
     if (c.status === "live" && c.findingsReviewed !== true) W('findings have not been reviewed by a clinician ("findingsReviewed" is not true). Findings must be neutral observations that never state the answer');
   }
   if (c.needsReview === true && c.status === "live") W('status is "live" but needsReview is true. Confirm the clinician review is done before leaving it live');
