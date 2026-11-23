@@ -171,7 +171,6 @@ function getSessionId() {
 }
 function getResponses() { return safeGet(STORE_RESPONSES, []).map(normResp); }
 function addResponse(rec) {
-  if (state.facilitator) return;
   var all = getResponses();
   all.push(rec);
   safeSet(STORE_RESPONSES, all);
@@ -193,7 +192,6 @@ var eventSeqCounter = 0;
 function nextEventSeq() { eventSeqCounter += 1; return eventSeqCounter; }
 function getEvents() { return safeGet(STORE_EVENTS, []); }
 function addEventRecord(rec) {
-  if (state.facilitator) return;
   var all = getEvents();
   all.push(rec);
   if (all.length > EVENT_LOG_CAP) all = all.slice(all.length - EVENT_LOG_CAP);
@@ -273,14 +271,7 @@ var state = {
   progressOpen: false,
   ageBandOpen: false,
   resetConfirmOpen: false,
-  endSessionConfirmOpen: false,
-  /* Facilitator mode: one person runs cases with a group on a shared screen.
-     Nothing is saved or sent while it is on. */
-  facilitator: false,
-  facLarge: false,
-  facStage: "pick",      /* pick | case | done */
-  facPick: [],
-  facRevealed: false
+  endSessionConfirmOpen: false
 };
 
 function shuffleArray(arr) {
@@ -392,7 +383,6 @@ function esc(s) {
    the nav and this dispatcher, but their render functions and data are left
    intact below so that chrome can be reinstated later without rebuilding it. */
 function render() {
-  if (state.facilitator) { renderFacilitator(); window.scrollTo(0, 0); return; }
   if (!getLearnerName() || !getLearnerEmail() || (COLLECT.enabled && !getProfile())) { renderLogin(); window.scrollTo(0, 0); return; }
   renderPractice();
   window.scrollTo(0, 0);
@@ -483,8 +473,6 @@ function renderLogin() {
     '</div>' +
     (COLLECT.enabled && COLLECT.notice ? '<p class="login-notice">' + esc(COLLECT.notice) + '</p>' : '') +
     '<div class="cta-row"><button class="btn btn-primary" onclick="submitLogin()">Continue</button></div>' +
-    '<div class="restart-row" style="margin-top:6px;"><button class="btn btn-ghost" onclick="startFacilitator()">Running this with a group? Facilitator mode</button></div>' +
-    '<p class="login-notice" style="text-align:center;">Facilitator mode needs no sign-in. Nothing is saved or sent.</p>' +
     '</div>';
   appEl.innerHTML = html;
   var input = document.getElementById("login-name-input");
@@ -573,7 +561,6 @@ function renderEndSessionConfirm() {
 
 /* ---- Practice mode ---- */
 function renderPractice() {
-  if (state.facilitator && !state.refCardOpen) { renderFacilitator(); return; }
   if (state.resetConfirmOpen) { renderResetConfirm(); return; }
   if (state.endSessionConfirmOpen) { renderEndSessionConfirm(); return; }
   if (state.progressOpen) { renderProgress(); return; }
@@ -600,7 +587,6 @@ function renderCaseInfo(c) {
   html += caseHeader(c, num, pct);
   html += '<img class="case-image" src="' + IMAGES[c.image] + '" alt="Illustration of the patient described in this case" loading="lazy">';
   html += '<div class="stage-tag">Case info</div>';
-  html += '<h3 class="case-title">' + esc(c.title) + '</h3>';
   html += '<p class="vignette">' + esc(c.arrival) + '</p>';
   html += '<div class="cta-row"><button class="btn btn-primary" onclick="toggleCaseInfo()">Back to assessment</button></div>';
   html += '</div>';
@@ -706,7 +692,6 @@ function renderPracticeHome() {
     '<button class="btn btn-primary" onclick="startPractice(\'decide\')">Start</button>' +
     '</div>' +
     '<div class="restart-row" style="margin-top:2px;"><button class="btn btn-ghost" onclick="openProgress()">📊 My progress</button></div>' +
-    '<div class="restart-row" style="margin-top:2px;"><button class="btn btn-ghost" onclick="startFacilitator()">👥 Facilitator mode</button></div>' +
     '<details class="about-box"><summary>ℹ️ About</summary>' +
     '<p><b>IITT Practice Companion</b></p>' +
     '<p>Developed by <b>Janani Ahmed, MD MPH</b></p>' +
@@ -777,7 +762,7 @@ function renderProgress() {
   html += '<div class="recent-list">';
   recent.forEach(function (r) {
     var c = caseById(r.case_id);
-    var title = c ? c.title : r.case_id;
+    var title = c ? ((c.population === "adult" ? "Adult" : "Paediatric") + " \u00b7 " + c.age) : r.case_id;
     var resultLabel = r.response_classification === "correct" ? "Correct"
       : r.response_classification === "correct_unsupported" ? "No basis yet"
       : "Incorrect";
@@ -809,7 +794,6 @@ function renderArrival(c) {
   html += caseHeader(c, num, pct);
   html += '<img class="case-image" src="' + IMAGES[c.image] + '" alt="Illustration of the patient described in this case" loading="lazy">';
   html += '<div class="stage-tag">Arrival</div>';
-  html += '<h3 class="case-title">' + esc(c.title) + '</h3>';
   html += '<p class="vignette">' + esc(c.arrival) + '</p>';
   html += '<div class="cta-row"><button class="btn btn-primary" onclick="beginAssessment()">Begin assessment</button></div>';
   html += '</div>';
@@ -859,7 +843,6 @@ function renderCheckpoint(c) {
   html += caseHeader(c, num, stepPct);
   html += miniImageRow(c, true);
   html += '<div class="stage-tag">' + (meta.level === "red" ? "Red criteria" : meta.level === "yellow" ? "Yellow criteria" : "High-risk vital signs") + '</div>';
-  html += '<h3 class="case-title" style="font-size:16px;">' + esc(c.title) + '</h3>';
   html += renderReferenceLinks();
 
   html += renderCheckpointTrail(c);
@@ -906,7 +889,7 @@ function renderCheckpoint(c) {
     var isRight = state.cpSelected === cp.correct;
     html += '<div class="cp-feedback ' + (isRight ? "right" : "wrong") + '">' +
       '<div class="cp-feedback-title">' + (isRight ? "Correct" : "Not quite") + '</div>' +
-      '<div class="cp-feedback-body">Answer: <b>' + (cp.correct === "yes" ? "Yes" : "No") + '.</b> ' + esc(cp.why) + '</div>' +
+      '<div class="cp-feedback-body">Answer: <b>' + (cp.correct === "yes" ? "Yes" : "No") + '.</b></div>' +
       '</div>';
     html += '<div class="submit-row"><button class="btn btn-primary" onclick="advanceCheckpoint()">Continue</button></div>';
   }
@@ -1013,7 +996,6 @@ function renderReady(c) {
   html += caseHeader(c, num, pct);
   html += miniImageRow(c, false, true);
   html += '<div class="stage-tag">Case info</div>';
-  html += '<h3 class="case-title" style="font-size:16px;">' + esc(c.title) + '</h3>';
   html += '<p class="vignette">' + esc(c.arrival) + '</p>';
   html += '<div class="divider"></div>';
   html += '<div class="stage-tag">Work through the card</div>';
@@ -1068,7 +1050,6 @@ function renderDecision(c) {
   html += caseHeader(c, num, pct);
   html += miniImageRow(c, true);
   html += '<div class="stage-tag">Triage decision</div>';
-  html += '<h3 class="case-title" style="font-size:16px;">' + esc(c.title) + '</h3>';
   html += renderCheckpointTrail(c);
   html += '<div class="decision-prompt">Based on everything you found, what is the appropriate IITT triage category?</div>';
   html += '<div class="decision-grid">';
@@ -1086,7 +1067,7 @@ function renderDecision(c) {
 }
 function selectAnswer(k) {
   if (state.locked) return;
-  state.selected = (state.facilitator && state.selected === k) ? null : k;
+  state.selected = k;
   renderKeepingScroll();
 }
 function selectConfidence(k) {
@@ -1181,194 +1162,11 @@ function renderFeedback(c) {
   }
 
   html += '<div class="detail-section"><h4>Why</h4><p><b>' + esc(c.keyCriterion) + '.</b> ' + esc(c.feedbackWhy) + '</p></div>';
-  if (c.teachingPoint) html += '<div class="detail-section"><h4>Key takeaway</h4><p>' + esc(c.teachingPoint) + '</p></div>';
   if (c.reassessment) html += '<div class="reassess-note"><span>\uD83D\uDD01</span><span>' + esc(c.reassessment) + '</span></div>';
 
   html += '<div class="restart-row"><button class="btn btn-primary" onclick="nextCase()">' + (state.qIndex + 1 >= state.queue.length ? "See summary" : "Next case") + '</button></div>';
   if (state.qIndex + 1 < state.queue.length) html += '<div class="restart-row" style="margin-top:6px;"><button class="btn btn-ghost" onclick="endSessionNow()">Finish here &amp; see my report</button></div>';
   html += '</div>';
-  appEl.innerHTML = html;
-}
-
-/* ---------------- Facilitator mode ----------------
-   For a leader running cases with a group on a shared screen. The leader picks
-   the cases, taps card sections for the group, optionally records what the
-   group chose, then reveals the answer. No sign-in; nothing is saved or sent
-   (addResponse, addEventRecord and the outbox are skipped while it is on). */
-function startFacilitator() {
-  state.facilitator = true;
-  state.practiceMode = "decide";
-  state.facStage = "pick";
-  state.facPick = [];
-  state.facRevealed = false;
-  state.queue = [];
-  state.qIndex = 0;
-  state.results = [];
-  resetCaseState();
-  document.body.classList.add("fac");
-  render();
-}
-function exitFacilitator() {
-  state.facilitator = false;
-  state.facLarge = false;
-  state.facStage = "pick";
-  state.facPick = [];
-  state.facRevealed = false;
-  state.queue = [];
-  state.qIndex = 0;
-  resetCaseState();
-  document.body.classList.remove("fac", "fac-large");
-  render();
-}
-function toggleFacLarge() {
-  state.facLarge = !state.facLarge;
-  document.body.classList.toggle("fac-large", state.facLarge);
-  renderKeepingScroll();
-}
-function facToggleCase(id) {
-  var i = state.facPick.indexOf(id);
-  if (i === -1) state.facPick.push(id); else state.facPick.splice(i, 1);
-  renderKeepingScroll();
-}
-function facSelectGroup(pop, on) {
-  CASES.forEach(function (c) {
-    if (pop !== "all" && c.population !== pop) return;
-    var i = state.facPick.indexOf(c.id);
-    if (on && i === -1) state.facPick.push(c.id);
-    if (!on && i !== -1) state.facPick.splice(i, 1);
-  });
-  renderKeepingScroll();
-}
-function facStart() {
-  if (!state.facPick.length) return;
-  state.queue = CASES.map(function (c) { return c.id; }).filter(function (id) { return state.facPick.indexOf(id) !== -1; });
-  state.qIndex = 0;
-  state.facStage = "case";
-  state.facRevealed = false;
-  resetCaseState();
-  render();
-}
-function facReveal() { state.facRevealed = true; render(); }
-function facBack() { state.facRevealed = false; render(); }
-function facNext() {
-  state.qIndex += 1;
-  resetCaseState();
-  state.facRevealed = false;
-  if (state.qIndex >= state.queue.length) state.facStage = "done";
-  render();
-}
-function facPickAgain() {
-  state.facStage = "pick";
-  state.queue = [];
-  state.qIndex = 0;
-  state.facRevealed = false;
-  resetCaseState();
-  render();
-}
-function facBar() {
-  return '<div class="fac-bar"><span class="fac-badge">Facilitator mode</span><span class="fac-note">Nothing is saved or sent</span>' +
-    '<span class="fac-spacer"></span>' +
-    '<button type="button" class="btn btn-ghost fac-small" onclick="toggleFacLarge()">' + (state.facLarge ? 'Normal text' : 'Larger text') + '</button>' +
-    '<button type="button" class="btn btn-ghost fac-small" onclick="exitFacilitator()">Exit</button></div>';
-}
-function renderFacilitator() {
-  if (state.facStage === "pick") renderFacPicker();
-  else if (state.facStage === "done") renderFacDone();
-  else {
-    var c = caseById(state.queue[state.qIndex]);
-    if (!c) { renderFacDone(); return; }
-    if (state.facRevealed) renderFacReveal(c); else renderFacCase(c);
-  }
-}
-function renderFacPicker() {
-  var html = facBar();
-  html += '<div class="card"><div class="stage-tag">Facilitator mode</div>';
-  html += '<h3 class="case-title">Choose the cases to run</h3>';
-  html += '<p class="vignette">Pick the cases for this session. They run in the order shown. You show the case, tap card sections for the group, and reveal the answer when the group is ready.</p>';
-  html += '<div class="fac-pick-actions"><button type="button" class="tp-allbtn" onclick="facSelectGroup(\'all\', true)">Select all</button>' +
-    '<button type="button" class="tp-allbtn" onclick="facSelectGroup(\'adult\', true)">All adult</button>' +
-    '<button type="button" class="tp-allbtn" onclick="facSelectGroup(\'pediatric\', true)">All paediatric</button>' +
-    '<button type="button" class="tp-allbtn" onclick="facSelectGroup(\'all\', false)">Clear</button></div>';
-  html += '<div class="fac-pick-list">';
-  CASES.forEach(function (c) {
-    var on = state.facPick.indexOf(c.id) !== -1;
-    html += '<label><input type="checkbox" ' + (on ? 'checked ' : '') + 'onchange="facToggleCase(\'' + c.id + '\')"><span><b>' + esc(c.title) + '</b><br><span class="fac-sub">' + (c.population === "adult" ? "Adult" : "Paediatric") + ' · ' + esc(c.age) + '</span></span></label>';
-  });
-  html += '</div>';
-  html += '<div class="submit-row"><button class="btn btn-primary" ' + (state.facPick.length ? '' : 'disabled') + ' onclick="facStart()">Start with ' + state.facPick.length + ' case' + (state.facPick.length === 1 ? '' : 's') + '</button></div>';
-  html += '</div>';
-  appEl.innerHTML = html;
-}
-function facHeader(c) {
-  var num = state.qIndex + 1;
-  var pct = Math.round((num - 1) / state.queue.length * 100);
-  var popLabel = c.population === "adult" ? "Adult" : "Paediatric";
-  return facBar() +
-    '<div class="progress-row"><span class="progress-label">Case ' + num + ' of ' + state.queue.length + '</span><span class="pop-badge">' + popLabel + ' · ' + esc(c.age) + '</span></div>' +
-    '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>';
-}
-function facCaseColumn(c) {
-  return '<img class="case-image" src="' + IMAGES[c.image] + '" alt="Illustration of the patient described in this case" loading="lazy">' +
-    '<div class="stage-tag">Case info</div>' +
-    '<h3 class="case-title">' + esc(c.title) + '</h3>' +
-    '<p class="vignette">' + esc(c.arrival) + '</p>';
-}
-function renderFacCase(c) {
-  var html = facHeader(c) + '<div class="card"><div class="fac-grid">';
-  html += '<div class="fac-col">' + facCaseColumn(c) + '</div>';
-  html += '<div class="fac-col"><div class="stage-tag">Work through the card</div>' + renderReferenceLinks();
-  html += '<p class="tp-howto">Tap a part of the IITT card to show the group what you find.</p>';
-  html += renderTiers(c);
-  html += '</div></div>';
-  html += '<div class="tp-pick"><h4>What did the group choose? (optional)</h4><div class="decision-grid">';
-  ["red", "yellow", "green", "uptriage"].forEach(function (k) {
-    var m = CATEGORY_META[k];
-    var sel = state.selected === k ? " selected" : "";
-    html += '<button class="decision-btn ' + k + sel + '" onclick="selectAnswer(\'' + k + '\')" aria-pressed="' + (state.selected === k) + '">' +
-      '<span class="d-emoji">' + m.emoji + '</span><span class="d-label">' + m.label + '</span></button>';
-  });
-  html += '</div><div class="submit-row"><button class="btn btn-primary" onclick="facReveal()">Reveal answer</button></div></div>';
-  html += '</div>';
-  appEl.innerHTML = html;
-}
-function renderFacReveal(c) {
-  var meta = CATEGORY_META[c.correct];
-  var deciding = decidingGroup(c);
-  var html = facHeader(c) + '<div class="card"><div class="fac-grid">';
-  html += '<div class="fac-col">';
-  html += '<span class="answer-chip ' + meta.chip + ' fac-answer">' + meta.emoji + ' Correct IITT category: ' + meta.label + '</span>';
-  if (state.selected) {
-    var sm = CATEGORY_META[state.selected];
-    html += '<p class="fac-group-note">The group chose <b>' + sm.label + '</b>.' + (state.selected === c.correct ? ' That matches.' : ' The correct category is <b>' + meta.label + '</b>.') + '</p>';
-  }
-  html += '<div class="detail-section"><h4>Why</h4><p><b>' + esc(c.keyCriterion) + '.</b> ' + esc(c.feedbackWhy) + '</p></div>';
-  if (c.teachingPoint) html += '<div class="detail-section"><h4>Key takeaway</h4><p>' + esc(c.teachingPoint) + '</p></div>';
-  if (c.reassessment) html += '<div class="reassess-note"><span>🔁</span><span>' + esc(c.reassessment) + '</span></div>';
-  if (c.discussion && c.discussion.length) {
-    var items = Array.isArray(c.discussion) ? c.discussion : [c.discussion];
-    html += '<div class="detail-section"><h4>For discussion</h4><ul class="fac-discuss">' + items.map(function (d) { return '<li>' + esc(d) + '</li>'; }).join("") + '</ul></div>';
-  }
-  html += '</div><div class="fac-col"><div class="stage-tag">Everything on the card</div>';
-  TIERS.forEach(function (t) {
-    html += '<div class="tp-tier tp-' + t.level + '"><div class="tp-tier-head"><h4>' + t.title + '</h4></div>';
-    groupsInTier(t.level).forEach(function (g) {
-      var seen = isChecked(g);
-      html += '<div class="tp-sec open"><div class="tp-sec-btn fac-sec-head"><span>' + esc(GROUP_META[g].label) + (g === deciding ? ' <span class="fac-decided">decided the case</span>' : '') + '</span><span class="tp-state">' + (seen ? '✓ Checked' : 'Not checked') + '</span></div>' + renderFindings(c, g) + '</div>';
-    });
-    html += '</div>';
-  });
-  html += '</div></div>';
-  var last = state.qIndex + 1 >= state.queue.length;
-  html += '<div class="restart-row"><button class="btn btn-ghost" onclick="facBack()">Back to the case</button>' +
-    '<button class="btn btn-primary" onclick="facNext()">' + (last ? 'Finish' : 'Next case') + '</button></div>';
-  html += '</div>';
-  appEl.innerHTML = html;
-}
-function renderFacDone() {
-  var html = facBar() + '<div class="card empty-hero"><h2 class="section-title">Session finished</h2>' +
-    '<p>You ran ' + state.queue.length + ' case' + (state.queue.length === 1 ? '' : 's') + '. Nothing from this session was saved or sent.</p>' +
-    '<div class="restart-row"><button class="btn btn-ghost" onclick="facPickAgain()">Pick other cases</button>' +
-    '<button class="btn btn-primary" onclick="exitFacilitator()">Exit facilitator mode</button></div></div>';
   appEl.innerHTML = html;
 }
 
@@ -1453,7 +1251,7 @@ function renderReviewList() {
     var meta = CATEGORY_META[c.correct];
     html += '<div class="review-list-item" onclick="openReview(\'' + c.id + '\')" role="button" tabindex="0">';
     html += '<img class="review-thumb" src="' + FACE_IMAGES[c.image] + '" alt="">';
-    html += '<div><div class="r-title">' + esc(c.title) + '</div><div class="r-sub">' + (c.population === "adult" ? "Adult" : "Paediatric") + ' \u00b7 ' + meta.label + ' \u00b7 ' + c.checkpoints.length + ' checkpoints \u00b7 slides ' + esc(c.sourceSlides) + '</div></div>';
+    html += '<div><div class="r-title">' + esc(c.title) + '</div><div class="r-sub">' + (c.population === "adult" ? "Adult" : "Paediatric") + ' \u00b7 ' + meta.label + ' \u00b7 ' + c.checkpoints.length + ' checkpoints</div></div>';
     if (c.needsReview) {
       var listStatus = reviewStatusFor(c.id);
       if (listStatus === "Reviewed \u2014 approved") html += '<span class="flag-pill confirmed">CONFIRMED</span>';
@@ -1501,7 +1299,7 @@ function renderReviewDetail(id) {
   html += '<ol class="cp-review-list">';
   c.checkpoints.forEach(function (cp) {
     var gm = GROUP_META[cp.g];
-    html += '<li><b>' + esc(gm.label) + ' (' + gm.level + '):</b> ' + esc(gm.question) + ' &rarr; <b>' + (cp.correct === "yes" ? "Yes" : "No") + '.</b> ' + esc(cp.why);
+    html += '<li><b>' + esc(gm.label) + ' (' + gm.level + '):</b> ' + esc(gm.question) + ' &rarr; <b>' + (cp.correct === "yes" ? "Yes" : "No") + '.</b>';
     if (cp.chips) {
       html += ' <i>(' + Object.keys(cp.chips).map(function (k) { return k + ": " + cp.chips[k]; }).join(", ") + ')</i>';
     }
@@ -1517,7 +1315,6 @@ function renderReviewDetail(id) {
   html += '<div class="detail-section"><h4>Correct triage category</h4><span class="answer-chip ' + meta.chip + '">' + meta.emoji + ' ' + meta.label + '</span></div>';
   html += '<div class="detail-section"><h4>Key IITT criterion</h4><p>' + esc(c.keyCriterion) + '</p></div>';
   html += '<div class="detail-section"><h4>Feedback</h4><p>' + esc(c.feedbackWhy) + '</p></div>';
-  if (c.teachingPoint) html += '<div class="detail-section"><h4>Teaching point</h4><p>' + esc(c.teachingPoint) + '</p></div>';
   if (c.reassessment) html += '<div class="detail-section"><h4>Reassessment note</h4><p>' + esc(c.reassessment) + '</p></div>';
 
   html += '<div class="divider"></div>';

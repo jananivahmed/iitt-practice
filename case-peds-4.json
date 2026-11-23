@@ -5,7 +5,7 @@
   "title": "4-year-old girl with abdominal pain",
   "age": "4 years",
   "sex": "Female",
-  "domain": "Abdominal pain (pediatric)",
+  "domain": "Abdominal pain",
   "focusTags": [
     "pediatric"
   ],
@@ -15,55 +15,46 @@
     "hr": "80–160 bpm",
     "rr": "20–40 breaths/min"
   },
-  "arrival": "A 4-year-old girl is brought in by her mother for mild, intermittent abdominal pain that began this morning. She has not vomited and does not have diarrhoea. She has been eating and drinking normally. She is alert, calm, and walking without assistance. Her abdomen is soft, and she does not appear to be in severe pain. Her peripheral pulse is strong, and her capillary refill is 2 seconds.",
+  "arrival": "A 4-year-old girl is brought in by her mother for mild, intermittent abdominal pain that began this morning.",
   "checkpoints": [
     {
       "g": "unresponsive",
-      "correct": "no",
-      "why": "She is alert and calm."
+      "correct": "no"
     },
     {
       "g": "airway_red",
-      "correct": "no",
-      "why": "No stridor, central cyanosis, or respiratory distress."
+      "correct": "no"
     },
     {
       "g": "circulation_red",
       "chips": {
         "HR": "165 bpm"
       },
-      "correct": "no",
-      "why": "Her peripheral pulse is strong and capillary refill is 2 seconds, with no bleeding or cold extremities. Her heart rate is elevated — this will be revisited at the vital signs step."
+      "correct": "no"
     },
     {
       "g": "disability_red",
-      "correct": "no",
-      "why": "No convulsions, and no altered mental status with stiff neck or fever."
+      "correct": "no"
     },
     {
       "g": "other_red",
-      "correct": "no",
-      "why": "No trauma, poisoning, threatened limb, or surgical diagnosis, and she is over 2 months old."
+      "correct": "no"
     },
     {
       "g": "airway_yellow",
-      "correct": "no",
-      "why": "No swelling of the mouth, throat, or neck, and no wheezing."
+      "correct": "no"
     },
     {
       "g": "circulation_yellow",
-      "correct": "no",
-      "why": "She is eating and drinking normally, with no vomiting, diarrhoea, or dehydration."
+      "correct": "no"
     },
     {
       "g": "disability_yellow",
-      "correct": "no",
-      "why": "She is alert and calm, walking without assistance, and not in severe pain."
+      "correct": "no"
     },
     {
       "g": "other_yellow",
-      "correct": "no",
-      "why": "No malnutrition, trauma, rash, or surgical diagnosis."
+      "correct": "no"
     },
     {
       "g": "vitals",
@@ -74,16 +65,14 @@
         "Temp": "37.2°C",
         "AVPU": "A"
       },
-      "correct": "yes",
-      "why": "Her heart rate of 165 is above the high-risk threshold of 160 for children aged 1 to 4 years. Her other values are within range."
+      "correct": "yes"
     }
   ],
   "correct": "uptriage",
   "keyCriterion": "High-risk vital sign — heart rate 165 bpm (threshold >160 for ages 1–4 years)",
-  "feedbackWhy": "This patient does not meet any red or yellow criteria. However, her heart rate is above the high-risk threshold of 160 beats/min for children aged 1–4 years.",
-  "teachingPoint": "She should not be moved directly to the low-acuity or waiting area without immediate review by a supervising clinician. The supervising clinician or local protocol should determine her final triage category.",
+  "feedbackWhy": "This patient does not meet any red or yellow criteria. However, her heart rate is above the high-risk threshold of 160 beats/min for children aged 1–4 years. She should not be moved directly to the low-acuity or waiting area without immediate review by a supervising clinician. The supervising clinician or local protocol should determine her final triage category.",
   "reassessment": null,
-  "needsReview": true,
+  "needsReview": false,
   "reviewNote": "This case's source-defined outcome is “Up-triage / immediate review by a supervising clinician,” distinct from a plain Yellow or Green. Confirm the scoring convention used for this against learner answers of Yellow or Green (currently: Green = under-triage, Yellow/Red = over-triage).",
   "findings": {
     "unresponsive": {
@@ -114,7 +103,7 @@
       "text": "Alert and calm. Walking without assistance. Not in severe pain."
     },
     "other_yellow": {
-      "text": "No malnutrition, trauma, rash or surgical diagnosis."
+      "text": "Abdomen is soft. No malnutrition, trauma, rash or surgical diagnosis."
     },
     "vitals": {
       "chips": {
@@ -126,5 +115,5 @@
       }
     }
   },
-  "findingsReviewed": false
+  "findingsReviewed": true
 }

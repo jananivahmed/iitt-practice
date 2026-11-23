@@ -5,7 +5,7 @@
   "title": "7-year-old boy with ear pain",
   "age": "7 years",
   "sex": "Male",
-  "domain": "ENT / minor illness (pediatric)",
+  "domain": "ENT / minor illness",
   "focusTags": [
     "pediatric"
   ],
@@ -15,55 +15,46 @@
     "hr": "70–140 bpm",
     "rr": "10–30 breaths/min"
   },
-  "arrival": "A 7-year-old boy is brought in by his father for mild pain in his left ear that began yesterday. He is alert, comfortable, and interacting normally. He has been eating and drinking normally. He has no severe pain, breathing difficulty, rash, trauma, or other concerning symptoms.",
+  "arrival": "A 7-year-old boy is brought in by his father for mild pain in his left ear that began yesterday.",
   "checkpoints": [
     {
       "g": "unresponsive",
-      "correct": "no",
-      "why": "He is alert and interacting normally."
+      "correct": "no"
     },
     {
       "g": "airway_red",
-      "correct": "no",
-      "why": "No stridor, central cyanosis, or respiratory distress."
+      "correct": "no"
     },
     {
       "g": "circulation_red",
       "chips": {
         "HR": "92 bpm"
       },
-      "correct": "no",
-      "why": "No bleeding, cold extremities, or signs of dehydration. His heart rate does not cross the high-risk threshold for his age band."
+      "correct": "no"
     },
     {
       "g": "disability_red",
-      "correct": "no",
-      "why": "No convulsions, and no altered mental status with stiff neck or fever."
+      "correct": "no"
     },
     {
       "g": "other_red",
-      "correct": "no",
-      "why": "No trauma, poisoning, threatened limb, or surgical diagnosis."
+      "correct": "no"
     },
     {
       "g": "airway_yellow",
-      "correct": "no",
-      "why": "No swelling of the mouth, throat, or neck, and no wheezing."
+      "correct": "no"
     },
     {
       "g": "circulation_yellow",
-      "correct": "no",
-      "why": "He is eating and drinking normally, with no vomiting or diarrhoea."
+      "correct": "no"
     },
     {
       "g": "disability_yellow",
-      "correct": "no",
-      "why": "He is comfortable, not irritable or lethargic, and not in severe pain."
+      "correct": "no"
     },
     {
       "g": "other_yellow",
-      "correct": "no",
-      "why": "No rash, trauma, malnutrition, or exposure requiring prophylaxis."
+      "correct": "no"
     },
     {
       "g": "vitals",
@@ -74,14 +65,12 @@
         "Temp": "37.3°C",
         "AVPU": "A"
       },
-      "correct": "no",
-      "why": "No value crosses a high-risk threshold for his age band, and he is alert on AVPU."
+      "correct": "no"
     }
   ],
   "correct": "green",
   "keyCriterion": "No red, yellow, or high-risk vital sign criteria met",
   "feedbackWhy": "This patient does not meet any red or yellow criteria and has no high-risk vital signs. He can safely wait for evaluation in the low-acuity area.",
-  "teachingPoint": null,
   "reassessment": "As with all patients in the waiting area, he should undergo reassessment because his condition can change while waiting. His caregiver should be advised to notify staff if his symptoms worsen.",
   "needsReview": false,
   "reviewNote": "",
@@ -126,5 +115,5 @@
       }
     }
   },
-  "findingsReviewed": false
+  "findingsReviewed": true
 }

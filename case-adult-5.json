@@ -11,55 +11,46 @@
   ],
   "image": "adult-5",
   "ageBandRef": null,
-  "arrival": "A 25-year-old man scraped his forearm against a wooden door earlier today. He has a small, superficial abrasion with no active bleeding, swelling, deformity, severe pain, or loss of movement or sensation. He is alert, comfortable, and otherwise feels well.",
+  "arrival": "A 25-year-old man presents after scraping his forearm against a wooden door earlier today.",
   "checkpoints": [
     {
       "g": "unresponsive",
-      "correct": "no",
-      "why": "He is alert and comfortable."
+      "correct": "no"
     },
     {
       "g": "airway_red",
-      "correct": "no",
-      "why": "No stridor, respiratory distress, or central cyanosis."
+      "correct": "no"
     },
     {
       "g": "circulation_red",
       "chips": {
         "HR": "78 bpm"
       },
-      "correct": "no",
-      "why": "His heart rate of 78 is well within range, and there is no bleeding or circulatory compromise."
+      "correct": "no"
     },
     {
       "g": "disability_red",
-      "correct": "no",
-      "why": "He has no convulsions, and he is alert with normal mental status, so a glucose is not needed here."
+      "correct": "no"
     },
     {
       "g": "other_red",
-      "correct": "no",
-      "why": "A superficial abrasion is not high-risk trauma, and the limb is not threatened."
+      "correct": "no"
     },
     {
       "g": "airway_yellow",
-      "correct": "no",
-      "why": "No swelling and no wheezing."
+      "correct": "no"
     },
     {
       "g": "circulation_yellow",
-      "correct": "no",
-      "why": "He is drinking normally, with no vomiting, diarrhoea, or bleeding."
+      "correct": "no"
     },
     {
       "g": "disability_yellow",
-      "correct": "no",
-      "why": "Alert and comfortable, with no weakness and no severe pain."
+      "correct": "no"
     },
     {
       "g": "other_yellow",
-      "correct": "no",
-      "why": "The wound is superficial, and a wooden door is not an exposure requiring time-sensitive prophylaxis."
+      "correct": "no"
     },
     {
       "g": "vitals",
@@ -70,14 +61,12 @@
         "Temp": "36.8°C",
         "AVPU": "A"
       },
-      "correct": "no",
-      "why": "No value crosses a high-risk threshold, and he is alert on AVPU."
+      "correct": "no"
     }
   ],
   "correct": "green",
   "keyCriterion": "No red, yellow, or high-risk vital sign criteria met",
   "feedbackWhy": "This patient does not meet any red or yellow criteria and has no high-risk vital signs. He can safely wait for evaluation in the low-acuity area.",
-  "teachingPoint": null,
   "reassessment": "As with all patients in the waiting area, he should undergo reassessment because a patient's condition can change while waiting.",
   "needsReview": false,
   "reviewNote": "",
@@ -98,7 +87,7 @@
       "text": "No convulsions. Alert with normal mental status."
     },
     "other_red": {
-      "text": "Small, superficial abrasion on the forearm. Limb not threatened."
+      "text": "Small, superficial abrasion on the forearm. Distal pulses are intact."
     },
     "airway_yellow": {
       "text": "No swelling. No wheezing."
@@ -107,10 +96,10 @@
       "text": "Drinking normally. No vomiting, diarrhoea or bleeding."
     },
     "disability_yellow": {
-      "text": "Alert and comfortable. No weakness. No severe pain."
+      "text": "Alert and comfortable. No weakness. No loss of movement or sensation. No severe pain."
     },
     "other_yellow": {
-      "text": "Superficial wound from a wooden door."
+      "text": "Superficial wound from a wooden door. No deformity."
     },
     "vitals": {
       "chips": {
@@ -122,5 +111,5 @@
       }
     }
   },
-  "findingsReviewed": false
+  "findingsReviewed": true
 }

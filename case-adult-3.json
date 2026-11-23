@@ -11,25 +11,59 @@
   ],
   "image": "adult-3",
   "ageBandRef": null,
-  "arrival": "A 28-year-old woman initially collapsed while shopping. She is 39 weeks pregnant. During the triage assessment, she reports feeling tired and weak.",
+  "arrival": "A 28-year-old woman, 39 weeks pregnant, presents after she collapsed while shopping.",
   "checkpoints": [
     {
       "g": "unresponsive",
-      "correct": "yes",
-      "why": "She becomes unresponsive during the assessment. This is the first red criterion, and no further assessment is needed before escalating."
+      "correct": "yes"
     }
   ],
   "correct": "red",
   "keyCriterion": "Red — Unresponsive",
-  "feedbackWhy": "She becomes unresponsive during the assessment.",
-  "teachingPoint": "Her pregnancy at 39 weeks means the obstetric team should be involved early, but the RED category is already determined by her unresponsiveness alone.",
+  "feedbackWhy": "She becomes unresponsive during the assessment, this is the first red criterion and the patient should be moved to the high acuity area immediately.",
   "reassessment": null,
   "needsReview": false,
   "reviewNote": "",
   "findings": {
     "unresponsive": {
-      "text": "Becomes unresponsive during the triage assessment."
+      "text": "Reports feeling tired and weak. Becomes unresponsive during the triage assessment."
+    },
+    "airway_red": {
+      "text": "Breathing. No stridor. No central cyanosis."
+    },
+    "circulation_red": {
+      "chips": {
+        "HR": "118 bpm"
+      },
+      "text": "Pulse palpable. No heavy bleeding."
+    },
+    "disability_red": {
+      "text": "Not responding to voice. No convulsions."
+    },
+    "other_red": {
+      "text": "Visibly pregnant with gravid uterus. No trauma or threatened limb."
+    },
+    "airway_yellow": {
+      "text": "No swelling of the mouth, throat or neck. No wheezing."
+    },
+    "circulation_yellow": {
+      "text": "No vomiting or diarrhoea. No visible bleeding."
+    },
+    "disability_yellow": {
+      "text": "Not responding to voice, so unable to report pain or walk."
+    },
+    "other_yellow": {
+      "text": "Visibly pregnant with gravid uterus. No rash, deformity, fracture or dislocation."
+    },
+    "vitals": {
+      "chips": {
+        "HR": "118 bpm",
+        "RR": "20 breaths/min",
+        "SpO2": "96%",
+        "Temp": "36.9°C",
+        "AVPU": "U"
+      }
     }
   },
-  "findingsReviewed": false
+  "findingsReviewed": true
 }

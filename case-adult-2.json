@@ -2,7 +2,7 @@
   "id": "adult-2",
   "status": "live",
   "population": "adult",
-  "title": "40-year-old man with alcohol use and agitation",
+  "title": "40-year-old man who smells of alcohol",
   "age": "40 years",
   "sex": "Male",
   "domain": "Behavioural / safety",
@@ -11,46 +11,40 @@
   ],
   "image": "adult-2",
   "ageBandRef": null,
-  "arrival": "A 40-year-old man smells strongly of alcohol. He is yelling at and threatening another patient. He states that he would like to see a doctor. However, when asked for more information, he screams and threatens staff.",
+  "arrival": "A 40-year-old man smells strongly of alcohol. He comes in saying he would like to see a doctor.",
   "checkpoints": [
     {
       "g": "unresponsive",
-      "correct": "no",
-      "why": "He is awake, shouting, and speaking."
+      "correct": "no"
     },
     {
       "g": "airway_red",
-      "correct": "no",
-      "why": "He is breathing without distress."
+      "correct": "no"
     },
     {
       "g": "circulation_red",
       "chips": {
         "HR": "Not obtained — unsafe to approach"
       },
-      "correct": "no",
-      "why": "It is not safe to palpate his pulse because of his agitation. For this exercise an unassessable group is treated as “no” so the walkthrough can continue — but being unable to assess a criterion is not the same as the criterion being absent; it is checked once it is safe."
+      "correct": "no"
     },
     {
       "g": "disability_red",
       "chips": {
         "Glucose": "Not obtained — unsafe to approach"
       },
-      "correct": "no",
-      "why": "He is not convulsing, but his glucose cannot be safely checked right now for the same reason. This is treated as “no” for the exercise, not as confirmed absence."
+      "correct": "no"
     },
     {
       "g": "other_red",
-      "correct": "yes",
-      "why": "He is violent and aggressive, threatening both another patient and staff."
+      "correct": "yes"
     }
   ],
   "correct": "red",
   "keyCriterion": "Red — Other: violent or aggressive",
   "feedbackWhy": "He is violent and threatening other patients and staff. His behaviour poses an immediate safety risk.",
-  "teachingPoint": "Vital signs do not affect this patient's triage decision and should be obtained only once it is safe to do so.",
   "reassessment": null,
-  "needsReview": true,
+  "needsReview": false,
   "reviewNote": "The source case marks Circulation and Disability as “unable to assess” rather than a clean No (unsafe to approach). This prototype forces both to “No” so the yes/no walkthrough can continue, and explains the nuance in the rationale text. Confirm whether a distinct “cannot assess” answer option should be added instead.",
   "findings": {
     "unresponsive": {
@@ -73,7 +67,22 @@
     },
     "other_red": {
       "text": "Violent and aggressive. Threatening both another patient and staff."
+    },
+    "airway_yellow": {
+      "text": "No visible swelling of the mouth, throat or neck. No audible wheezing."
+    },
+    "circulation_yellow": {
+      "text": "Not assessed: not safe to approach."
+    },
+    "disability_yellow": {
+      "text": "Not assessed: not safe to approach. Standing and moving about."
+    },
+    "other_yellow": {
+      "text": "Smells strongly of alcohol. No visible deformity or bleeding."
+    },
+    "vitals": {
+      "text": "Not obtained: unsafe to approach."
     }
   },
-  "findingsReviewed": false
+  "findingsReviewed": true
 }

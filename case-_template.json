@@ -15,28 +15,23 @@
   "checkpoints": [
     {
       "g": "unresponsive",
-      "correct": "no",
-      "why": "REPLACE: why the answer is no, in plain words"
+      "correct": "no"
     },
     {
       "g": "airway_red",
-      "correct": "no",
-      "why": "REPLACE"
+      "correct": "no"
     },
     {
       "g": "circulation_red",
       "chips": {
         "HR": "REPLACE: value"
       },
-      "correct": "no",
-      "why": "REPLACE"
+      "correct": "no"
     }
   ],
   "correct": "green",
   "keyCriterion": "REPLACE: the criterion that decides the category",
   "feedbackWhy": "REPLACE: why this is the correct category",
-  "teachingPoint": null,
-  "discussion": [],
   "reassessment": null,
   "needsReview": true,
   "reviewNote": "REPLACE: what a clinician should confirm",

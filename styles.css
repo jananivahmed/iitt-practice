@@ -451,24 +451,3 @@
 .tp-conf{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .tp-conf-btn{font:inherit;font-size:14px;font-weight:600;padding:11px 6px;border:1.5px solid var(--line,#cfd8d6);border-radius:10px;background:#fff;color:inherit;cursor:pointer}
 .tp-conf-btn.selected{border-color:var(--primary,#0f5e63);background:var(--primary-soft,#e3f1f1);color:var(--primary-dark,#0b4a4e)}
-
-/* Facilitator mode */
-body.fac .wrap{max-width:1040px}
-body.fac-large .wrap{zoom:1.3}
-.fac-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;font-size:13px;color:var(--ink-soft)}
-.fac-badge{background:var(--primary-soft,#e3f1f1);color:var(--primary-dark,#0b4a4e);padding:4px 10px;border-radius:999px;font-weight:700}
-.fac-spacer{flex:1}
-.fac-small{padding:6px 12px;font-size:13px}
-.fac-grid{display:grid;grid-template-columns:1fr;gap:16px}
-@media (min-width:900px){.fac-grid{grid-template-columns:1fr 1fr;gap:28px;align-items:start}}
-.fac-pick-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
-.fac-pick-list label{display:flex;gap:12px;align-items:flex-start;padding:11px 4px;border-bottom:1px solid var(--line,#e3e8e7);font-size:15px;cursor:pointer}
-.fac-pick-list input{margin-top:3px;width:18px;height:18px;flex:none}
-.fac-sub{color:var(--ink-soft);font-size:13px}
-.fac-answer{font-size:17px;padding:10px 14px}
-.fac-group-note{margin:10px 0;font-size:15px}
-.fac-discuss{margin:6px 0 0;padding-left:20px;line-height:1.5}
-.fac-sec-head{cursor:default}
-.fac-decided{margin-left:6px;font-size:11.5px;font-weight:700;color:var(--primary-dark,#0b4a4e);background:var(--primary-soft,#e3f1f1);padding:2px 8px;border-radius:999px}
-.fac-bar .btn{width:auto;flex:none}
-body.fac .fac-col .case-image{max-height:42vh;width:auto;max-width:100%;display:block;margin:0 auto 10px;object-fit:contain}

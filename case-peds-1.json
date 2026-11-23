@@ -5,39 +5,73 @@
   "title": "9-year-old boy with fever",
   "age": "9 years",
   "sex": "Male",
-  "domain": "Respiratory distress (pediatric)",
+  "domain": "Respiratory distress",
   "focusTags": [
     "pediatric"
   ],
   "image": "peds-1",
-  "ageBandRef": null,
-  "arrival": "A 9-year-old boy is brought in by his father for three days of fever. He has become increasingly tired and has worsening cough and difficulty breathing.",
+  "ageBandRef": {
+    "band": "5–12 years",
+    "hr": "70–140 bpm",
+    "rr": "10–30 breaths/min"
+  },
+  "arrival": "A 9-year-old boy is brought in by his father for three days of fever, with worsening cough and difficulty breathing.",
   "checkpoints": [
     {
       "g": "unresponsive",
-      "correct": "no",
-      "why": "He is alert and interactive."
+      "correct": "no"
     },
     {
       "g": "airway_red",
-      "correct": "yes",
-      "why": "His chest draws inward when he breathes. Chest indrawing is accessory muscle use, which meets the definition of respiratory distress."
+      "correct": "yes"
     }
   ],
   "correct": "red",
   "keyCriterion": "Red — Airway & breathing: respiratory distress (chest indrawing)",
   "feedbackWhy": "Chest indrawing indicates accessory muscle use and respiratory distress.",
-  "teachingPoint": "He requires immediate evaluation.",
   "reassessment": null,
   "needsReview": false,
   "reviewNote": "",
   "findings": {
     "unresponsive": {
-      "text": "Alert and interactive."
+      "text": "Alert and interactive. Increasingly tired."
     },
     "airway_red": {
       "text": "His chest draws inward when he breathes."
+    },
+    "circulation_red": {
+      "chips": {
+        "HR": "120 bpm"
+      },
+      "text": "Strong pulse. Warm extremities. Capillary refill 2 seconds."
+    },
+    "disability_red": {
+      "text": "No convulsions. Alert and interacting."
+    },
+    "other_red": {
+      "text": "No trauma, poisoning, threatened limb or surgical diagnosis. Fever for three days."
+    },
+    "airway_yellow": {
+      "text": "No swelling of the mouth, throat or neck. No stridor."
+    },
+    "circulation_yellow": {
+      "text": "Drinking normally. No vomiting, diarrhoea or dehydration."
+    },
+    "disability_yellow": {
+      "text": "Alert. Not irritable. Not in severe pain."
+    },
+    "other_yellow": {
+      "text": "No rash, trauma or malnutrition."
+    },
+    "vitals": {
+      "chips": {
+        "HR": "120 bpm",
+        "RR": "28 breaths/min",
+        "SpO2": "95%",
+        "Temp": "38.8°C",
+        "AVPU": "A"
+      }
     }
   },
-  "findingsReviewed": false
+  "findingsReviewed": true
 }
