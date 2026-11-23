@@ -100,6 +100,7 @@ var STORE_LEARNER_NAME = "iitt_learner_name_v1";
 var STORE_LEARNER_EMAIL = "iitt_learner_email_v1";
 var STORE_PROFILE = "iitt_learner_profile_v1";
 var STORE_OUTBOX = "iitt_outbox_v1";
+var STORE_CASE_COUNT = "iitt_case_count_v1";
 var ROLES = ["Nurse", "Physician", "Clinical officer or other clinician", "Student", "Other"];
 var COUNTRIES = ["Afghanistan", "Albania", "Algeria", "American Samoa", "Andorra", "Angola", "Anguilla", "Antarctica", "Antigua & Barbuda", "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan", "Bolivia", "Bosnia & Herzegovina", "Botswana", "Bouvet Island", "Brazil", "British Indian Ocean Territory", "British Virgin Islands", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Caribbean Netherlands", "Cayman Islands", "Central African Republic", "Chad", "Chile", "China", "Christmas Island", "Cocos (Keeling) Islands", "Colombia", "Comoros", "Congo - Brazzaville", "Congo - Kinshasa", "Cook Islands", "Costa Rica", "Croatia", "Cuba", "Curaçao", "Cyprus", "Czechia", "Côte d’Ivoire", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Falkland Islands", "Faroe Islands", "Fiji", "Finland", "France", "French Guiana", "French Polynesia", "French Southern Territories", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Gibraltar", "Greece", "Greenland", "Grenada", "Guadeloupe", "Guam", "Guatemala", "Guernsey", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Heard & McDonald Islands", "Honduras", "Hong Kong SAR China", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Isle of Man", "Israel", "Italy", "Jamaica", "Japan", "Jersey", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macao SAR China", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Martinique", "Mauritania", "Mauritius", "Mayotte", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Montserrat", "Morocco", "Mozambique", "Myanmar (Burma)", "Namibia", "Nauru", "Nepal", "Netherlands", "New Caledonia", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue", "Norfolk Island", "North Korea", "North Macedonia", "Northern Mariana Islands", "Norway", "Oman", "Pakistan", "Palau", "Palestinian Territories", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Pitcairn Islands", "Poland", "Portugal", "Puerto Rico", "Qatar", "Romania", "Russia", "Rwanda", "Réunion", "Samoa", "San Marino", "Sark", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Sint Maarten", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Georgia & South Sandwich Islands", "South Korea", "South Sudan", "Spain", "Sri Lanka", "St. Barthélemy", "St. Helena", "St. Kitts & Nevis", "St. Lucia", "St. Martin", "St. Pierre & Miquelon", "St. Vincent & Grenadines", "Sudan", "Suriname", "Svalbard & Jan Mayen", "Sweden", "Switzerland", "Syria", "São Tomé & Príncipe", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tokelau", "Tonga", "Trinidad & Tobago", "Tunisia", "Turkmenistan", "Turks & Caicos Islands", "Tuvalu", "Türkiye", "U.S. Outlying Islands", "U.S. Virgin Islands", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Wallis & Futuna", "Western Sahara", "Yemen", "Zambia", "Zimbabwe", "Åland Islands"];
 /* Data collection is off unless collection.json says otherwise. */
@@ -283,7 +284,18 @@ function shuffleArray(arr) {
 }
 function shuffledCaseOrder() {
   var ids = CASES.map(function (c) { return c.id; });
-  return shuffleArray(ids);
+  return shuffleArray(ids).slice(0, getCaseCount());
+}
+/* How many cases a practice run contains: 1 up to every case available (10 at most). */
+function maxCaseCount() { return Math.max(1, Math.min(10, CASES.length)); }
+function getCaseCount() {
+  var n = parseInt(safeGet(STORE_CASE_COUNT, 5), 10);
+  if (isNaN(n)) n = 5;
+  return Math.max(1, Math.min(maxCaseCount(), n));
+}
+function changeCaseCount(delta) {
+  safeSet(STORE_CASE_COUNT, getCaseCount() + delta);
+  renderPracticeHome();
 }
 function caseById(id) {
   for (var i = 0; i < CASES.length; i++) if (CASES[i].id === id) return CASES[i];
@@ -657,7 +669,7 @@ function renderAgeBandVitals() {
   });
   html += '</tbody></table>';
   html += '<p style="font-size:14px; color:var(--ink-soft); line-height:1.5; margin-top:10px;">Values shown outside these ranges meet high-risk vital sign criteria. For the complete official table (all age bands), use the Paediatric IITT reference card.</p>';
-  html += '<div class="ref-links" style="margin-top:6px;"><button type="button" class="ref-link" onclick="openRefCard(\'pediatric\')">Paediatric IITT card (age &lt;12)</button></div>';
+  html += '<div class="ref-links" style="margin-top:12px;"><button type="button" class="ref-link" onclick="openRefCard(\'pediatric\')">Paediatric IITT card (age &lt;12)</button></div>';
   html += '<div class="cta-row"><button class="btn btn-primary" onclick="closeAgeBandVitals()">Back to assessment</button></div>';
   html += '</div>';
   appEl.innerHTML = html;
@@ -680,6 +692,15 @@ function renderPracticeHome() {
     '<img class="hero-image" src="ui-hero.jpg" alt="Nurse registering a patient at a triage desk">' +
     '<h2 class="section-title">Interagency Integrated Triage Tool Practice Companion</h2>' +
     '<p>Choose how you want to practice.</p>' +
+    '</div>' +
+    '<div class="card count-card" role="group" aria-labelledby="count-label">' +
+    '<div id="count-label" class="count-label">How many cases do you want to practise?</div>' +
+    '<div class="count-stepper">' +
+    '<button type="button" class="count-btn" aria-label="Fewer cases" onclick="changeCaseCount(-1)"' + (getCaseCount() <= 1 ? ' disabled' : '') + '>\u2212</button>' +
+    '<output class="count-value" aria-live="polite">' + getCaseCount() + '</output>' +
+    '<button type="button" class="count-btn" aria-label="More cases" onclick="changeCaseCount(1)"' + (getCaseCount() >= maxCaseCount() ? ' disabled' : '') + '>+</button>' +
+    '</div>' +
+    '<div class="count-note">Up to ' + maxCaseCount() + '. Cases are picked at random.</div>' +
     '</div>' +
     '<div class="card mode-card">' +
     '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.guided + '" alt=""> Guided Triage Practice</h3>' +
