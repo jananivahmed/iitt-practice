@@ -101,6 +101,8 @@ var STORE_LEARNER_EMAIL = "iitt_learner_email_v1";
 var STORE_PROFILE = "iitt_learner_profile_v1";
 var STORE_OUTBOX = "iitt_outbox_v1";
 var STORE_CASE_COUNT = "iitt_case_count_v1";
+var STORE_RUN = "iitt_run_in_progress_v1";
+var STORE_INTRO = "iitt_intro_seen_v1";
 var ROLES = ["Nurse", "Physician", "Clinical officer or other clinician", "Student", "Other"];
 var COUNTRIES = ["Afghanistan", "Albania", "Algeria", "American Samoa", "Andorra", "Angola", "Anguilla", "Antarctica", "Antigua & Barbuda", "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan", "Bolivia", "Bosnia & Herzegovina", "Botswana", "Bouvet Island", "Brazil", "British Indian Ocean Territory", "British Virgin Islands", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Caribbean Netherlands", "Cayman Islands", "Central African Republic", "Chad", "Chile", "China", "Christmas Island", "Cocos (Keeling) Islands", "Colombia", "Comoros", "Congo - Brazzaville", "Congo - Kinshasa", "Cook Islands", "Costa Rica", "Croatia", "Cuba", "Curaçao", "Cyprus", "Czechia", "Côte d’Ivoire", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Falkland Islands", "Faroe Islands", "Fiji", "Finland", "France", "French Guiana", "French Polynesia", "French Southern Territories", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Gibraltar", "Greece", "Greenland", "Grenada", "Guadeloupe", "Guam", "Guatemala", "Guernsey", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Heard & McDonald Islands", "Honduras", "Hong Kong SAR China", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Isle of Man", "Israel", "Italy", "Jamaica", "Japan", "Jersey", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macao SAR China", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Martinique", "Mauritania", "Mauritius", "Mayotte", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Montserrat", "Morocco", "Mozambique", "Myanmar (Burma)", "Namibia", "Nauru", "Nepal", "Netherlands", "New Caledonia", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue", "Norfolk Island", "North Korea", "North Macedonia", "Northern Mariana Islands", "Norway", "Oman", "Pakistan", "Palau", "Palestinian Territories", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Pitcairn Islands", "Poland", "Portugal", "Puerto Rico", "Qatar", "Romania", "Russia", "Rwanda", "Réunion", "Samoa", "San Marino", "Sark", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Sint Maarten", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Georgia & South Sandwich Islands", "South Korea", "South Sudan", "Spain", "Sri Lanka", "St. Barthélemy", "St. Helena", "St. Kitts & Nevis", "St. Lucia", "St. Martin", "St. Pierre & Miquelon", "St. Vincent & Grenadines", "Sudan", "Suriname", "Svalbard & Jan Mayen", "Sweden", "Switzerland", "Syria", "São Tomé & Príncipe", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tokelau", "Tonga", "Trinidad & Tobago", "Tunisia", "Turkmenistan", "Turks & Caicos Islands", "Tuvalu", "Türkiye", "U.S. Outlying Islands", "U.S. Virgin Islands", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Wallis & Futuna", "Western Sahara", "Yemen", "Zambia", "Zimbabwe", "Åland Islands"];
 /* Data collection is off unless collection.json says otherwise. */
@@ -145,6 +147,7 @@ function setLearnerEmail(email) { safeSet(STORE_LEARNER_EMAIL, email); }
    status/notes) are content about the CASES, not the learner, so they are
    deliberately left untouched here. */
 function resetForNewUser() {
+  safeRemove(STORE_RUN);
   safeRemove(STORE_RESPONSES);
   safeRemove(STORE_EVENTS);
   safeRemove(STORE_SESSION);
@@ -324,6 +327,7 @@ function resetCaseState() {
   state.locked = false;
   state.answerStart = Date.now();
   state.caseInfoOpen = false;
+  state.collapsed = {};
   state.refCardOpen = null;
   state.refZoomed = false;
 }
@@ -551,6 +555,7 @@ function closeEndSessionConfirm() {
 }
 function endSessionNow() {
   state.endSessionConfirmOpen = false;
+  if (!state.results.length) { goToPracticeHome(); return; }
   state.qIndex = state.queue.length;
   render();
 }
@@ -560,17 +565,71 @@ function renderEndSessionConfirm() {
   html += '<h3 class="case-title">End this practice session now?</h3>';
   html += '<p class="vignette">' + (doneCount
     ? 'You’ll get a feedback report on the ' + doneCount + ' case' + (doneCount === 1 ? "" : "s") + ' you’ve completed so far. The case in progress won’t be scored.'
-    : 'You haven’t completed a case yet, so the report won’t have anything to show. You can also just keep going.') + '</p>';
+    : 'You haven’t completed a case yet, so there is no report to show. Leaving takes you back to the start.') + '</p>';
   html += '<div class="restart-row">' +
     '<button class="btn btn-ghost" onclick="closeEndSessionConfirm()">Keep practicing</button>' +
-    '<button class="btn btn-primary" onclick="endSessionNow()">End &amp; see report</button>' +
+    '<button class="btn btn-primary" onclick="endSessionNow()">' + (doneCount ? 'End &amp; see report' : 'Leave practice') + '</button>' +
     '</div>';
   html += '</div>';
   appEl.innerHTML = html;
 }
 
 /* ---- Practice mode ---- */
+/* The screen being shown, as a short signature. When it changes, focus moves
+   to the new content and screen readers are told; when it stays the same (for
+   example a card was checked), focus stays on the same control. */
+function screenSignature() {
+  return [state.resetConfirmOpen, state.endSessionConfirmOpen, state.progressOpen, state.queue.length, state.qIndex, state.refCardOpen, state.ageBandOpen, state.caseInfoOpen, state.phase, state.cpIndex, state.cpLocked, state.locked].join("|");
+}
+var lastSignature = null;
 function renderPractice() {
+  var sig = screenSignature();
+  var sameScreen = sig === lastSignature;
+  var buttons = appEl.querySelectorAll("button, select, input");
+  var focusIndex = -1;
+  for (var i = 0; i < buttons.length; i++) if (buttons[i] === document.activeElement) focusIndex = i;
+  renderPracticeScreen();
+  lastSignature = sig;
+  saveRun();
+  if (sameScreen && focusIndex >= 0) {
+    var again = appEl.querySelectorAll("button, select, input");
+    if (again[focusIndex] && !again[focusIndex].disabled) again[focusIndex].focus({ preventScroll: true });
+  } else if (!sameScreen) {
+    window.scrollTo(0, 0);
+    appEl.setAttribute("tabindex", "-1");
+    appEl.focus({ preventScroll: true });
+    announceScreen();
+  }
+}
+function announceScreen() {
+  var live = document.getElementById("sr-live");
+  if (!live) return;
+  var el = appEl.querySelector(".f-title") || appEl.querySelector(".cp-feedback-title") || appEl.querySelector("h2, h3, .decision-prompt");
+  live.textContent = el ? el.textContent : "";
+}
+
+/* ---- Keeping a run in progress across a reload ---- */
+function saveRun() {
+  if (!state.queue.length) { safeRemove(STORE_RUN); return; }
+  safeSet(STORE_RUN, {
+    email: getLearnerEmail(),
+    practiceMode: state.practiceMode, queue: state.queue, qIndex: state.qIndex, phase: state.phase,
+    cpIndex: state.cpIndex, cpSelected: state.cpSelected, cpLocked: state.cpLocked, cpLog: state.cpLog,
+    checked: state.checked, gatherSeq: state.gatherSeq, selected: state.selected, confidence: state.confidence,
+    locked: state.locked, caseAttemptId: state.caseAttemptId, caseAttemptStart: state.caseAttemptStart, results: state.results
+  });
+}
+function restoreRun() {
+  var r = safeGet(STORE_RUN, null);
+  if (!r || r.email !== getLearnerEmail() || !r.queue || !r.queue.length) return false;
+  for (var i = 0; i < r.queue.length; i++) if (!caseById(r.queue[i])) return false;
+  ["practiceMode", "queue", "qIndex", "phase", "cpIndex", "cpSelected", "cpLocked", "cpLog", "checked", "gatherSeq", "selected", "confidence", "locked", "caseAttemptId", "caseAttemptStart", "results"].forEach(function (k) {
+    if (r[k] !== undefined) state[k] = r[k];
+  });
+  state.answerStart = Date.now();
+  return true;
+}
+function renderPracticeScreen() {
   if (state.resetConfirmOpen) { renderResetConfirm(); return; }
   if (state.endSessionConfirmOpen) { renderEndSessionConfirm(); return; }
   if (state.progressOpen) { renderProgress(); return; }
@@ -670,15 +729,27 @@ function renderAgeBandVitals() {
   appEl.innerHTML = html;
 }
 function renderReferenceLinks() {
-  return '<div class="ref-panel">' +
-    '<div class="ref-panel-title">Use the official reference cards as you assess</div>' +
+  return '<details class="ref-panel ref-collapsible">' +
+    '<summary class="ref-summary">Reference cards</summary>' +
     '<div class="ref-links">' +
     '<button type="button" class="ref-link" onclick="openRefCard(\'adult\')">Adult IITT card (age \u226512)</button>' +
     '<button type="button" class="ref-link" onclick="openRefCard(\'pediatric\')">Paediatric IITT card (age &lt;12)</button>' +
     '<button type="button" class="ref-link" onclick="openRefCard(\'reference\')">Reference card (trauma, burns &amp; other high-risk criteria)</button>' +
-    '</div></div>';
+    '</div></details>';
 }
 
+function introCard() {
+  if (safeGet(STORE_INTRO, false)) return '';
+  return '<div class="card intro-card"><h3>How this works</h3>' +
+    '<p class="reading">You will practise using the IITT card to place a patient in a triage category: red, yellow, green or up-triage.</p>' +
+    '<ul class="intro-list">' +
+    '<li><b>Guided Triage Practice</b> takes you through the card one step at a time and tells you straight away whether each answer is right.</li>' +
+    '<li><b>Triage Practice</b> lets you check the parts of the card you choose, then decide. You will see how much you checked before deciding.</li>' +
+    '</ul>' +
+    '<p class="reading">Each case ends with an explanation and a link back to the part of the card that decides it. Pick how many cases you want below.</p>' +
+    '<button type="button" class="btn btn-ghost" onclick="dismissIntro()">Got it</button></div>';
+}
+function dismissIntro() { safeSet(STORE_INTRO, true); renderPracticeHome(); }
 function renderPracticeHome() {
   var name = getLearnerName();
   appEl.innerHTML =
@@ -688,6 +759,7 @@ function renderPracticeHome() {
     '<h2 class="section-title">Interagency Integrated Triage Tool Practice Companion</h2>' +
     '<p>Choose how you want to practice.</p>' +
     '</div>' +
+    introCard() +
     '<div class="card mode-card">' +
     '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.guided + '" alt=""> Guided Triage Practice</h3>' +
     '<p>You will be guided through each criteria in order before making a triage decision.</p>' +
@@ -708,7 +780,7 @@ function renderPracticeHome() {
     '<div class="count-note">Up to ' + maxCaseCount() + '. Cases are picked at random.</div>' +
     '</div>' +
     '<div class="restart-row" style="margin-top:2px;"><button class="btn btn-ghost" onclick="openProgress()">My progress</button></div>' +
-    '<details class="about-box"><summary>ℹ️ About</summary>' +
+    '<details class="about-box"><summary>About</summary>' +
     '<p><b>IITT Practice Companion</b></p>' +
     '<p>Developed by <b>Janani Ahmed, MD MPH</b></p>' +
     '<p>Assistant Professor, Emergency Medicine, The Ohio State University</p>' +
@@ -773,8 +845,33 @@ function renderProgress() {
     html += '</tbody></table>';
   }
 
+  /* Which parts of the card decide the cases this learner gets right or wrong. */
+  var parts = {};
+  all.forEach(function (r) {
+    var g = r.deciding_group;
+    if (!g || !GROUP_META[g]) return;
+    var e = parts[g] || (parts[g] = { n: 0, right: 0, skipped: 0 });
+    e.n += 1;
+    if (r.response_classification === "correct") e.right += 1;
+    if (r.deciding_group_checked === false) e.skipped += 1;
+  });
+  var partKeys = Object.keys(parts).sort(function (x, y) {
+    var ax = parts[x].right / parts[x].n, ay = parts[y].right / parts[y].n;
+    return ax - ay || parts[y].n - parts[x].n;
+  });
+  if (partKeys.length) {
+    html += '<h3 class="case-review-title">Parts of the card to practise</h3>';
+    html += '<p class="section-sub">The part of the card that decided each case, with the lowest scores first.</p><div class="case-review">';
+    partKeys.forEach(function (g, i) {
+      var e = parts[g];
+      html += '<div class="part-row"><span class="part-name">' + esc(GROUP_META[g].label) + ' <span class="part-level">(' + esc(GROUP_META[g].level) + ')</span>' + (i === 0 && e.right < e.n ? '<span class="part-next">Practise next</span>' : '') + '</span>' +
+        '<span class="part-score">' + e.right + ' of ' + e.n + ' correct' + (e.skipped ? ', not opened in ' + e.skipped : '') + '</span></div>';
+    });
+    html += '</div>';
+  }
+
   var recent = all.slice().sort(function (a, b) { return new Date(b.timestamp) - new Date(a.timestamp); }).slice(0, 8);
-  html += '<h4 class="mt-5 mb-2 text-base">Recent cases</h4>';
+  html += '<h3 class="case-review-title">Recent cases</h3>';
   html += '<div class="recent-list">';
   recent.forEach(function (r) {
     var c = caseById(r.case_id);
@@ -886,10 +983,15 @@ function renderCheckpoint(c) {
     html += '<div class="age-ref">High-risk thresholds for <b>' + esc(c.ageBandRef.band) + '</b>: heart rate outside <b>' + esc(c.ageBandRef.hr) + '</b>, respiratory rate outside <b>' + esc(c.ageBandRef.rr) + '</b>.</div>';
   }
 
+  /* Try the judgement first: the card's criteria stay closed until an answer is
+     confirmed, so the learner recalls the criteria rather than reading them off. */
+  var critHtml = '';
   if (critList && critList.length) {
-    html += '<ul class="criteria-list">';
-    critList.forEach(function (item) { html += '<li>' + esc(item) + '</li>'; });
-    html += '</ul>';
+    critHtml = '<ul class="criteria-list">' + critList.map(function (item) { return '<li>' + esc(item) + '</li>'; }).join('') + '</ul>';
+  }
+  if (critHtml && !state.cpLocked) {
+    html += '<details class="criteria-peek"><summary>Show the criteria for this step</summary>' + critHtml + '</details>';
+    html += '<p class="criteria-hint">Try to answer from what you remember of the card first.</p>';
   }
 
   html += '<div class="decision-prompt" style="margin-top:16px;">' + esc(meta.question) + '</div>';
@@ -908,6 +1010,7 @@ function renderCheckpoint(c) {
     html += '<div class="cp-feedback ' + (isRight ? "right" : "wrong") + '">' +
       '<div class="cp-feedback-title">' + (isRight ? "Correct" : "Not quite") + '</div>' +
       '<div class="cp-feedback-body">Answer: <b>' + (cp.correct === "yes" ? "Yes" : "No") + '.</b></div>' +
+      ((critHtml || (stepFind && stepFind.text) || stepChips) ? '<div class="cp-feedback-why">' + (critHtml ? '<div class="cp-why-title">The IITT card lists, for ' + esc(meta.label) + ':</div>' + critHtml : '') + '<div class="cp-why-title">What you found:</div>' + (stepFind && stepFind.text ? findingList(stepFind.text, '') : '') + (stepChips ? '<div class="cp-chip-line">' + Object.keys(stepChips).map(function (k) { return esc(k) + ' ' + esc(stepChips[k]); }).join(', ') + '</div>' : '') + '</div>' : '') +
       '</div>';
     html += '<div class="submit-row"><button class="btn btn-primary" onclick="advanceCheckpoint()">Continue</button></div>';
   }
@@ -1000,14 +1103,14 @@ function renderTiers(c) {
     var groups = groupsInTier(t.level);
     var nDone = groups.filter(isChecked).length;
     html += '<div class="tp-tier tp-' + t.level + '"><div class="tp-tier-head"><h4>' + t.title + ' <span class="tp-count">' + nDone + ' of ' + groups.length + ' checked</span></h4>';
-    if (groups.length > 1) html += '<button type="button" class="tp-allbtn" onclick="checkTier(\'' + t.level + '\')">' + t.all + '</button>';
     html += '</div>';
     groups.forEach(function (g) {
-      var open = isChecked(g);
+      var open = isChecked(g) && !(state.collapsed && state.collapsed[g]);
+      var wasChecked = isChecked(g);
       var enter = open && justOpened[g] ? ' enter' : '';
-      html += '<div class="tp-sec' + (open ? ' open' : '') + enter + '">' +
-        '<button type="button" class="tp-sec-btn" aria-expanded="' + open + '" onclick="checkItem(\'' + g + '\')">' +
-        '<span>' + esc(GROUP_META[g].label) + '</span><span class="tp-state">' + (open ? '✓ Checked' : 'Tap to check') + '</span></button>' +
+      html += '<div class="tp-sec' + (open ? ' open' : '') + (wasChecked && !open ? ' done' : '') + enter + '">' +
+        '<button type="button" class="tp-sec-btn' + (wasChecked && !open ? ' tp-collapsed' : '') + '" aria-expanded="' + open + '" onclick="checkItem(\'' + g + '\')">' +
+        '<span>' + esc(GROUP_META[g].label) + '</span><span class="tp-state">' + (open ? '✓ Checked, tap to hide' : (wasChecked ? '✓ Checked, tap to show' : 'Tap to check')) + '</span></button>' +
         (open ? renderFindings(c, g) : '') + '</div>';
     });
     html += '</div>';
@@ -1020,7 +1123,7 @@ function renderReady(c) {
   var pct = Math.round((num - 1) / state.queue.length * 100);
   var html = '<div class="card">';
   html += caseHeader(c, num, pct);
-  html += miniImageRow(c, false, true);
+  html += miniImageRow(c, true, true);
   html += '<p class="vignette">' + esc(c.arrival) + '</p>';
   html += '<div class="divider"></div>';
   html += '<div class="stage-tag">Work through the card</div>';
@@ -1070,7 +1173,12 @@ function renderKeepingScroll() {
   window.scrollTo(0, y);
 }
 function checkItem(g) {
-  markChecked(g);
+  if (isChecked(g)) {
+    state.collapsed = state.collapsed || {};
+    state.collapsed[g] = !state.collapsed[g];
+  } else {
+    markChecked(g);
+  }
   renderKeepingScroll();
 }
 function checkTier(level) {
@@ -1195,6 +1303,9 @@ function renderFeedback(c) {
   }
 
   html += '<div class="detail-section"><h4>Why</h4><p><b>' + esc(c.keyCriterion) + '.</b> ' + esc(c.feedbackWhy) + '</p></div>';
+  var dgFb = decidingGroup(c);
+  var cardKey = c.population === "adult" ? "adult" : "pediatric";
+  html += '<div class="review-card-row"><button type="button" class="btn btn-ghost" onclick="openRefCard(\'' + cardKey + '\')">Review ' + (dgFb ? esc(GROUP_META[dgFb].label) + ' on the ' : 'the ') + (c.population === "adult" ? "adult" : "paediatric") + ' IITT card</button></div>';
   if (c.reassessment) html += '<div class="reassess-note"><span>' + esc(c.reassessment) + '</span></div>';
 
   html += '<div class="restart-row"><button class="btn btn-primary" onclick="nextCase()">' + (state.qIndex + 1 >= state.queue.length ? "See summary" : "Next case") + '</button></div>';
@@ -1208,8 +1319,20 @@ function nextCase() {
   resetCaseState();
   renderPractice();
 }
+function practiceMissed() {
+  var ids = [];
+  state.results.forEach(function (r) {
+    if (r.response_classification !== "correct" && ids.indexOf(r.case_id) === -1) ids.push(r.case_id);
+  });
+  if (!ids.length) return;
+  state.queue = shuffleArray(ids);
+  state.qIndex = 0;
+  state.results = [];
+  resetCaseState();
+  render();
+}
 function restartPractice() { startPractice(state.practiceMode); }
-function goToPracticeHome() { state.queue = []; render(); }
+function goToPracticeHome() { state.queue = []; safeRemove(STORE_RUN); render(); }
 
 function renderPracticeSummary() {
   var results = state.results;
@@ -1262,7 +1385,26 @@ function renderPracticeSummary() {
     html += '<div class="reassess-note" style="margin-top:10px;"><span>On average, you gathered ' + avgPct + '% of the available checks per case before deciding.</span></div>';
   }
 
-  html += '<div class="restart-row"><button class="btn btn-primary" onclick="restartPractice()">Restart (same mode)</button></div>';
+  /* Case by case: what happened on each case, with the explanation, and a way to retry the misses. */
+  html += '<h3 class="case-review-title">Your cases</h3><div class="case-review">';
+  var missedIds = [];
+  results.forEach(function (r) {
+    var cc = caseById(r.case_id);
+    if (!cc) return;
+    var good = r.response_classification === "correct";
+    if (!good) missedIds.push(r.case_id);
+    var rowTitle = (cc.population === "adult" ? "Adult" : "Paediatric") + ", " + cc.age;
+    var verdict = good ? "Correct" : (r.response_classification === "correct_unsupported" ? "Right category, not enough checked" : "Incorrect");
+    html += '<details class="case-review-item"><summary><span class="cr-title">' + esc(rowTitle) + '</span><span class="cr-verdict">' + (good ? "\u2713 " : "\u2717 ") + verdict + '</span></summary>' +
+      '<div class="cr-body"><p class="reading">' + esc(cc.arrival) + '</p>' +
+      '<p class="reading">You chose <b>' + CATEGORY_META[r.selected_triage_category].label + '</b>. Correct category: <b>' + CATEGORY_META[cc.correct].label + '</b>.</p>' +
+      '<p class="reading"><b>' + esc(cc.keyCriterion) + '.</b> ' + esc(cc.feedbackWhy) + '</p></div></details>';
+  });
+  html += '</div>';
+  if (missedIds.length) {
+    html += '<div class="restart-row"><button class="btn btn-primary" onclick="practiceMissed()">Practise the ' + missedIds.length + ' case' + (missedIds.length === 1 ? '' : 's') + ' I missed</button></div>';
+  }
+  html += '<div class="restart-row"><button class="btn ' + (missedIds.length ? 'btn-ghost' : 'btn-primary') + '" onclick="restartPractice()">Restart (same mode)</button></div>';
   html += '<div class="restart-row"><button class="btn btn-ghost" onclick="goToPracticeHome()">Choose a different mode</button></div>';
   html += '<div class="restart-row"><button class="btn btn-ghost" onclick="openProgress()">My progress</button></div>';
   html += '<div class="restart-row"><button class="btn btn-ghost" onclick="openResetConfirm()">Reset for new user</button></div>';
@@ -1518,10 +1660,32 @@ function boot() {
     }).then(function (loaded) {
       CASES = loaded.filter(caseVisibleHere);
       computeAgeBandVitals();
+      if (getLearnerName() && getLearnerEmail()) restoreRun();
       render();
+      setupBackButton();
       if (!window.__statusTimer) window.__statusTimer = setInterval(checkPausedAgain, STATUS_RECHECK_MS);
     });
   }).catch(showLoadError);
+}
+
+/* The browser Back button (and the Android back gesture) steps back inside the
+   app: it closes an open panel, or asks before leaving a case. */
+function setupBackButton() {
+  try { history.pushState({ iitt: 1 }, ""); } catch (e) { return; }
+  window.addEventListener("popstate", function () {
+    var inCase = state.queue.length && state.qIndex < state.queue.length;
+    if (state.resetConfirmOpen) { state.resetConfirmOpen = false; }
+    else if (state.endSessionConfirmOpen) { state.endSessionConfirmOpen = false; }
+    else if (state.refCardOpen) { state.refCardOpen = null; state.refZoomed = false; }
+    else if (state.ageBandOpen) { state.ageBandOpen = false; }
+    else if (state.caseInfoOpen) { state.caseInfoOpen = false; }
+    else if (state.progressOpen) { state.progressOpen = false; }
+    else if (inCase) { state.endSessionConfirmOpen = true; }
+    else if (state.queue.length) { state.queue = []; safeRemove(STORE_RUN); }
+    else { return; }
+    try { history.pushState({ iitt: 1 }, ""); } catch (e) {}
+    render();
+  });
 }
 
 boot();

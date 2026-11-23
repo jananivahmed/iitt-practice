@@ -26,7 +26,7 @@
   --red:#D31510;        --on-red:#FFFFFF;     --red-soft:#FCE5E4;     --red-ink:#7A0B08;
   --yellow:#FFC800;     --on-yellow:#1B1B1B;  --yellow-soft:#FFF2BF;  --yellow-ink:#5A4300;
   --green:#1F7A4D;      --on-green:#FFFFFF;   --green-soft:#DCF1E5;   --green-ink:#0F4A2D;
-  --uptriage:#7326D3;   --on-uptriage:#FFFFFF;--uptriage-soft:#EEE3FB;--uptriage-ink:#45168A;
+  --uptriage:#E4C8A8;   --on-uptriage:#161B22;--uptriage-soft:#F6EBDD;--uptriage-ink:#5A3E1E;
 
   /* names the older rules and inline styles still use */
   --bg:var(--page);
@@ -52,7 +52,7 @@
     --red:#F0605B; --on-red:#1B0000; --red-soft:#4A1514; --red-ink:#FFD6D4;
     --yellow:#FFC800; --on-yellow:#1B1B1B; --yellow-soft:#4A3B00; --yellow-ink:#FFE88A;
     --green:#4BBF86; --on-green:#04210F; --green-soft:#12392A; --green-ink:#BFEBD3;
-    --uptriage:#B68CF2; --on-uptriage:#1E0A3D; --uptriage-soft:#33205A; --uptriage-ink:#E3D1FA;
+    --uptriage:#E4C8A8; --on-uptriage:#161B22; --uptriage-soft:#3A2C1C; --uptriage-ink:#F0DEC6;
     color-scheme: dark;
   }
 }
@@ -64,7 +64,7 @@
   --red:#F0605B; --on-red:#1B0000; --red-soft:#4A1514; --red-ink:#FFD6D4;
   --yellow:#FFC800; --on-yellow:#1B1B1B; --yellow-soft:#4A3B00; --yellow-ink:#FFE88A;
   --green:#4BBF86; --on-green:#04210F; --green-soft:#12392A; --green-ink:#BFEBD3;
-  --uptriage:#B68CF2; --on-uptriage:#1E0A3D; --uptriage-soft:#33205A; --uptriage-ink:#E3D1FA;
+  --uptriage:#E4C8A8; --on-uptriage:#161B22; --uptriage-soft:#3A2C1C; --uptriage-ink:#F0DEC6;
   color-scheme: dark;
 }
 
@@ -303,7 +303,7 @@ table.pop-table tr:last-child td{border-bottom:none;}
 .tp-sec .tp-sec-btn{color:var(--on-tier);}
 .tp-sec .tp-sec-btn:hover{filter:brightness(.94);}
 .tp-sec .tp-state{font-size:15px; font-weight:700; color:var(--on-tier);}
-.tp-sec.open{background:var(--page); color:var(--ink); border-color:var(--line); border-bottom:6px solid var(--tier);}
+.tp-sec.open,.tp-sec.done{background:var(--page); color:var(--ink); border-color:var(--line); border-bottom:6px solid var(--tier);}
 .tp-sec.open .tp-sec-btn{color:var(--ink);}
 .tp-sec.open .tp-sec-btn:hover{filter:none; background:var(--tile);}
 .tp-sec.open .tp-state{color:var(--ink); font-weight:700;}
@@ -454,3 +454,55 @@ main{text-align:center;}
 .feedback-banner.correct .f-title::before,.cp-feedback.right .cp-feedback-title::before{content:"\2713\00a0";}
 .cp-feedback.wrong{border:2px solid var(--ink);}
 .reassess-note{text-align:left;}
+
+/* ---------- v0.7.1: practice-first criteria, case review, intro, a11y ---------- */
+.sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;}
+h1.t1{font-size:inherit; font-weight:700; margin:0; line-height:1.3;}
+#app:focus{outline:none;}
+.criteria-peek{margin:12px 0 4px; text-align:left;}
+.criteria-peek summary{cursor:pointer; color:var(--link); font-weight:700; min-height:44px; display:flex; align-items:center; text-decoration:underline; text-underline-offset:3px;}
+.criteria-peek .criteria-list{margin-top:4px;}
+.criteria-hint{font-size:15px; color:var(--ink-soft); margin:0 0 4px;}
+.cp-feedback-why{text-align:left; margin-top:12px; padding-top:12px; border-top:1px solid var(--line);}
+.cp-why-title{font-weight:700; font-size:15px; margin:8px 0 2px;}
+.cp-feedback-why .criteria-list,.cp-feedback-why .finding-list{margin:4px 0 8px;}
+.cp-chip-line{font-size:16px;}
+.review-card-row{margin-top:12px;}
+.case-review{text-align:left; border-top:1px solid var(--line);}
+.case-review-item{border-bottom:1px solid var(--line);}
+.case-review-item summary{display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:48px; padding:8px 0; cursor:pointer; font-weight:700; list-style:none;}
+.case-review-item summary::-webkit-details-marker{display:none;}
+.cr-verdict{font-weight:700; white-space:nowrap; font-size:15px;}
+.cr-body{padding:0 0 12px;}
+.intro-card{background:var(--tile); border-radius:4px; padding:16px; margin-bottom:16px;}
+.intro-card h3{margin-bottom:8px;}
+.intro-list{text-align:left; padding-left:22px; margin:8px 0; line-height:1.5;}
+.intro-list li{margin-bottom:8px;}
+
+.case-review-title{margin:28px 0 8px;}
+
+/* ---------- v0.7.3 ---------- */
+.ref-collapsible{padding:0 16px;}
+.ref-collapsible[open]{padding-bottom:12px;}
+.ref-summary{cursor:pointer; min-height:48px; display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--ink); list-style:none;}
+.ref-summary::-webkit-details-marker{display:none;}
+.ref-summary::after{content:"\00a0\25BE"; font-size:14px;}
+.ref-collapsible[open] .ref-summary::after{content:"\00a0\25B4";}
+.ref-collapsible .ref-links{margin-top:0;}
+.tp-sec-btn.tp-collapsed{background:var(--tile);}
+.tp-sec.open .tp-state,.tp-sec-btn.tp-collapsed .tp-state{color:var(--ink);}
+.tp-sec:not(.open) .tp-sec-btn.tp-collapsed{color:var(--ink);}
+.part-row{display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); text-align:left;}
+.part-name{font-weight:700;}
+.part-level{font-weight:400; color:var(--ink-soft);}
+.part-next{display:inline-block; margin-left:8px; font-size:14px; font-weight:700; background:var(--tile-2); padding:2px 8px; border-radius:4px;}
+.part-score{font-size:15px; text-align:right; color:var(--ink);}
+
+.tp-sec.done .tp-sec-btn,.tp-sec.done .tp-state{color:var(--ink);}
+.tp-sec.done .tp-sec-btn:hover{background:var(--tile);}
+
+/* Up-triage is the tan of the IITT card. On white it needs an edge so the shape reads. */
+.decision-btn.uptriage,.chip-uptriage,.tp-vitals .tp-sec{box-shadow:inset 0 0 0 1px #B8976F;}
+.decision-btn.uptriage.selected{box-shadow:inset 0 0 0 1px #B8976F, 0 0 0 3px var(--page), 0 0 0 6px var(--ink);}
+.tp-vitals .tp-sec.open,.tp-vitals .tp-sec.done{box-shadow:none; border-bottom-color:#B8976F;}
+.tp-sec.open .tp-state,.tp-vitals .tp-sec .tp-state{font-weight:700;}
