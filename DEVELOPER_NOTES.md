@@ -139,3 +139,8 @@ The checker never changes a file.
 ## Later
 
 Teaching point, facilitator mode (removed for now), guided teaching notes, difficulty rating, reassessment advice and discussion questions are also planned for later (see the Case Blueprint, Future development). Focus tags and targeted sets, free-text questions, study data (the case id and version would go in each record), facilitator view and offline use. None of these are built.
+
+
+## Design system
+
+The app uses Material 3. Colour roles, shape, type scale and state layers are defined at the top and bottom of `styles.css` (the `--md-*` variables and the "Material 3 design system layer" block). The older variable names (`--primary`, `--surface`, `--ink` and so on) are kept and point at the Material 3 roles. Triage red, yellow, green and up-triage are custom colour roles with container and on-container pairs, in light and dark. Font: Roboto.
