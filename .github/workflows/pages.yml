@@ -53,7 +53,7 @@ jobs:
             for f in "$1"/*; do
               name=$(basename "$f")
               case "$name" in
-                README.md|RUNBOOK.md|DEVELOPER_NOTES.md|validate.js|config.json|case-_template.json) ;;
+                README.md|RUNBOOK.md|DEVELOPER_NOTES.md|receiver.gs|validate.js|config.json|case-_template.json) ;;
                 *) [ -f "$f" ] && cp "$f" "$2/" ;;
               esac
             done
