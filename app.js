@@ -85,10 +85,10 @@ function computeAgeBandVitals() {
 }
 
 var CATEGORY_META = {
-  red:      { label: "RED",       emoji: "\uD83D\uDD34", chip: "chip-red" },
-  yellow:   { label: "YELLOW",    emoji: "\uD83D\uDFE1", chip: "chip-yellow" },
-  green:    { label: "GREEN",     emoji: "\uD83D\uDFE2", chip: "chip-green" },
-  uptriage: { label: "UP-TRIAGE", emoji: "\u26A0\uFE0F", chip: "chip-uptriage" }
+  red:      { label: "RED",       emoji: "", chip: "chip-red" },
+  yellow:   { label: "YELLOW",    emoji: "", chip: "chip-yellow" },
+  green:    { label: "GREEN",     emoji: "", chip: "chip-green" },
+  uptriage: { label: "UP-TRIAGE", emoji: "", chip: "chip-uptriage" }
 };
 
 /* ---------------- storage helpers ---------------- */
@@ -593,11 +593,11 @@ function renderCaseInfo(c) {
   appEl.innerHTML = html;
 }
 function miniImageRow(c, showAgeBand, hideCaseInfoBtn) {
-  return '<div class="mini-header">' +
+  return '<div class="mini-header flex items-center gap-3 mb-4">' +
     '<img class="case-image-mini" src="' + FACE_IMAGES[c.image] + '" alt="Portrait of the patient described in this case" loading="lazy">' +
-    '<div class="case-info-row">' +
-    (showAgeBand && AGE_BAND_VITALS.length ? '<button class="case-info-btn" onclick="openAgeBandVitals()">\uD83D\uDCCA Pediatric age-band vitals</button>' : '') +
-    (hideCaseInfoBtn ? '' : '<button class="case-info-btn" onclick="toggleCaseInfo()">\uD83D\uDCCB Case info</button>') +
+    '<div class="case-info-row flex flex-wrap justify-end gap-2 ml-auto">' +
+    (showAgeBand && AGE_BAND_VITALS.length ? '<button class="case-info-btn" onclick="openAgeBandVitals()">Age-band vitals</button>' : '') +
+    (hideCaseInfoBtn ? '' : '<button class="case-info-btn" onclick="toggleCaseInfo()">Case info</button>') +
     '</div>' +
     '</div>';
 }
@@ -656,7 +656,7 @@ function renderAgeBandVitals() {
     html += '<tr><td>' + esc(b.band) + '</td><td>' + esc(b.hr) + '</td><td>' + esc(b.rr) + '</td></tr>';
   });
   html += '</tbody></table>';
-  html += '<p style="font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin-top:10px;">Values shown outside these ranges meet high-risk vital sign criteria. For the complete official table (all age bands), use the Paediatric IITT reference card.</p>';
+  html += '<p style="font-size:14px; color:var(--ink-soft); line-height:1.5; margin-top:10px;">Values shown outside these ranges meet high-risk vital sign criteria. For the complete official table (all age bands), use the Paediatric IITT reference card.</p>';
   html += '<div class="ref-links" style="margin-top:6px;"><button type="button" class="ref-link" onclick="openRefCard(\'pediatric\')">Paediatric IITT card (age &lt;12)</button></div>';
   html += '<div class="cta-row"><button class="btn btn-primary" onclick="closeAgeBandVitals()">Back to assessment</button></div>';
   html += '</div>';
@@ -664,7 +664,7 @@ function renderAgeBandVitals() {
 }
 function renderReferenceLinks() {
   return '<div class="ref-panel">' +
-    '<div class="ref-panel-title">\uD83D\uDCC4 Use the official reference cards as you assess</div>' +
+    '<div class="ref-panel-title">Use the official reference cards as you assess</div>' +
     '<div class="ref-links">' +
     '<button type="button" class="ref-link" onclick="openRefCard(\'adult\')">Adult IITT card (age \u226512)</button>' +
     '<button type="button" class="ref-link" onclick="openRefCard(\'pediatric\')">Paediatric IITT card (age &lt;12)</button>' +
@@ -675,7 +675,7 @@ function renderReferenceLinks() {
 function renderPracticeHome() {
   var name = getLearnerName();
   appEl.innerHTML =
-    (name ? '<div class="learner-bar"><span>👤 Practicing as <b>' + esc(name) + '</b></span><button type="button" class="learner-bar-link" onclick="openResetConfirm()">Switch user</button></div>' : '') +
+    (name ? '<div class="learner-bar"><span>Practising as <b>' + esc(name) + '</b></span><button type="button" class="learner-bar-link" onclick="openResetConfirm()">Switch user</button></div>' : '') +
     '<div class="card empty-hero" style="padding-bottom:6px;">' +
     '<img class="hero-image" src="ui-hero.jpg" alt="Nurse registering a patient at a triage desk">' +
     '<h2 class="section-title">Interagency Integrated Triage Tool Practice Companion</h2>' +
@@ -691,7 +691,7 @@ function renderPracticeHome() {
     '<p>Work through the IITT card in any order, check the parts you want to know more about, and choose a triage category when you have enough information.</p>' +
     '<button class="btn btn-primary" onclick="startPractice(\'decide\')">Start</button>' +
     '</div>' +
-    '<div class="restart-row" style="margin-top:2px;"><button class="btn btn-ghost" onclick="openProgress()">📊 My progress</button></div>' +
+    '<div class="restart-row" style="margin-top:2px;"><button class="btn btn-ghost" onclick="openProgress()">My progress</button></div>' +
     '<details class="about-box"><summary>ℹ️ About</summary>' +
     '<p><b>IITT Practice Companion</b></p>' +
     '<p>Developed by <b>Janani Ahmed, MD MPH</b></p>' +
@@ -719,7 +719,7 @@ function renderProgress() {
   if (!all.length) {
     html += '<p class="section-sub">Complete a case to start building your progress history.</p>';
     html += '<div class="restart-row"><button class="btn btn-primary" onclick="closeProgress()">Back to practice</button></div>';
-    html += '<div class="restart-row"><button class="btn btn-ghost" onclick="openResetConfirm()">👤 Reset for new user</button></div>';
+    html += '<div class="restart-row"><button class="btn btn-ghost" onclick="openResetConfirm()">Reset for new user</button></div>';
     html += '</div>';
     appEl.innerHTML = html;
     return;
@@ -758,32 +758,31 @@ function renderProgress() {
   }
 
   var recent = all.slice().sort(function (a, b) { return new Date(b.timestamp) - new Date(a.timestamp); }).slice(0, 8);
-  html += '<h4 style="font-size:12.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin:18px 0 8px; font-weight:700;">Recent cases</h4>';
+  html += '<h4 class="mt-5 mb-2 text-base">Recent cases</h4>';
   html += '<div class="recent-list">';
   recent.forEach(function (r) {
     var c = caseById(r.case_id);
-    var title = c ? ((c.population === "adult" ? "Adult" : "Paediatric") + " \u00b7 " + c.age) : r.case_id;
+    var title = c ? ((c.population === "adult" ? "Adult" : "Paediatric") + ", " + c.age) : r.case_id;
     var resultLabel = r.response_classification === "correct" ? "Correct"
       : r.response_classification === "correct_unsupported" ? "No basis yet"
       : "Incorrect";
-    var resultColor = r.response_classification === "correct" ? "var(--green)"
-      : r.response_classification === "correct_unsupported" ? "var(--uptriage)"
-      : "var(--red)";
+    var resultColor = "var(--ink)";
     html += '<div class="recent-row"><span class="recent-title">' + esc(title) + '</span><span class="recent-badge" style="color:' + resultColor + '">' + resultLabel + '</span></div>';
   });
   html += '</div>';
 
   html += '<div class="restart-row" style="margin-top:18px;"><button class="btn btn-primary" onclick="closeProgress()">Back to practice</button></div>';
-  html += '<div class="restart-row"><button class="btn btn-ghost" onclick="openResetConfirm()">👤 Reset for new user</button></div>';
+  html += '<div class="restart-row"><button class="btn btn-ghost" onclick="openResetConfirm()">Reset for new user</button></div>';
   html += '</div>';
   appEl.innerHTML = html;
 }
 
 function caseHeader(c, num, pct) {
   var popLabel = c.population === "adult" ? "Adult" : "Paediatric";
-  var html = '<div class="progress-row"><span class="progress-label">Case ' + num + ' of ' + state.queue.length + '</span><span class="pop-badge">' + popLabel + ' \u00b7 ' + esc(c.age) + '</span></div>';
-  html += '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>';
-  html += '<div class="end-session-row"><button type="button" class="end-session-link" onclick="openEndSessionConfirm()">End session &amp; see report</button></div>';
+  var html = '<div class="progress-row"><span class="progress-label">Case ' + num + ' of ' + state.queue.length + '</span><span class="pop-badge">' + popLabel + ', ' + esc(c.age) + '</span></div>';
+  var fromPct = Math.max(0, Math.round((num - 1) / state.queue.length * 100));
+  html += '<div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><div class="progress-fill" style="--to:' + (pct / 100) + ';--from:' + (fromPct / 100) + '"></div></div>';
+  html += '<div class="flex justify-end mt-1"><button type="button" class="end-session-link" onclick="openEndSessionConfirm()">End session and see report</button></div>';
   return html;
 }
 
@@ -980,13 +979,15 @@ function renderTiers(c) {
     html += '</div>';
     groups.forEach(function (g) {
       var open = isChecked(g);
-      html += '<div class="tp-sec' + (open ? ' open' : '') + '">' +
+      var enter = open && justOpened[g] ? ' enter' : '';
+      html += '<div class="tp-sec' + (open ? ' open' : '') + enter + '">' +
         '<button type="button" class="tp-sec-btn" aria-expanded="' + open + '" onclick="checkItem(\'' + g + '\')">' +
         '<span>' + esc(GROUP_META[g].label) + '</span><span class="tp-state">' + (open ? '✓ Checked' : 'Tap to check') + '</span></button>' +
         (open ? renderFindings(c, g) : '') + '</div>';
     });
     html += '</div>';
   });
+  justOpened = {};
   return html;
 }
 function renderReady(c) {
@@ -1009,7 +1010,7 @@ function renderReady(c) {
     var m = CATEGORY_META[k];
     var sel = state.selected === k ? " selected" : "";
     html += '<button class="decision-btn ' + k + sel + '" onclick="selectAnswer(\'' + k + '\')" aria-pressed="' + (state.selected === k) + '">' +
-      '<span class="d-emoji">' + m.emoji + '</span><span class="d-label">' + m.label + '</span></button>';
+      '<span class="d-label">' + m.label + '</span></button>';
   });
   html += '</div>';
   html += '<h4 class="tp-conf-title">How sure are you?</h4><div class="tp-conf" role="group" aria-label="How sure are you?">';
@@ -1023,8 +1024,10 @@ function renderReady(c) {
   appEl.innerHTML = html;
 }
 
+var justOpened = {};
 function markChecked(g) {
   if (isChecked(g)) return;
+  justOpened[g] = true;
   var seq = nextGatherSeq();
   state.checked.push({ g: g, seq: seq });
   logEvent("item_checked", { group: g, seq: seq, has_findings: !!((caseById(state.queue[state.qIndex]).findings || {})[g]) });
@@ -1058,7 +1061,7 @@ function renderDecision(c) {
     var sel = state.selected === k ? " selected" : "";
     var dis = state.locked ? " disabled" : "";
     html += '<button class="decision-btn ' + k + sel + '" ' + dis + ' onclick="selectAnswer(\'' + k + '\')" aria-pressed="' + (state.selected === k) + '">' +
-      '<span class="d-emoji">' + m.emoji + '</span><span class="d-label">' + m.label + '</span></button>';
+      '<span class="d-label">' + m.label + '</span></button>';
   });
   html += '</div>';
   html += '<div class="submit-row"><button class="btn btn-primary" ' + (state.selected ? '' : 'disabled') + ' onclick="submitDecision()">Submit decision</button></div>';
@@ -1132,7 +1135,6 @@ function renderFeedback(c) {
   var selMeta = CATEGORY_META[state.selected];
   var bannerClass = result === "correct" ? "correct" : "incorrect";
   var bannerTitle = result === "correct" ? "Correct" : (result === "correct_unsupported" ? "Right category \u2014 not enough basis yet" : "Incorrect");
-  var bannerEmoji = result === "correct" ? "\u2705" : (result === "correct_unsupported" ? "\u2753" : "\u26A0\uFE0F");
 
   var rightCount = state.cpLog.filter(function (l) { return l.isRight; }).length;
   var infoLine;
@@ -1148,21 +1150,21 @@ function renderFeedback(c) {
   html += caseHeader(c, num, Math.round(num / state.queue.length * 100));
   html += miniImageRow(c);
   var bannerSub = "You selected <b>" + selMeta.label + "</b>";
-  if (result === "incorrect") bannerSub += " &middot; correct category was <b>" + meta.label + "</b>";
-  else if (result === "correct_unsupported") bannerSub += " &middot; that’s the correct category, but not on the information you had at that point";
-  html += '<div class="feedback-banner ' + bannerClass + '"><span class="f-emoji">' + bannerEmoji + '</span><div><div class="f-title">' + bannerTitle + '</div><div class="f-sub">' + bannerSub + '</div></div></div>';
+  if (result === "incorrect") bannerSub += ". The correct category was <b>" + meta.label + "</b>";
+  else if (result === "correct_unsupported") bannerSub += ". That is the correct category, but not on the information you had at that point";
+  html += '<div class="feedback-banner ' + bannerClass + '"><div><div class="f-title">' + bannerTitle + '</div><div class="f-sub">' + bannerSub + '</div></div></div>';
 
-  html += '<span class="answer-chip ' + meta.chip + '">' + meta.emoji + ' Correct IITT category: ' + meta.label + '</span>';
-  html += '<div class="reassess-note" style="margin-top:10px;"><span>\uD83D\uDCCB</span><span>' + infoLine + '</span></div>';
+  html += '<span class="answer-chip ' + meta.chip + '">' + 'Correct IITT category: ' + meta.label + '</span>';
+  html += '<div class="reassess-note" style="margin-top:10px;"><span>' + infoLine + '</span></div>';
   if (rec.confidence) {
     var confLine = 'You said you were <b>' + esc(confidenceLabel(rec.confidence).toLowerCase()) + '</b>';
     if (result === "correct") confLine += ' and the category was correct.';
     else confLine += ' and the category was not correct.';
-    html += '<div class="reassess-note" style="margin-top:6px;"><span>\uD83C\uDFAF</span><span>' + confLine + '</span></div>';
+    html += '<div class="reassess-note" style="margin-top:6px;"><span>' + confLine + '</span></div>';
   }
 
   html += '<div class="detail-section"><h4>Why</h4><p><b>' + esc(c.keyCriterion) + '.</b> ' + esc(c.feedbackWhy) + '</p></div>';
-  if (c.reassessment) html += '<div class="reassess-note"><span>\uD83D\uDD01</span><span>' + esc(c.reassessment) + '</span></div>';
+  if (c.reassessment) html += '<div class="reassess-note"><span>' + esc(c.reassessment) + '</span></div>';
 
   html += '<div class="restart-row"><button class="btn btn-primary" onclick="nextCase()">' + (state.qIndex + 1 >= state.queue.length ? "See summary" : "Next case") + '</button></div>';
   if (state.qIndex + 1 < state.queue.length) html += '<div class="restart-row" style="margin-top:6px;"><button class="btn btn-ghost" onclick="endSessionNow()">Finish here &amp; see my report</button></div>';
@@ -1201,7 +1203,7 @@ function renderPracticeSummary() {
   var html = '<div class="card">';
   html += '<h2 class="section-title">Practice complete</h2>';
   var modeLabel = state.practiceMode === "decide" ? "Triage practice" : "Guided triage practice";
-  html += '<p class="section-sub">Mode: ' + modeLabel + ' &middot; Cases completed: ' + results.length + '</p>';
+  html += '<p class="section-sub">Mode: ' + modeLabel + '. Cases completed: ' + results.length + '</p>';
   html += '<div class="summary-stat-grid' + (totalUnsupported ? ' summary-stat-grid-4' : '') + '">';
   html += '<div class="summary-stat correct"><div class="s-num">' + totalCorrect + '</div><div class="s-label">Correct</div></div>';
   if (totalUnsupported) html += '<div class="summary-stat unsupported"><div class="s-num">' + totalUnsupported + '</div><div class="s-label">Right answer, no basis</div></div>';
@@ -1215,24 +1217,24 @@ function renderPracticeSummary() {
   html += '<tr><td>Paediatric</td><td>' + pedsB.correct + '</td>' + (totalUnsupported ? '<td>' + pedsB.unsupported + '</td>' : '') + '<td>' + pedsB.incorrect + '</td></tr>';
   html += '</tbody></table>';
   if (totalUnsupported) {
-    html += '<p style="font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin-top:8px;">&ldquo;Right answer, no basis&rdquo; means you picked the correct category, but hadn\u2019t yet checked the specific finding that determines it \u2014 these are not counted as correct.</p>';
+    html += '<p style="font-size:14px; color:var(--ink-soft); line-height:1.5; margin-top:8px;">&ldquo;Right answer, no basis&rdquo; means you picked the correct category, but hadn\u2019t yet checked the specific finding that determines it \u2014 these are not counted as correct.</p>';
   }
 
   if (uptriageResults.length) {
-    html += '<div class="reassess-note" style="margin-top:16px;"><span>\u26A0\uFE0F</span><span>High-risk vital sign (up-triage) cases: ' + uptriageCorrect + ' of ' + uptriageResults.length + ' correctly identified as needing up-triage.</span></div>';
+    html += '<div class="reassess-note" style="margin-top:16px;"><span>High-risk vital sign (up-triage) cases: ' + uptriageCorrect + ' of ' + uptriageResults.length + ' correctly identified as needing up-triage.</span></div>';
   }
 
   if (isFreeMode()) {
     var totalGathered = results.reduce(function (sum, r) { return sum + (r.info_items_gathered || 0); }, 0);
     var totalAvailable = results.reduce(function (sum, r) { return sum + (r.info_items_available || 0); }, 0);
     var avgPct = totalAvailable ? Math.round((totalGathered / totalAvailable) * 100) : 0;
-    html += '<div class="reassess-note" style="margin-top:10px;"><span>\uD83D\uDCCA</span><span>On average, you gathered ' + avgPct + '% of the available checks per case before deciding.</span></div>';
+    html += '<div class="reassess-note" style="margin-top:10px;"><span>On average, you gathered ' + avgPct + '% of the available checks per case before deciding.</span></div>';
   }
 
   html += '<div class="restart-row"><button class="btn btn-primary" onclick="restartPractice()">Restart (same mode)</button></div>';
   html += '<div class="restart-row"><button class="btn btn-ghost" onclick="goToPracticeHome()">Choose a different mode</button></div>';
-  html += '<div class="restart-row"><button class="btn btn-ghost" onclick="openProgress()">📊 My progress</button></div>';
-  html += '<div class="restart-row"><button class="btn btn-ghost" onclick="openResetConfirm()">👤 Reset for new user</button></div>';
+  html += '<div class="restart-row"><button class="btn btn-ghost" onclick="openProgress()">My progress</button></div>';
+  html += '<div class="restart-row"><button class="btn btn-ghost" onclick="openResetConfirm()">Reset for new user</button></div>';
   html += '</div>';
   appEl.innerHTML = html;
 }
@@ -1251,11 +1253,11 @@ function renderReviewList() {
     var meta = CATEGORY_META[c.correct];
     html += '<div class="review-list-item" onclick="openReview(\'' + c.id + '\')" role="button" tabindex="0">';
     html += '<img class="review-thumb" src="' + FACE_IMAGES[c.image] + '" alt="">';
-    html += '<div><div class="r-title">' + esc(c.title) + '</div><div class="r-sub">' + (c.population === "adult" ? "Adult" : "Paediatric") + ' \u00b7 ' + meta.label + ' \u00b7 ' + c.checkpoints.length + ' checkpoints</div></div>';
+    html += '<div><div class="r-title">' + esc(c.title) + '</div><div class="r-sub">' + (c.population === "adult" ? "Adult" : "Paediatric") + ', ' + meta.label + ', ' + c.checkpoints.length + ' checkpoints</div></div>';
     if (c.needsReview) {
       var listStatus = reviewStatusFor(c.id);
-      if (listStatus === "Reviewed \u2014 approved") html += '<span class="flag-pill confirmed">CONFIRMED</span>';
-      else if (listStatus === "Reviewed \u2014 needs edits") html += '<span class="flag-pill edits">EDITS NOTED</span>';
+      if (listStatus === "Reviewed \u2014 approved") html += '<span class="flag-pill confirmed">Confirmed</span>';
+      else if (listStatus === "Reviewed \u2014 needs edits") html += '<span class="flag-pill edits">Edits noted</span>';
       else html += '<span class="flag-pill">NEEDS REVIEW</span>';
     }
     html += '</div>';
@@ -1278,12 +1280,12 @@ function renderReviewDetail(id) {
     var detailStatus = overrides.review_status || "Not yet reviewed";
     var bannerClass = detailStatus === "Reviewed \u2014 approved" ? " confirmed" : (detailStatus === "Reviewed \u2014 needs edits" ? " edits" : "");
     html += '<div class="review-flag-banner' + bannerClass + '">';
-    html += '\uD83D\uDEA9 <b>Needs clinician review:</b> ' + esc(c.reviewNote);
-    if (detailStatus === "Reviewed \u2014 approved") html += '<div style="margin-top:6px; font-weight:700;">\u2713 Confirmed as extracted.</div>';
-    else if (detailStatus === "Reviewed \u2014 needs edits") html += '<div style="margin-top:6px; font-weight:700;">\u270E Edits requested \u2014 see notes below.</div>';
+    html += '<b>Needs clinician review:</b> ' + esc(c.reviewNote);
+    if (detailStatus === "Reviewed \u2014 approved") html += '<div style="margin-top:6px; font-weight:700;">Confirmed as extracted.</div>';
+    else if (detailStatus === "Reviewed \u2014 needs edits") html += '<div style="margin-top:6px; font-weight:700;">Edits requested \u2014 see notes below.</div>';
     html += '<div class="review-flag-actions">' +
-      '<button type="button" class="btn btn-primary btn-sm" onclick="confirmCaseReview(\'' + id + '\')">\u2713 Confirm as extracted</button>' +
-      '<button type="button" class="btn btn-ghost btn-sm" onclick="requestCaseEdits(\'' + id + '\')">\u270E Request edits</button>' +
+      '<button type="button" class="btn btn-primary btn-sm" onclick="confirmCaseReview(\'' + id + '\')">Confirm as extracted</button>' +
+      '<button type="button" class="btn btn-ghost btn-sm" onclick="requestCaseEdits(\'' + id + '\')">Request edits</button>' +
       '</div>';
     html += '<div class="field-row" style="margin-top:12px; margin-bottom:0;"><label>Resolution notes</label><textarea rows="3" data-case="' + id + '" data-field="review_resolution_notes" onchange="onMetaEdit(this)" placeholder="Add corrections, clarifications, or the reasoning for confirming this as-is...">' + esc(overrides.review_resolution_notes || "") + '</textarea></div>';
     html += '</div>';
@@ -1309,7 +1311,7 @@ function renderReviewDetail(id) {
     html += '</li>';
   });
   html += '</ol>';
-  html += '<p style="font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin-top:8px;">Steps tagged <b>DECIDE-MODE STEP</b> are the only ones offered as \u201cwhat would you check next\u201d options in Triage practice \u2014 they mark where the source slides show genuinely new information (an \u201cAdditional information\u201d reveal) rather than something already evident from the case info. This filtering is an editorial judgment call; please confirm it against the source slides.</p>';
+  html += '<p style="font-size:14px; color:var(--ink-soft); line-height:1.5; margin-top:8px;">Steps tagged <b>DECIDE-MODE STEP</b> are the only ones offered as \u201cwhat would you check next\u201d options in Triage practice \u2014 they mark where the source slides show genuinely new information (an \u201cAdditional information\u201d reveal) rather than something already evident from the case info. This filtering is an editorial judgment call; please confirm it against the source slides.</p>';
   html += '</div>';
 
   html += '<div class="detail-section"><h4>Correct triage category</h4><span class="answer-chip ' + meta.chip + '">' + meta.emoji + ' ' + meta.label + '</span></div>';
@@ -1318,7 +1320,7 @@ function renderReviewDetail(id) {
   if (c.reassessment) html += '<div class="detail-section"><h4>Reassessment note</h4><p>' + esc(c.reassessment) + '</p></div>';
 
   html += '<div class="divider"></div>';
-  html += '<h4 style="font-size:12.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px;">Educational-design metadata (for clinician completion)</h4>';
+  html += '<h4 class="mb-2 text-base">Educational-design metadata (for clinician completion)</h4>';
   INTERNAL_FIELDS.forEach(function (f) {
     var val = overrides[f.key] || "";
     html += '<div class="field-row"><label>' + esc(f.label) + '</label><textarea rows="2" data-case="' + id + '" data-field="' + f.key + '" onchange="onMetaEdit(this)" placeholder="Not yet reviewed">' + esc(val) + '</textarea></div>';
@@ -1385,14 +1387,14 @@ function renderCoverage() {
   html += '</tbody></table>';
 
   html += '<div class="divider"></div>';
-  html += '<h4 style="font-size:12.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:6px;">Clinical domains represented</h4>';
+  html += '<h4 class="mb-2 text-base">Clinical domains represented</h4>';
   CASES.forEach(function (c) {
     html += '<div class="coverage-domain-row"><span>' + esc(c.domain) + '</span><span class="c-count">' + (c.population === "adult" ? "Adult" : "Peds") + '</span></div>';
   });
 
   html += '<div class="divider"></div>';
-  html += '<h4 style="font-size:12.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:6px;">Criterion types &amp; intended challenges</h4>';
-  html += '<p style="font-size:13px; color:var(--ink-soft); line-height:1.5;">Not yet populated &mdash; complete the educational-design metadata for each case in Clinician review to build this out.</p>';
+  html += '<h4 class="mb-2 text-base">Criterion types &amp; intended challenges</h4>';
+  html += '<p style="font-size:14px; color:var(--ink-soft); line-height:1.5;">Not yet populated &mdash; complete the educational-design metadata for each case in Clinician review to build this out.</p>';
 
   html += '</div>';
   appEl.innerHTML = html;

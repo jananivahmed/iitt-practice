@@ -143,4 +143,18 @@ Teaching point, facilitator mode (removed for now), guided teaching notes, diffi
 
 ## Design system
 
-The app uses Material 3. Colour roles, shape, type scale and state layers are defined at the top and bottom of `styles.css` (the `--md-*` variables and the "Material 3 design system layer" block). The older variable names (`--primary`, `--surface`, `--ink` and so on) are kept and point at the Material 3 roles. Triage red, yellow, green and up-triage are custom colour roles with container and on-container pairs, in light and dark. Font: Roboto.
+The look follows Adobe Spectrum principles: flat neutral surfaces, an 8px grid, 4px corners, 2px focus rings and one action blue. One rule decides colour: red, yellow, green and purple only ever mean a triage category (the decision buttons, the correct-category bar, the card section markers). Everything else is neutral or the action blue. Tokens are at the top of `styles.css`; the older variable names (`--primary`, `--surface`, `--ink`) still work and point at them. Font: Atkinson Hyperlegible, with system fonts as the fallback. There are no emoji in the interface.
+
+## Tailwind CSS (added in 0.5.0)
+
+`tailwind.css` is a compiled file that the app loads after `styles.css`. It holds only the Tailwind utility classes that `app.js` actually uses (for example `flex`, `gap-3`, `mt-5`). There is no Tailwind reset, so existing screens are unchanged.
+
+- Source lives in `tailwind/` (not published; the Pages workflow copies top-level files only).
+- Colour utilities (`text-ink`, `bg-tile`, `text-action`) read the same CSS variables as `styles.css`, so they follow light and dark mode.
+- After adding a new utility class in `app.js`, rebuild and commit the result:
+  `cd tailwind && npm install && npm run build`
+- If you skip the rebuild, the new class simply has no effect; nothing breaks.
+
+## Motion rules
+
+Motion only answers an action: feedback banners fade in, a newly checked card section reveals, the progress bar grows to its new value, buttons press down 2%. Easing is ease-out-quart (no bounce), only `transform` and `opacity` animate, and `prefers-reduced-motion` turns it all off. Do not add entrance animations to screens.

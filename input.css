@@ -1,0 +1,28 @@
+/* Tailwind v4 build for the IITT Practice Companion.
+   Only the theme and the utilities are included. There is no Tailwind
+   "preflight" reset, because styles.css already sets the base styles and a
+   second reset would change how existing screens look.
+   Utilities are generated for the class names that appear in ../app.js and
+   ../index.html. Rebuild with:  npm run build   (inside this folder). */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@source "../app.js";
+@source "../index.html";
+
+/* Tailwind reads its design tokens from the same CSS variables as styles.css,
+   so utilities such as text-ink or bg-tile follow light and dark mode. */
+@theme inline {
+  --color-page: var(--page);
+  --color-tile: var(--tile);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-action: var(--action);
+  --color-red: var(--red);
+  --color-yellow: var(--yellow);
+  --color-green: var(--green);
+  --color-uptriage: var(--uptriage);
+  --font-sans: var(--font);
+  --ease-out-quart: cubic-bezier(.25, 1, .5, 1);
+}
