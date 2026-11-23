@@ -463,23 +463,23 @@ function renderLogin() {
   var html = '<div class="card empty-hero" style="padding-bottom:24px;">' +
     '<img class="login-avatar" src="' + LOGIN_AVATAR + '" alt="">' +
     '<h2 class="section-title">Who’s practicing?</h2>' +
-    '<p>Enter your name and email so your progress stays separate from other learners using this device, and so your feedback reports are tied to you.</p>' +
-    '<div class="field-row" style="text-align:left; max-width:320px; margin:0 auto 4px;">' +
+    '<p class="reading">Enter your name and email so your progress stays separate from other learners using this device, and so your feedback reports are tied to you.</p>' +
+    '<div class="field-row" style="text-align:left;">' +
     '<input type="text" id="login-name-input" placeholder="Your name" maxlength="60" autocomplete="off" onkeydown="if(event.key===\'Enter\'){event.preventDefault();submitLogin();}">' +
     '<div id="login-name-error" class="login-error" hidden>Enter your name to continue.</div>' +
     '</div>' +
-    '<div class="field-row" style="text-align:left; max-width:320px; margin:0 auto 4px;">' +
+    '<div class="field-row" style="text-align:left;">' +
     '<input type="email" id="login-email-input" placeholder="you@example.com" maxlength="120" autocomplete="off" onkeydown="if(event.key===\'Enter\'){event.preventDefault();submitLogin();}">' +
     '<div id="login-email-error" class="login-error" hidden>Enter a valid email address to continue.</div>' +
     '</div>' +
-    '<div class="field-row" style="text-align:left; max-width:320px; margin:0 auto 4px;">' +
+    '<div class="field-row" style="text-align:left;">' +
     '<select id="login-role-input"><option value="">Your role</option>' + ROLES.map(function (r) { return '<option>' + esc(r) + '</option>'; }).join("") + '</select>' +
     '<div id="login-role-error" class="login-error" hidden>Choose your role to continue.</div>' +
     '</div>' +
-    '<div class="field-row" style="text-align:left; max-width:320px; margin:0 auto 4px;">' +
+    '<div class="field-row" style="text-align:left;">' +
     '<input type="text" id="login-facility-input" placeholder="Facility or organisation (optional)" maxlength="120" autocomplete="off">' +
     '</div>' +
-    '<div class="field-row" style="text-align:left; max-width:320px; margin:0 auto 4px;">' +
+    '<div class="field-row" style="text-align:left;">' +
     '<select id="login-country-input"><option value="">Country</option>' + COUNTRIES.map(function (c) { return '<option>' + esc(c) + '</option>'; }).join("") + '</select>' +
     '<div id="login-country-error" class="login-error" hidden>Choose your country to continue.</div>' +
     '</div>' +
@@ -531,7 +531,6 @@ function closeResetConfirm() {
 function renderResetConfirm() {
   var name = getLearnerName();
   var html = '<div class="card">';
-  html += '<div class="stage-tag">Reset for new user</div>';
   html += '<h3 class="case-title">Clear progress on this device?</h3>';
   html += '<p class="vignette">This clears ' + (name ? '<b>' + esc(name) + '</b>’s' : 'the current') + ' saved responses, event history, name, and email from this device, and returns to the sign-in screen for the next learner. This can’t be undone.</p>';
   html += '<div class="restart-row">' +
@@ -558,7 +557,6 @@ function endSessionNow() {
 function renderEndSessionConfirm() {
   var doneCount = state.results.length;
   var html = '<div class="card">';
-  html += '<div class="stage-tag">End session</div>';
   html += '<h3 class="case-title">End this practice session now?</h3>';
   html += '<p class="vignette">' + (doneCount
     ? 'You’ll get a feedback report on the ' + doneCount + ' case' + (doneCount === 1 ? "" : "s") + ' you’ve completed so far. The case in progress won’t be scored.'
@@ -598,7 +596,6 @@ function renderCaseInfo(c) {
   var html = '<div class="card">';
   html += caseHeader(c, num, pct);
   html += '<img class="case-image" src="' + IMAGES[c.image] + '" alt="Illustration of the patient described in this case" loading="lazy">';
-  html += '<div class="stage-tag">Case info</div>';
   html += '<p class="vignette">' + esc(c.arrival) + '</p>';
   html += '<div class="cta-row"><button class="btn btn-primary" onclick="toggleCaseInfo()">Back to assessment</button></div>';
   html += '</div>';
@@ -636,7 +633,6 @@ function renderRefCardViewer() {
   var meta = REF_CARD_META[state.refCardOpen];
   var html = '<div class="card ref-viewer-card">';
   html += '<button type="button" class="back-link" onclick="closeRefCard()">\u2190 Back to case</button>';
-  html += '<div class="stage-tag">Reference card</div>';
   html += '<h3 class="case-title">' + esc(meta.label) + '</h3>';
   html += '<p class="ref-viewer-hint">Pinch or use the zoom button to read the fine print.</p>';
   html += '<div class="ref-zoom-row">' +
@@ -660,7 +656,6 @@ function closeAgeBandVitals() {
 function renderAgeBandVitals() {
   var html = '<div class="card">';
   html += '<button type="button" class="back-link" onclick="closeAgeBandVitals()">← Back</button>';
-  html += '<div class="stage-tag">Reference</div>';
   html += '<h3 class="case-title">Paediatric age-band vital sign thresholds</h3>';
   html += '<p class="ref-viewer-hint">High-risk heart rate and respiratory rate ranges by age band, as used in this case set.</p>';
   html += '<table class="pop-table"><thead><tr><th>Age band</th><th>Heart rate</th><th>Respiratory rate</th></tr></thead><tbody>';
@@ -668,7 +663,7 @@ function renderAgeBandVitals() {
     html += '<tr><td>' + esc(b.band) + '</td><td>' + esc(b.hr) + '</td><td>' + esc(b.rr) + '</td></tr>';
   });
   html += '</tbody></table>';
-  html += '<p style="font-size:14px; color:var(--ink-soft); line-height:1.5; margin-top:10px;">Values shown outside these ranges meet high-risk vital sign criteria. For the complete official table (all age bands), use the Paediatric IITT reference card.</p>';
+  html += '<p class="reading" style="font-size:14px; color:var(--ink-soft); line-height:1.5; margin-top:10px;">Values shown outside these ranges meet high-risk vital sign criteria. For the complete official table (all age bands), use the Paediatric IITT reference card.</p>';
   html += '<div class="ref-links" style="margin-top:12px;"><button type="button" class="ref-link" onclick="openRefCard(\'pediatric\')">Paediatric IITT card (age &lt;12)</button></div>';
   html += '<div class="cta-row"><button class="btn btn-primary" onclick="closeAgeBandVitals()">Back to assessment</button></div>';
   html += '</div>';
@@ -693,15 +688,6 @@ function renderPracticeHome() {
     '<h2 class="section-title">Interagency Integrated Triage Tool Practice Companion</h2>' +
     '<p>Choose how you want to practice.</p>' +
     '</div>' +
-    '<div class="card count-card" role="group" aria-labelledby="count-label">' +
-    '<div id="count-label" class="count-label">How many cases do you want to practise?</div>' +
-    '<div class="count-stepper">' +
-    '<button type="button" class="count-btn" aria-label="Fewer cases" onclick="changeCaseCount(-1)"' + (getCaseCount() <= 1 ? ' disabled' : '') + '>\u2212</button>' +
-    '<output class="count-value" aria-live="polite">' + getCaseCount() + '</output>' +
-    '<button type="button" class="count-btn" aria-label="More cases" onclick="changeCaseCount(1)"' + (getCaseCount() >= maxCaseCount() ? ' disabled' : '') + '>+</button>' +
-    '</div>' +
-    '<div class="count-note">Up to ' + maxCaseCount() + '. Cases are picked at random.</div>' +
-    '</div>' +
     '<div class="card mode-card">' +
     '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.guided + '" alt=""> Guided Triage Practice</h3>' +
     '<p>You will be guided through each criteria in order before making a triage decision.</p>' +
@@ -711,6 +697,15 @@ function renderPracticeHome() {
     '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.triage + '" alt=""> Triage Practice</h3>' +
     '<p>Work through the IITT card in any order, check the parts you want to know more about, and choose a triage category when you have enough information.</p>' +
     '<button class="btn btn-primary" onclick="startPractice(\'decide\')">Start</button>' +
+    '</div>' +
+    '<div class="card count-card" role="group" aria-labelledby="count-label">' +
+    '<div id="count-label" class="count-label">Cases to practice</div>' +
+    '<div class="count-stepper">' +
+    '<button type="button" class="count-btn" aria-label="Fewer cases" onclick="changeCaseCount(-1)"' + (getCaseCount() <= 1 ? ' disabled' : '') + '>\u2212</button>' +
+    '<output class="count-value" aria-live="polite">' + getCaseCount() + '</output>' +
+    '<button type="button" class="count-btn" aria-label="More cases" onclick="changeCaseCount(1)"' + (getCaseCount() >= maxCaseCount() ? ' disabled' : '') + '>+</button>' +
+    '</div>' +
+    '<div class="count-note">Up to ' + maxCaseCount() + '. Cases are picked at random.</div>' +
     '</div>' +
     '<div class="restart-row" style="margin-top:2px;"><button class="btn btn-ghost" onclick="openProgress()">My progress</button></div>' +
     '<details class="about-box"><summary>ℹ️ About</summary>' +
@@ -803,19 +798,22 @@ function caseHeader(c, num, pct) {
   var html = '<div class="progress-row"><span class="progress-label">Case ' + num + ' of ' + state.queue.length + '</span><span class="pop-badge">' + popLabel + ', ' + esc(c.age) + '</span></div>';
   var fromPct = Math.max(0, Math.round((num - 1) / state.queue.length * 100));
   html += '<div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><div class="progress-fill" style="--to:' + (pct / 100) + ';--from:' + (fromPct / 100) + '"></div></div>';
-  html += '<div class="flex justify-end mt-1"><button type="button" class="end-session-link" onclick="openEndSessionConfirm()">End session and see report</button></div>';
+  
   return html;
 }
 
+function endSessionRow() {
+  return '<div class="end-session-row"><button type="button" class="end-session-link" onclick="openEndSessionConfirm()">End session and see report</button></div>';
+}
 function renderArrival(c) {
   var num = state.qIndex + 1;
   var pct = Math.round((num - 1) / state.queue.length * 100);
   var html = '<div class="card">';
   html += caseHeader(c, num, pct);
   html += '<img class="case-image" src="' + IMAGES[c.image] + '" alt="Illustration of the patient described in this case" loading="lazy">';
-  html += '<div class="stage-tag">Arrival</div>';
   html += '<p class="vignette">' + esc(c.arrival) + '</p>';
   html += '<div class="cta-row"><button class="btn btn-primary" onclick="beginAssessment()">Begin assessment</button></div>';
+  html += endSessionRow();
   html += '</div>';
   appEl.innerHTML = html;
 }
@@ -883,7 +881,7 @@ function renderCheckpoint(c) {
     });
     html += '</div>';
   }
-  if (stepFind && stepFind.text) html += '<p class="cp-find-text">' + esc(stepFind.text) + '</p>';
+  if (stepFind && stepFind.text) html += findingList(stepFind.text, "cp-find-text");
   if (cp.g === "vitals" && c.ageBandRef) {
     html += '<div class="age-ref">High-risk thresholds for <b>' + esc(c.ageBandRef.band) + '</b>: heart rate outside <b>' + esc(c.ageBandRef.hr) + '</b>, respiratory rate outside <b>' + esc(c.ageBandRef.rr) + '</b>.</div>';
   }
@@ -914,7 +912,7 @@ function renderCheckpoint(c) {
     html += '<div class="submit-row"><button class="btn btn-primary" onclick="advanceCheckpoint()">Continue</button></div>';
   }
 
-  html += '</div></div>';
+  html += '</div>' + endSessionRow() + '</div>';
   appEl.innerHTML = html;
 }
 
@@ -969,6 +967,11 @@ function decidingGroup(c) {
   for (var i = 0; i < c.checkpoints.length; i++) if (c.checkpoints[i].correct === "yes") return c.checkpoints[i].g;
   return null;
 }
+/* A finding is written as short sentences; show each one as its own bullet. */
+function findingList(text, cls) {
+  var parts = String(text).split(/(?<=[.!?])\s+(?=[A-Z0-9])/).map(function (t) { return t.trim(); }).filter(Boolean);
+  return '<ul class="finding-list' + (cls ? ' ' + cls : '') + '">' + parts.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
+}
 function renderFindings(c, g) {
   var f = (c.findings || {})[g];
   var html = '<div class="tp-find">';
@@ -982,7 +985,7 @@ function renderFindings(c, g) {
       });
       html += '</div>';
     }
-    if (f.text) html += '<p>' + esc(f.text) + '</p>';
+    if (f.text) html += findingList(f.text, "");
   }
   if (g === "vitals" && c.ageBandRef) {
     html += '<div class="age-ref">High-risk thresholds for <b>' + esc(c.ageBandRef.band) + '</b>: heart rate outside <b>' + esc(c.ageBandRef.hr) + '</b>, respiratory rate outside <b>' + esc(c.ageBandRef.rr) + '</b>.</div>';
@@ -995,7 +998,8 @@ function renderTiers(c) {
   var html = "";
   TIERS.forEach(function (t) {
     var groups = groupsInTier(t.level);
-    html += '<div class="tp-tier tp-' + t.level + '"><div class="tp-tier-head"><h4>' + t.title + '</h4>';
+    var nDone = groups.filter(isChecked).length;
+    html += '<div class="tp-tier tp-' + t.level + '"><div class="tp-tier-head"><h4>' + t.title + ' <span class="tp-count">' + nDone + ' of ' + groups.length + ' checked</span></h4>';
     if (groups.length > 1) html += '<button type="button" class="tp-allbtn" onclick="checkTier(\'' + t.level + '\')">' + t.all + '</button>';
     html += '</div>';
     groups.forEach(function (g) {
@@ -1017,7 +1021,6 @@ function renderReady(c) {
   var html = '<div class="card">';
   html += caseHeader(c, num, pct);
   html += miniImageRow(c, false, true);
-  html += '<div class="stage-tag">Case info</div>';
   html += '<p class="vignette">' + esc(c.arrival) + '</p>';
   html += '<div class="divider"></div>';
   html += '<div class="stage-tag">Work through the card</div>';
@@ -1026,7 +1029,8 @@ function renderReady(c) {
 
   html += renderTiers(c);
 
-  html += '<div class="tp-pick"><h4>Your triage category</h4><div class="decision-grid">';
+  html += '<div class="tp-jump"><span class="tp-jump-count">' + state.checked.length + ' of ' + Object.keys(GROUP_META).length + ' checked</span><button type="button" class="btn btn-primary btn-sm" onclick="jumpToPick()">Choose triage category</button></div>';
+  html += '<div class="tp-pick" id="tp-pick"><h4>Your triage category</h4><div class="decision-grid">';
   ["red", "yellow", "green", "uptriage"].forEach(function (k) {
     var m = CATEGORY_META[k];
     var sel = state.selected === k ? " selected" : "";
@@ -1040,11 +1044,18 @@ function renderReady(c) {
     html += '<button type="button" class="tp-conf-btn' + (on ? ' selected' : '') + '" aria-pressed="' + on + '" onclick="selectConfidence(\'' + o.k + '\')">' + o.label + '</button>';
   });
   html += '</div>';
-  html += '<div class="submit-row"><button class="btn btn-primary" ' + (state.selected && state.confidence ? '' : 'disabled') + ' onclick="submitDecision()">Submit decision</button></div></div>';
+  html += '<div class="submit-row"><button class="btn btn-primary" ' + (state.selected && state.confidence ? '' : 'disabled') + ' onclick="submitDecision()">Submit decision</button></div>';
+  if (!(state.selected && state.confidence)) html += '<p class="submit-help">' + (!state.selected ? 'Choose a category and how sure you are to submit.' : 'Choose how sure you are to submit.') + '</p>';
+  html += '</div>';
+  html += endSessionRow();
   html += '</div>';
   appEl.innerHTML = html;
 }
 
+function jumpToPick() {
+  var el = document.getElementById("tp-pick");
+  if (el) el.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+}
 var justOpened = {};
 function markChecked(g) {
   if (isChecked(g)) return;
@@ -1073,7 +1084,6 @@ function renderDecision(c) {
   var html = '<div class="card">';
   html += caseHeader(c, num, pct);
   html += miniImageRow(c, true);
-  html += '<div class="stage-tag">Triage decision</div>';
   html += renderCheckpointTrail(c);
   html += '<div class="decision-prompt">Based on everything you found, what is the appropriate IITT triage category?</div>';
   html += '<div class="decision-grid">';
@@ -1086,6 +1096,7 @@ function renderDecision(c) {
   });
   html += '</div>';
   html += '<div class="submit-row"><button class="btn btn-primary" ' + (state.selected ? '' : 'disabled') + ' onclick="submitDecision()">Submit decision</button></div>';
+  html += endSessionRow();
   html += '</div>';
   appEl.innerHTML = html;
 }
@@ -1154,7 +1165,7 @@ function renderFeedback(c) {
   var result = rec.response_classification;
   var meta = CATEGORY_META[c.correct];
   var selMeta = CATEGORY_META[state.selected];
-  var bannerClass = result === "correct" ? "correct" : "incorrect";
+  var bannerClass = result === "correct" ? "correct" : (result === "incorrect" ? "incorrect" : "partial");
   var bannerTitle = result === "correct" ? "Correct" : (result === "correct_unsupported" ? "Right category \u2014 not enough basis yet" : "Incorrect");
 
   var rightCount = state.cpLog.filter(function (l) { return l.isRight; }).length;
@@ -1171,11 +1182,10 @@ function renderFeedback(c) {
   html += caseHeader(c, num, Math.round(num / state.queue.length * 100));
   html += miniImageRow(c);
   var bannerSub = "You selected <b>" + selMeta.label + "</b>";
-  if (result === "incorrect") bannerSub += ". The correct category was <b>" + meta.label + "</b>";
+  if (result === "incorrect") bannerSub += ".";
   else if (result === "correct_unsupported") bannerSub += ". That is the correct category, but not on the information you had at that point";
-  html += '<div class="feedback-banner ' + bannerClass + '"><div><div class="f-title">' + bannerTitle + '</div><div class="f-sub">' + bannerSub + '</div></div></div>';
-
-  html += '<span class="answer-chip ' + meta.chip + '">' + 'Correct IITT category: ' + meta.label + '</span>';
+  html += '<div class="feedback-banner ' + bannerClass + '"><div class="f-title">' + bannerTitle + '</div><div class="f-sub">' + bannerSub + '</div>' +
+    (result === "incorrect" ? '<span class="answer-chip ' + meta.chip + '">Correct category: ' + meta.label + '</span>' : '') + '</div>';
   html += '<div class="reassess-note" style="margin-top:10px;"><span>' + infoLine + '</span></div>';
   if (rec.confidence) {
     var confLine = 'You said you were <b>' + esc(confidenceLabel(rec.confidence).toLowerCase()) + '</b>';
