@@ -193,6 +193,7 @@
   .feedback-banner.correct{background:var(--green-soft); color:var(--green-ink);}
   .feedback-banner.under{background:var(--red-soft); color:var(--red-ink);}
   .feedback-banner.over{background:var(--yellow-soft); color:var(--yellow-ink);}
+  .feedback-banner.incorrect{background:var(--red-soft); color:var(--red-ink);}
   .feedback-banner.neutral{background:var(--uptriage-soft); color:var(--uptriage-ink);}
   .feedback-banner .f-title{font-weight:800; font-size:16px; margin-bottom:2px;}
   .feedback-banner .f-sub{font-size:13.5px; line-height:1.4;}
@@ -211,15 +212,17 @@
     margin-top:14px; padding:11px 13px; background:var(--surface-alt); border-radius:10px;
     font-size:13px; line-height:1.5; color:var(--ink-soft); display:flex; gap:8px;
   }
-  .summary-stat-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:16px 0;}
+  .summary-stat-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:16px 0;}
   .summary-stat{background:var(--surface-alt); border-radius:12px; padding:14px 8px; text-align:center;}
   .summary-stat .s-num{font-size:24px; font-weight:800; font-variant-numeric:tabular-nums;}
   .summary-stat .s-label{font-size:11.5px; color:var(--ink-soft); font-weight:600; margin-top:2px;}
   .summary-stat.correct .s-num{color:var(--green);}
   .summary-stat.under .s-num{color:var(--red);}
   .summary-stat.over .s-num{color:var(--yellow);}
+  .summary-stat.incorrect .s-num{color:var(--red);}
+  .dir-note{font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin:8px 0 0;}
   .summary-stat.unsupported .s-num{color:var(--uptriage);}
-  .summary-stat-grid-4{grid-template-columns:repeat(2,1fr);}
+  .summary-stat-grid-4{grid-template-columns:repeat(3,1fr);}
   table.pop-table{width:100%; border-collapse:collapse; margin-top:8px; font-size:13.5px;}
   table.pop-table th{text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); font-weight:700; padding:6px 4px; border-bottom:1px solid var(--border);}
   table.pop-table td{padding:8px 4px; border-bottom:1px solid var(--border);}
@@ -267,7 +270,7 @@
   }
   .field-row{margin-bottom:14px;}
   .field-row label{display:block; font-size:12px; font-weight:700; color:var(--ink-soft); margin-bottom:5px; text-transform:uppercase; letter-spacing:.03em;}
-  .field-row textarea, .field-row select, .field-row input[type=text]{
+  .field-row textarea, .field-row select, .field-row input[type=text], .field-row input[type=email]{
     width:100%; font-family:inherit; font-size:14px; padding:9px 11px; border-radius:9px;
     border:1px solid var(--border); background:var(--surface); color:var(--ink); resize:vertical;
   }
@@ -439,3 +442,5 @@
 .tp-none{color:var(--ink-soft);font-style:italic}
 .tp-pick{margin-top:16px;padding-top:12px;border-top:1px solid var(--border)}
 .tp-pick h4{margin:0 0 8px;font-size:14px}
+
+  .login-notice{font-size:12.5px; color:var(--ink-soft); line-height:1.5; max-width:320px; margin:10px auto 0; text-align:left;}

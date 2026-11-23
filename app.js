@@ -98,6 +98,12 @@ var STORE_SESSION = "iitt_session_id_v1";
 var STORE_EVENTS = "iitt_practice_events_v1";
 var STORE_LEARNER_NAME = "iitt_learner_name_v1";
 var STORE_LEARNER_EMAIL = "iitt_learner_email_v1";
+var STORE_PROFILE = "iitt_learner_profile_v1";
+var STORE_OUTBOX = "iitt_outbox_v1";
+var ROLES = ["Nurse", "Physician", "Clinical officer or other clinician", "Student", "Other"];
+var COUNTRIES = ["Afghanistan", "Albania", "Algeria", "American Samoa", "Andorra", "Angola", "Anguilla", "Antarctica", "Antigua & Barbuda", "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan", "Bolivia", "Bosnia & Herzegovina", "Botswana", "Bouvet Island", "Brazil", "British Indian Ocean Territory", "British Virgin Islands", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Caribbean Netherlands", "Cayman Islands", "Central African Republic", "Chad", "Chile", "China", "Christmas Island", "Cocos (Keeling) Islands", "Colombia", "Comoros", "Congo - Brazzaville", "Congo - Kinshasa", "Cook Islands", "Costa Rica", "Croatia", "Cuba", "Curaçao", "Cyprus", "Czechia", "Côte d’Ivoire", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Falkland Islands", "Faroe Islands", "Fiji", "Finland", "France", "French Guiana", "French Polynesia", "French Southern Territories", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Gibraltar", "Greece", "Greenland", "Grenada", "Guadeloupe", "Guam", "Guatemala", "Guernsey", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Heard & McDonald Islands", "Honduras", "Hong Kong SAR China", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Isle of Man", "Israel", "Italy", "Jamaica", "Japan", "Jersey", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macao SAR China", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Martinique", "Mauritania", "Mauritius", "Mayotte", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Montserrat", "Morocco", "Mozambique", "Myanmar (Burma)", "Namibia", "Nauru", "Nepal", "Netherlands", "New Caledonia", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue", "Norfolk Island", "North Korea", "North Macedonia", "Northern Mariana Islands", "Norway", "Oman", "Pakistan", "Palau", "Palestinian Territories", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Pitcairn Islands", "Poland", "Portugal", "Puerto Rico", "Qatar", "Romania", "Russia", "Rwanda", "Réunion", "Samoa", "San Marino", "Sark", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Sint Maarten", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Georgia & South Sandwich Islands", "South Korea", "South Sudan", "Spain", "Sri Lanka", "St. Barthélemy", "St. Helena", "St. Kitts & Nevis", "St. Lucia", "St. Martin", "St. Pierre & Miquelon", "St. Vincent & Grenadines", "Sudan", "Suriname", "Svalbard & Jan Mayen", "Sweden", "Switzerland", "Syria", "São Tomé & Príncipe", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tokelau", "Tonga", "Trinidad & Tobago", "Tunisia", "Turkmenistan", "Turks & Caicos Islands", "Tuvalu", "Türkiye", "U.S. Outlying Islands", "U.S. Virgin Islands", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Wallis & Futuna", "Western Sahara", "Yemen", "Zambia", "Zimbabwe", "Åland Islands"];
+/* Data collection is off unless collection.json says otherwise. */
+var COLLECT = { enabled: false, endpoint: "", notice: "" };
 /* Cap on stored events so a long-lived device doesn't grow localStorage without
    bound before a real sync/export exists. Oldest events are dropped first. */
 var EVENT_LOG_CAP = 4000;
@@ -118,6 +124,8 @@ function safeRemove(key) {
 }
 function getLearnerName() { return safeGet(STORE_LEARNER_NAME, null); }
 function setLearnerName(name) { safeSet(STORE_LEARNER_NAME, name); }
+function getProfile() { return safeGet(STORE_PROFILE, null); }
+function setProfile(p) { safeSet(STORE_PROFILE, p); }
 function getLearnerEmail() { return safeGet(STORE_LEARNER_EMAIL, null); }
 function setLearnerEmail(email) { safeSet(STORE_LEARNER_EMAIL, email); }
 /* Clears everything specific to the person currently practicing on this
@@ -132,6 +140,9 @@ function resetForNewUser() {
   safeRemove(STORE_SESSION);
   safeRemove(STORE_LEARNER_NAME);
   safeRemove(STORE_LEARNER_EMAIL);
+  safeRemove(STORE_PROFILE);
+  /* The outbox is left alone on purpose: details already submitted at sign-in
+     are still sent even if the next learner starts on this device. */
   eventSeqCounter = 0;
   state.queue = [];
   state.qIndex = 0;
@@ -149,7 +160,7 @@ function getSessionId() {
   }
   return sid;
 }
-function getResponses() { return safeGet(STORE_RESPONSES, []); }
+function getResponses() { return safeGet(STORE_RESPONSES, []).map(normResp); }
 function addResponse(rec) {
   var all = getResponses();
   all.push(rec);
@@ -297,13 +308,39 @@ function resetCaseState() {
 
 /* ---------------- scoring ---------------- */
 function classify(correct, selected) {
-  if (correct === selected) return "correct";
-  if (correct === "uptriage") {
-    return selected === "green" ? "under" : "over";
-  }
+  if (correct === selected) return { result: "correct", direction: null };
+  /* Wrong answers are recorded as "incorrect". The direction is a secondary
+     detail: under or over relative to the correct category, or "na" when the
+     correct answer is up-triage (which has no place on the red/yellow/green scale). */
+  if (correct === "uptriage") return { result: "incorrect", direction: "na" };
   var rank = { green: 0, yellow: 1, red: 2 };
-  if (rank[selected] < rank[correct]) return "under";
-  return "over";
+  return { result: "incorrect", direction: rank[selected] < rank[correct] ? "under" : "over" };
+}
+/* Older saved records used "under" / "over" as the classification. Read them
+   as incorrect with that direction so earlier practice still counts. */
+function normResp(r) {
+  if (r && (r.response_classification === "under" || r.response_classification === "over")) {
+    var c = {}; for (var k in r) c[k] = r[k];
+    c.error_direction = r.response_classification;
+    c.response_classification = "incorrect";
+    return c;
+  }
+  return r;
+}
+function isIncorrect(r) { return r.response_classification === "incorrect"; }
+function directionCounts(list) {
+  var inc = list.filter(isIncorrect);
+  return {
+    incorrect: inc.length,
+    under: inc.filter(function (r) { return r.error_direction === "under"; }).length,
+    over: inc.filter(function (r) { return r.error_direction === "over"; }).length,
+    na: inc.filter(function (r) { return r.error_direction !== "under" && r.error_direction !== "over"; }).length
+  };
+}
+function directionNote(list) {
+  var d = directionCounts(list);
+  if (!d.incorrect) return "";
+  return '<p class="dir-note">Of the ' + d.incorrect + ' incorrect: ' + d.under + ' under-triaged, ' + d.over + ' over-triaged, ' + d.na + ' not applicable (up-triage cases).</p>';
 }
 /* "decide" (Triage practice) gathers freely rather than walking every
    checkpoint in order; walkthrough mode does not. */
@@ -325,17 +362,70 @@ function esc(s) {
    the nav and this dispatcher, but their render functions and data are left
    intact below so that chrome can be reinstated later without rebuilding it. */
 function render() {
-  if (!getLearnerName() || !getLearnerEmail()) { renderLogin(); window.scrollTo(0, 0); return; }
+  if (!getLearnerName() || !getLearnerEmail() || (COLLECT.enabled && !getProfile())) { renderLogin(); window.scrollTo(0, 0); return; }
   renderPractice();
   window.scrollTo(0, 0);
 }
 
 var EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/* ---- Sending sign-in details (only when collection.json enables it) ----
+   Each sign-in is saved on the device first, then sent in the background.
+   If sending fails (offline, server busy) the record stays saved and is
+   retried the next time the app opens or the device comes back online.
+   The record id lets the receiver ignore a repeat, so retrying is safe. */
+function getOutbox() { return safeGet(STORE_OUTBOX, []); }
+function setOutbox(list) { safeSet(STORE_OUTBOX, list); }
+function queueRegistration(name, email, profile) {
+  if (!COLLECT.enabled || !COLLECT.endpoint) return;
+  var now = new Date().toISOString();
+  var rec = {
+    record_id: getSessionId() + "-" + now,
+    session_id: getSessionId(),
+    signed_in_at: now,
+    name: name,
+    email: email,
+    role: profile.role,
+    facility: profile.facility || "",
+    country: profile.country,
+    app_version: SITE.version || "",
+    site: SITE.env
+  };
+  var box = getOutbox();
+  box.push(rec);
+  setOutbox(box);
+  flushOutbox();
+}
+var flushing = false;
+function flushOutbox() {
+  if (flushing || !COLLECT.enabled || !COLLECT.endpoint) return;
+  var box = getOutbox();
+  if (!box.length) return;
+  flushing = true;
+  var rec = box[0];
+  fetch(COLLECT.endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(rec)
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (res && res.ok) {
+      setOutbox(getOutbox().filter(function (x) { return x.record_id !== rec.record_id; }));
+    } else {
+      /* the receiver refused this record (for example invalid data): drop it
+         rather than retrying forever */
+      if (res && res.error) setOutbox(getOutbox().filter(function (x) { return x.record_id !== rec.record_id; }));
+      else throw new Error("not sent");
+    }
+    flushing = false;
+    flushOutbox();
+  }).catch(function () { flushing = false; });
+}
+window.addEventListener("online", function () { flushOutbox(); });
+
 /* ---- Login (a name + email to keep one learner's practice history separate
    from the next person's on a shared device — not authentication; nothing is
-   checked against anything, and nothing leaves this device; no email is
-   sent from here). ---- */
+   checked against anything. Nothing leaves this device unless collection.json
+   turns data collection on; no email is sent from here). ---- */
 function renderLogin() {
   var html = '<div class="card empty-hero" style="padding-bottom:24px;">' +
     '<img class="login-avatar" src="' + LOGIN_AVATAR + '" alt="">' +
@@ -349,6 +439,18 @@ function renderLogin() {
     '<input type="email" id="login-email-input" placeholder="you@example.com" maxlength="120" autocomplete="off" onkeydown="if(event.key===\'Enter\'){event.preventDefault();submitLogin();}">' +
     '<div id="login-email-error" class="login-error" hidden>Enter a valid email address to continue.</div>' +
     '</div>' +
+    '<div class="field-row" style="text-align:left; max-width:320px; margin:0 auto 4px;">' +
+    '<select id="login-role-input"><option value="">Your role</option>' + ROLES.map(function (r) { return '<option>' + esc(r) + '</option>'; }).join("") + '</select>' +
+    '<div id="login-role-error" class="login-error" hidden>Choose your role to continue.</div>' +
+    '</div>' +
+    '<div class="field-row" style="text-align:left; max-width:320px; margin:0 auto 4px;">' +
+    '<input type="text" id="login-facility-input" placeholder="Facility or organisation (optional)" maxlength="120" autocomplete="off">' +
+    '</div>' +
+    '<div class="field-row" style="text-align:left; max-width:320px; margin:0 auto 4px;">' +
+    '<select id="login-country-input"><option value="">Country</option>' + COUNTRIES.map(function (c) { return '<option>' + esc(c) + '</option>'; }).join("") + '</select>' +
+    '<div id="login-country-error" class="login-error" hidden>Choose your country to continue.</div>' +
+    '</div>' +
+    (COLLECT.enabled && COLLECT.notice ? '<p class="login-notice">' + esc(COLLECT.notice) + '</p>' : '') +
     '<div class="cta-row"><button class="btn btn-primary" onclick="submitLogin()">Continue</button></div>' +
     '</div>';
   appEl.innerHTML = html;
@@ -362,16 +464,27 @@ function submitLogin() {
   var email = emailInput ? emailInput.value.trim() : "";
   var nameErr = document.getElementById("login-name-error");
   var emailErr = document.getElementById("login-email-error");
+  var role = (document.getElementById("login-role-input") || {}).value || "";
+  var facility = ((document.getElementById("login-facility-input") || {}).value || "").trim();
+  var country = (document.getElementById("login-country-input") || {}).value || "";
   var nameOk = !!name;
   var emailOk = !!email && EMAIL_PATTERN.test(email);
+  var roleOk = ROLES.indexOf(role) !== -1;
+  var countryOk = COUNTRIES.indexOf(country) !== -1;
   if (nameErr) nameErr.hidden = nameOk;
   if (emailErr) emailErr.hidden = emailOk;
-  if (!nameOk || !emailOk) {
-    (nameOk ? emailInput : nameInput).focus();
+  var roleErr = document.getElementById("login-role-error");
+  var countryErr = document.getElementById("login-country-error");
+  if (roleErr) roleErr.hidden = roleOk;
+  if (countryErr) countryErr.hidden = countryOk;
+  if (!nameOk || !emailOk || !roleOk || !countryOk) {
+    (nameOk ? (emailOk ? (roleOk ? document.getElementById("login-country-input") : document.getElementById("login-role-input")) : emailInput) : nameInput).focus();
     return;
   }
   setLearnerName(name);
   setLearnerEmail(email);
+  setProfile({ role: role, facility: facility, country: country });
+  queueRegistration(name, email, { role: role, facility: facility, country: country });
   render();
 }
 function openResetConfirm() {
@@ -596,15 +709,14 @@ function renderProgress() {
 
   var totalCorrect = all.filter(function (r) { return r.response_classification === "correct"; }).length;
   var totalUnsupported = all.filter(function (r) { return r.response_classification === "correct_unsupported"; }).length;
-  var totalUnder = all.filter(function (r) { return r.response_classification === "under"; }).length;
-  var totalOver = all.filter(function (r) { return r.response_classification === "over"; }).length;
+  var totalIncorrect = all.filter(isIncorrect).length;
 
   html += '<div class="summary-stat-grid' + (totalUnsupported ? ' summary-stat-grid-4' : '') + '">';
   html += '<div class="summary-stat correct"><div class="s-num">' + totalCorrect + '</div><div class="s-label">Correct</div></div>';
   if (totalUnsupported) html += '<div class="summary-stat unsupported"><div class="s-num">' + totalUnsupported + '</div><div class="s-label">Right answer, no basis</div></div>';
-  html += '<div class="summary-stat under"><div class="s-num">' + totalUnder + '</div><div class="s-label">Under-triaged</div></div>';
-  html += '<div class="summary-stat over"><div class="s-num">' + totalOver + '</div><div class="s-label">Over-triaged</div></div>';
+  html += '<div class="summary-stat incorrect"><div class="s-num">' + totalIncorrect + '</div><div class="s-label">Incorrect</div></div>';
   html += '</div>';
+  html += directionNote(all);
 
   function bucketForMode(mode) {
     var subset = all.filter(function (r) { return r.practice_mode === mode; });
@@ -612,16 +724,15 @@ function renderProgress() {
       n: subset.length,
       correct: subset.filter(function (r) { return r.response_classification === "correct"; }).length,
       unsupported: subset.filter(function (r) { return r.response_classification === "correct_unsupported"; }).length,
-      under: subset.filter(function (r) { return r.response_classification === "under"; }).length,
-      over: subset.filter(function (r) { return r.response_classification === "over"; }).length
+      incorrect: subset.filter(isIncorrect).length
     };
   }
   var walkB = bucketForMode("walkthrough");
   var decideB = bucketForMode("decide");
   if (walkB.n || decideB.n) {
-    html += '<table class="pop-table"><thead><tr><th>Mode</th><th>Cases</th><th>Correct</th>' + (totalUnsupported ? '<th>No basis</th>' : '') + '<th>Under</th><th>Over</th></tr></thead><tbody>';
-    if (walkB.n) html += '<tr><td>Guided triage practice</td><td>' + walkB.n + '</td><td>' + walkB.correct + '</td>' + (totalUnsupported ? '<td>' + walkB.unsupported + '</td>' : '') + '<td>' + walkB.under + '</td><td>' + walkB.over + '</td></tr>';
-    if (decideB.n) html += '<tr><td>Triage practice</td><td>' + decideB.n + '</td><td>' + decideB.correct + '</td>' + (totalUnsupported ? '<td>' + decideB.unsupported + '</td>' : '') + '<td>' + decideB.under + '</td><td>' + decideB.over + '</td></tr>';
+    html += '<table class="pop-table"><thead><tr><th>Mode</th><th>Cases</th><th>Correct</th>' + (totalUnsupported ? '<th>No basis</th>' : '') + '<th>Incorrect</th></tr></thead><tbody>';
+    if (walkB.n) html += '<tr><td>Guided triage practice</td><td>' + walkB.n + '</td><td>' + walkB.correct + '</td>' + (totalUnsupported ? '<td>' + walkB.unsupported + '</td>' : '') + '<td>' + walkB.incorrect + '</td></tr>';
+    if (decideB.n) html += '<tr><td>Triage practice</td><td>' + decideB.n + '</td><td>' + decideB.correct + '</td>' + (totalUnsupported ? '<td>' + decideB.unsupported + '</td>' : '') + '<td>' + decideB.incorrect + '</td></tr>';
     html += '</tbody></table>';
   }
 
@@ -633,12 +744,10 @@ function renderProgress() {
     var title = c ? c.title : r.case_id;
     var resultLabel = r.response_classification === "correct" ? "Correct"
       : r.response_classification === "correct_unsupported" ? "No basis yet"
-      : r.response_classification === "under" ? "Under-triaged"
-      : "Over-triaged";
+      : "Incorrect";
     var resultColor = r.response_classification === "correct" ? "var(--green)"
       : r.response_classification === "correct_unsupported" ? "var(--uptriage)"
-      : r.response_classification === "under" ? "var(--red)"
-      : "var(--yellow-ink)";
+      : "var(--red)";
     html += '<div class="recent-row"><span class="recent-title">' + esc(title) + '</span><span class="recent-badge" style="color:' + resultColor + '">' + resultLabel + '</span></div>';
   });
   html += '</div>';
@@ -929,7 +1038,8 @@ function submitDecision() {
   if (!state.selected || state.locked) return;
   state.locked = true;
   var c = caseById(state.queue[state.qIndex]);
-  var result = classify(c.correct, state.selected);
+  var cls = classify(c.correct, state.selected);
+  var result = cls.result;
   var deciding = decidingGroup(c);
   var checkedGroups = state.checked.map(function (e) { return e.g; });
   var responseTimeMs = state.answerStart ? (Date.now() - state.answerStart) : null;
@@ -941,6 +1051,7 @@ function submitDecision() {
     correct_triage_category: c.correct,
     selected_triage_category: state.selected,
     response_classification: result,
+    error_direction: cls.direction,
     response_time_ms: responseTimeMs,
     case_position: state.qIndex + 1,
     practice_mode: state.practiceMode,
@@ -957,6 +1068,7 @@ function submitDecision() {
     selected_triage_category: state.selected,
     correct_triage_category: c.correct,
     response_classification: result,
+    error_direction: cls.direction,
     response_time_ms: responseTimeMs,
     info_items_gathered: rec.info_items_gathered,
     info_items_available: rec.info_items_available,
@@ -974,9 +1086,9 @@ function renderFeedback(c) {
   var result = rec.response_classification;
   var meta = CATEGORY_META[c.correct];
   var selMeta = CATEGORY_META[state.selected];
-  var bannerClass = result === "correct" ? "correct" : (result === "under" ? "under" : "over");
-  var bannerTitle = result === "correct" ? "Correct" : (result === "correct_unsupported" ? "Right category \u2014 not enough basis yet" : (result === "under" ? "Under-triage" : "Over-triage"));
-  var bannerEmoji = result === "correct" ? "\u2705" : (result === "correct_unsupported" ? "\u2753" : (result === "under" ? "\u26A0\uFE0F" : "\u2139\uFE0F"));
+  var bannerClass = result === "correct" ? "correct" : "incorrect";
+  var bannerTitle = result === "correct" ? "Correct" : (result === "correct_unsupported" ? "Right category \u2014 not enough basis yet" : "Incorrect");
+  var bannerEmoji = result === "correct" ? "\u2705" : (result === "correct_unsupported" ? "\u2753" : "\u26A0\uFE0F");
 
   var rightCount = state.cpLog.filter(function (l) { return l.isRight; }).length;
   var infoLine;
@@ -992,7 +1104,7 @@ function renderFeedback(c) {
   html += caseHeader(c, num, Math.round(num / state.queue.length * 100));
   html += miniImageRow(c);
   var bannerSub = "You selected <b>" + selMeta.label + "</b>";
-  if (result === "under" || result === "over") bannerSub += " &middot; correct category was <b>" + meta.label + "</b>";
+  if (result === "incorrect") bannerSub += " &middot; correct category was <b>" + meta.label + "</b>";
   else if (result === "correct_unsupported") bannerSub += " &middot; that’s the correct category, but not on the information you had at that point";
   html += '<div class="feedback-banner ' + bannerClass + '"><span class="f-emoji">' + bannerEmoji + '</span><div><div class="f-title">' + bannerTitle + '</div><div class="f-sub">' + bannerSub + '</div></div></div>';
 
@@ -1021,16 +1133,14 @@ function renderPracticeSummary() {
   var results = state.results;
   var totalCorrect = results.filter(function (r) { return r.response_classification === "correct"; }).length;
   var totalUnsupported = results.filter(function (r) { return r.response_classification === "correct_unsupported"; }).length;
-  var totalUnder = results.filter(function (r) { return r.response_classification === "under"; }).length;
-  var totalOver = results.filter(function (r) { return r.response_classification === "over"; }).length;
+  var totalIncorrect = results.filter(isIncorrect).length;
 
   function bucketFor(pop) {
     var subset = results.filter(function (r) { return r.adult_or_pediatric === pop; });
     return {
       correct: subset.filter(function (r) { return r.response_classification === "correct"; }).length,
       unsupported: subset.filter(function (r) { return r.response_classification === "correct_unsupported"; }).length,
-      under: subset.filter(function (r) { return r.response_classification === "under"; }).length,
-      over: subset.filter(function (r) { return r.response_classification === "over"; }).length
+      incorrect: subset.filter(isIncorrect).length
     };
   }
   var adultB = bucketFor("adult");
@@ -1046,13 +1156,13 @@ function renderPracticeSummary() {
   html += '<div class="summary-stat-grid' + (totalUnsupported ? ' summary-stat-grid-4' : '') + '">';
   html += '<div class="summary-stat correct"><div class="s-num">' + totalCorrect + '</div><div class="s-label">Correct</div></div>';
   if (totalUnsupported) html += '<div class="summary-stat unsupported"><div class="s-num">' + totalUnsupported + '</div><div class="s-label">Right answer, no basis</div></div>';
-  html += '<div class="summary-stat under"><div class="s-num">' + totalUnder + '</div><div class="s-label">Under-triaged</div></div>';
-  html += '<div class="summary-stat over"><div class="s-num">' + totalOver + '</div><div class="s-label">Over-triaged</div></div>';
+  html += '<div class="summary-stat incorrect"><div class="s-num">' + totalIncorrect + '</div><div class="s-label">Incorrect</div></div>';
   html += '</div>';
+  html += directionNote(results);
 
-  html += '<table class="pop-table"><thead><tr><th>Population</th><th>Correct</th>' + (totalUnsupported ? '<th>No basis</th>' : '') + '<th>Under</th><th>Over</th></tr></thead><tbody>';
-  html += '<tr><td>Adult</td><td>' + adultB.correct + '</td>' + (totalUnsupported ? '<td>' + adultB.unsupported + '</td>' : '') + '<td>' + adultB.under + '</td><td>' + adultB.over + '</td></tr>';
-  html += '<tr><td>Paediatric</td><td>' + pedsB.correct + '</td>' + (totalUnsupported ? '<td>' + pedsB.unsupported + '</td>' : '') + '<td>' + pedsB.under + '</td><td>' + pedsB.over + '</td></tr>';
+  html += '<table class="pop-table"><thead><tr><th>Population</th><th>Correct</th>' + (totalUnsupported ? '<th>No basis</th>' : '') + '<th>Incorrect</th></tr></thead><tbody>';
+  html += '<tr><td>Adult</td><td>' + adultB.correct + '</td>' + (totalUnsupported ? '<td>' + adultB.unsupported + '</td>' : '') + '<td>' + adultB.incorrect + '</td></tr>';
+  html += '<tr><td>Paediatric</td><td>' + pedsB.correct + '</td>' + (totalUnsupported ? '<td>' + pedsB.unsupported + '</td>' : '') + '<td>' + pedsB.incorrect + '</td></tr>';
   html += '</tbody></table>';
   if (totalUnsupported) {
     html += '<p style="font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin-top:8px;">&ldquo;Right answer, no basis&rdquo; means you picked the correct category, but hadn\u2019t yet checked the specific finding that determines it \u2014 these are not counted as correct.</p>';
@@ -1304,10 +1414,16 @@ function boot() {
     }
     return Promise.all([
       fetchJson("version.json").catch(function () { return {}; }),
-      fetchJson("status.json").catch(function () { return { paused: false }; })
+      fetchJson("status.json").catch(function () { return { paused: false }; }),
+      fetchJson("collection.json").catch(function () { return {}; })
     ]);
   }).then(function (res) {
     SITE.version = (res[0] && res[0].version) || "";
+    var col = res[2] || {};
+    COLLECT.enabled = col.enabled === true && typeof col.endpoint === "string" && col.endpoint.indexOf("https://script.google.com/") === 0;
+    COLLECT.endpoint = COLLECT.enabled ? col.endpoint : "";
+    COLLECT.notice = typeof col.notice === "string" ? col.notice : "";
+    flushOutbox();
     var status = res[1] || {};
     if (SITE.env === "live" && status.paused === true) {
       showPausedScreen(status.message);

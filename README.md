@@ -22,6 +22,8 @@ All files sit at the top level (no folders), so they can be dragged into GitHub 
 | `picture-<id>.jpg`, `portrait-<id>.jpg` | The large case picture and the small portrait for each case |
 | `refcard-*.png`, `ui-*.jpg/png` | The three reference cards and the interface pictures |
 | `status.json` | The pause switch |
+| `collection.json` | Switch and address for collecting sign-in details (off by default) |
+| `receiver.gs` | The Google script that receives sign-in details into a Google Sheet (not published) |
 | `version.json` | The version number shown in About |
 | `tags.json` | The list of allowed case focus tags |
 | `validate.js` | Checks the cases before every publish |

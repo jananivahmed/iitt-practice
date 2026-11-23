@@ -39,6 +39,16 @@ if (status && typeof status.paused !== "boolean") err('status.json: "paused" mus
 const version = json("version.json");
 if (version && !version.version) err('version.json: missing "version"');
 
+// Data collection switch (off unless enabled with a Google script address)
+if (fs.existsSync(path.join(root, "collection.json"))) {
+  const col = json("collection.json");
+  if (col) {
+    if (typeof col.enabled !== "boolean") err('collection.json: "enabled" must be true or false');
+    else if (col.enabled && !(typeof col.endpoint === "string" && col.endpoint.startsWith("https://script.google.com/"))) err('collection.json: "enabled" is true but "endpoint" is not a Google script web address (https://script.google.com/...)');
+    else if (col.enabled) warn('collection.json: data collection is ON. Make sure consent wording and approvals are in place before real learners use this site');
+  }
+}
+
 // Manifest
 const manifest = json("cases.json");
 const listed = (manifest && manifest.cases) || [];

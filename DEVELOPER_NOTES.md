@@ -29,7 +29,7 @@ Rules for whoever does the conversion (Claude or a developer):
 | 3. Case info text | `arrival` |
 | 3. Fair-play check, where the deciding finding appears, fictional or de-identified | confirmations for the reviewer. Not stored |
 | 4. Yes or No | `checkpoints[].correct` |
-| 4. Why | `checkpoints[].why` |
+| 4. Teaching note (Guided Triage Practice) | `checkpoints[].why`. Required on every step |
 | 4. What the learner finds | `findings.<group>` (`text` and/or `chips`). Values shown in Guided Triage Practice go in `checkpoints[].chips` |
 | 5. Correct category | `correct` (`red`, `yellow`, `green`, `uptriage`) |
 | 5. Deciding criterion | `keyCriterion` |
@@ -102,6 +102,21 @@ One per card step, in card order, stopping at the first `"yes"`. If no red or ye
 - `draft`, `ready`: shown on the preview site only.
 - `live`: approved by the clinician lead. Shown on the live site.
 - A clinical change to a live case sends it back to `ready` and through review again.
+
+## Collecting sign-in details (registration)
+
+Off by default. At sign-in the app asks for name, email, role, facility (optional) and country. When `collection.json` has `"enabled": true` and an `endpoint` starting `https://script.google.com/`, each sign-in is saved on the device (an outbox), sent in the background, and removed once the receiver confirms. If sending fails it is retried when the app opens or the device comes back online. The receiver ignores a repeated `record_id`, and refuses invalid data (which is then dropped, not retried).
+
+- **Receiver:** `receiver.gs` goes in the Apps Script editor of the "IITT Practice Companion: Registrations" Google Sheet (Extensions, Apps Script), deployed as a web app (execute as me, access anyone). The web app address goes in `collection.json`.
+- **Columns:** record_id, received_at, signed_in_at, session_id, name, email, role, facility, country, app_version, site.
+- **Role list** is in both `app.js` (`ROLES`) and `receiver.gs`. Change both together.
+- **Checker:** errors if `enabled` is true without a Google script address, and warns whenever collection is on.
+- **Limits:** the web address is public, so the receiver checks the fields and sizes but cannot stop deliberate spam. Consent wording and any approvals are needed before real learners use the collecting version. Answers and card-section data are not sent yet.
+- The outbox is kept when "Reset for new user" is used, so details already submitted are still sent.
+
+## Scoring
+
+Each answer is recorded as `correct` or `incorrect` (`response_classification`). For an incorrect answer, `error_direction` is a secondary detail: `under` (chose a lower category than the correct one), `over` (chose a higher one), or `na` (the correct answer is up-triage, which is not on the red/yellow/green scale). For an up-triage case, up-triage is the only correct answer. Summaries show the incorrect count first, then how many of those were under-triaged, over-triaged or not applicable. Older saved records that used `under` or `over` as the classification are read as incorrect with that direction.
 
 ## What the checker (`validate.js`) does
 
