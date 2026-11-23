@@ -1,12 +1,13 @@
 /* IITT Practice Companion: registration receiver (Google Apps Script).
-   Paste into the Apps Script editor of the "IITT Practice Companion: Registrations"
-   Google Sheet (Extensions > Apps Script), then Deploy > New deployment > Web app:
+   Paste into an Apps Script project (it works whether or not the project was opened
+   from the Sheet, because it opens the Sheet by its ID), then Deploy > Web app:
      Execute as: Me      Who has access: Anyone
    Copy the web app URL into collection.json ("endpoint") and set "enabled": true.
    Each learner sign-in becomes one row. A repeat of the same record_id is ignored,
    so the app can safely retry. */
 
-var SHEET_NAME = "Sheet1";              // change if the tab was renamed
+var SHEET_ID = "1Ev6VjmzA8bAHWKyTSdNYHiyuPrx_262DzTddCALD4B0";  // the Registrations Sheet
+var SHEET_NAME = "Sheet1";              // used if the tab has this name; otherwise the first tab
 var HEADERS = ["record_id", "received_at", "signed_in_at", "session_id", "name", "email",
                "role", "facility", "country", "app_version", "site"];
 var ROLES = ["Nurse", "Physician", "Clinical officer or other clinician", "Student", "Other"];
@@ -22,7 +23,8 @@ function doPost(e) {
     if (problem) return json_({ ok: false, error: problem });
 
     lock.waitLock(20000);
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheetByName(SHEET_NAME) || ss.getSheets()[0];
     if (!sheet) return json_({ ok: false, error: "sheet not found" });
     if (sheet.getLastRow() < 1) sheet.appendRow(HEADERS);
 
@@ -40,6 +42,7 @@ function doPost(e) {
     ]);
     return json_({ ok: true });
   } catch (err) {
+    console.error("doPost failed: " + err);   // shows under Executions in the Apps Script sidebar
     return json_({ ok: false, error: "bad request" });
   } finally {
     try { lock.releaseLock(); } catch (x) {}

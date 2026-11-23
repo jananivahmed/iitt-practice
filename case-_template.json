@@ -36,6 +36,7 @@
   "keyCriterion": "REPLACE: the criterion that decides the category",
   "feedbackWhy": "REPLACE: why this is the correct category",
   "teachingPoint": null,
+  "discussion": [],
   "reassessment": null,
   "needsReview": true,
   "reviewNote": "REPLACE: what a clinician should confirm",

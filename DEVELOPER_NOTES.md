@@ -30,7 +30,7 @@ Rules for whoever does the conversion (Claude or a developer):
 | 3. Fair-play check, where the deciding finding appears, fictional or de-identified | confirmations for the reviewer. Not stored |
 | 4. Yes or No | `checkpoints[].correct` |
 | 4. Teaching note (Guided Triage Practice) | `checkpoints[].why`. Required on every step |
-| 4. What the learner finds | `findings.<group>` (`text` and/or `chips`). Values shown in Guided Triage Practice go in `checkpoints[].chips` |
+| 4. What the learner finds | `findings.<group>` (`text` and/or `chips`). Shown in both modes: when a card section is opened (Triage Practice) and at each step (Guided Triage Practice) |
 | 5. Correct category | `correct` (`red`, `yellow`, `green`, `uptriage`) |
 | 5. Deciding criterion | `keyCriterion` |
 | 5. Feedback: why | `feedbackWhy` |
@@ -86,7 +86,7 @@ Checkpoints and findings use these group names, in card order. The checker reads
 One per card step, in card order, stopping at the first `"yes"`. If no red or yellow criterion is met, finish with `vitals`: `"yes"` gives up-triage, `"no"` gives green.
 
 - `g`: group name. `correct`: `"yes"` or `"no"`. `why`: plain-words reason (required).
-- `chips` (optional): values shown, such as `{ "HR": "110 bpm" }`.
+- `chips` (optional, old): values shown at the step. Guided Triage Practice now shows the step's `findings` (text and values) instead, so both modes share one stem. `chips` is only used if the case has no `findings` for that group.
 
 ## Findings (Triage Practice)
 
@@ -116,7 +116,15 @@ Off by default. At sign-in the app asks for name, email, role, facility (optiona
 
 ## Scoring
 
-Each answer is recorded as `correct` or `incorrect` (`response_classification`). For an incorrect answer, `error_direction` is a secondary detail: `under` (chose a lower category than the correct one), `over` (chose a higher one), or `na` (the correct answer is up-triage, which is not on the red/yellow/green scale). For an up-triage case, up-triage is the only correct answer. Summaries show the incorrect count first, then how many of those were under-triaged, over-triaged or not applicable. Older saved records that used `under` or `over` as the classification are read as incorrect with that direction.
+Each answer is recorded as `correct` or `incorrect` (`response_classification`). For an incorrect answer, `error_direction` is a secondary detail: `under` (chose a lower category than the correct one), `over` (chose a higher one), or `na` (the correct answer is up-triage, which is not on the red/yellow/green scale). For an up-triage case, up-triage is the only correct answer. Summaries show the incorrect count first, then how many of those were under-triaged, over-triaged or not applicable. In Triage Practice the learner also rates confidence before submitting (`not_sure`, `fairly_sure` or `certain`), saved as `confidence` on the response. It does not affect scoring. Summaries show how many were correct at each confidence level. Guided Triage Practice does not ask for it (`confidence` is null). Older saved records that used `under` or `over` as the classification are read as incorrect with that direction.
+
+## Facilitator mode (room with a screen)
+
+For a leader running cases with a group. Entry: "Facilitator mode" button on the sign-in screen and the practice home. No sign-in. Nothing is saved or sent: `addResponse` and `addEventRecord` return early while `state.facilitator` is on, and the outbox is never touched. State lives in memory only.
+
+Flow: pick cases (checkboxes, select all/adult/paediatric) → case screen (picture and case info on the left, card sections to tap on the right, optional "what did the group choose?", Reveal answer) → reveal screen (correct category, group's choice vs correct, why, takeaway, reassessment, optional discussion questions, every section's findings with the deciding section marked) → Next case → finish. "Larger text" toggles `body.fac-large`.
+
+Optional case field `"discussion"`: a text or list of text, shown only on the reveal screen. The checker validates its type. The Case Worksheet (section 6) has a matching row; copy it into `discussion` as a list, one question per item.
 
 ## What the checker (`validate.js`) does
 
