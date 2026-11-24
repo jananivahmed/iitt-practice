@@ -324,6 +324,7 @@ function resetCaseState() {
   state.gatherSeq = 0;
   state.selected = null;
   state.confidence = null;
+  state.reason = null;
   state.locked = false;
   state.answerStart = Date.now();
   state.caseInfoOpen = false;
@@ -614,7 +615,7 @@ function saveRun() {
   safeSet(STORE_RUN, {
     email: getLearnerEmail(),
     practiceMode: state.practiceMode, queue: state.queue, qIndex: state.qIndex, phase: state.phase,
-    cpIndex: state.cpIndex, cpSelected: state.cpSelected, cpLocked: state.cpLocked, cpLog: state.cpLog,
+    cpIndex: state.cpIndex, cpSelected: state.cpSelected, cpLocked: state.cpLocked, reason: state.reason, cpLog: state.cpLog,
     checked: state.checked, gatherSeq: state.gatherSeq, selected: state.selected, confidence: state.confidence,
     locked: state.locked, caseAttemptId: state.caseAttemptId, caseAttemptStart: state.caseAttemptStart, results: state.results
   });
@@ -623,7 +624,7 @@ function restoreRun() {
   var r = safeGet(STORE_RUN, null);
   if (!r || r.email !== getLearnerEmail() || !r.queue || !r.queue.length) return false;
   for (var i = 0; i < r.queue.length; i++) if (!caseById(r.queue[i])) return false;
-  ["practiceMode", "queue", "qIndex", "phase", "cpIndex", "cpSelected", "cpLocked", "cpLog", "checked", "gatherSeq", "selected", "confidence", "locked", "caseAttemptId", "caseAttemptStart", "results"].forEach(function (k) {
+  ["practiceMode", "queue", "qIndex", "phase", "cpIndex", "cpSelected", "cpLocked", "reason", "cpLog", "checked", "gatherSeq", "selected", "confidence", "locked", "caseAttemptId", "caseAttemptStart", "results"].forEach(function (k) {
     if (r[k] !== undefined) state[k] = r[k];
   });
   state.answerStart = Date.now();
@@ -817,11 +818,13 @@ function renderProgress() {
 
   var totalCorrect = all.filter(function (r) { return r.response_classification === "correct"; }).length;
   var totalUnsupported = all.filter(function (r) { return r.response_classification === "correct_unsupported"; }).length;
+  var totalWrongReason = all.filter(function (r) { return r.response_classification === "correct_wrong_reason"; }).length;
   var totalIncorrect = all.filter(isIncorrect).length;
 
-  html += '<div class="summary-stat-grid' + (totalUnsupported ? ' summary-stat-grid-4' : '') + '">';
+  html += '<div class="summary-stat-grid' + ((totalUnsupported || totalWrongReason) ? ' summary-stat-grid-4' : '') + '">';
   html += '<div class="summary-stat correct"><div class="s-num">' + totalCorrect + '</div><div class="s-label">Correct</div></div>';
-  if (totalUnsupported) html += '<div class="summary-stat unsupported"><div class="s-num">' + totalUnsupported + '</div><div class="s-label">Right answer, no basis</div></div>';
+  if (totalUnsupported) html += '<div class="summary-stat unsupported"><div class="s-num">' + totalUnsupported + '</div><div class="s-label">Not enough checked</div></div>';
+  if (totalWrongReason) html += '<div class="summary-stat unsupported"><div class="s-num">' + totalWrongReason + '</div><div class="s-label">Wrong reason</div></div>';
   html += '<div class="summary-stat incorrect"><div class="s-num">' + totalIncorrect + '</div><div class="s-label">Incorrect</div></div>';
   html += '</div>';
   html += directionNote(all);
@@ -833,17 +836,21 @@ function renderProgress() {
       n: subset.length,
       correct: subset.filter(function (r) { return r.response_classification === "correct"; }).length,
       unsupported: subset.filter(function (r) { return r.response_classification === "correct_unsupported"; }).length,
+      wrongReason: subset.filter(function (r) { return r.response_classification === "correct_wrong_reason"; }).length,
       incorrect: subset.filter(isIncorrect).length
     };
   }
   var walkB = bucketForMode("walkthrough");
   var decideB = bucketForMode("decide");
   if (walkB.n || decideB.n) {
-    html += '<table class="pop-table"><thead><tr><th>Mode</th><th>Cases</th><th>Correct</th>' + (totalUnsupported ? '<th>No basis</th>' : '') + '<th>Incorrect</th></tr></thead><tbody>';
-    if (walkB.n) html += '<tr><td>Guided triage practice</td><td>' + walkB.n + '</td><td>' + walkB.correct + '</td>' + (totalUnsupported ? '<td>' + walkB.unsupported + '</td>' : '') + '<td>' + walkB.incorrect + '</td></tr>';
-    if (decideB.n) html += '<tr><td>Triage practice</td><td>' + decideB.n + '</td><td>' + decideB.correct + '</td>' + (totalUnsupported ? '<td>' + decideB.unsupported + '</td>' : '') + '<td>' + decideB.incorrect + '</td></tr>';
+    html += '<table class="pop-table"><thead><tr><th>Mode</th><th>Cases</th><th>Correct</th>' + partialHead(totalUnsupported, totalWrongReason) + '<th>Incorrect</th></tr></thead><tbody>';
+    if (walkB.n) html += '<tr><td>Guided triage practice</td><td>' + walkB.n + '</td><td>' + walkB.correct + '</td>' + partialCells(walkB, totalUnsupported, totalWrongReason) + '<td>' + walkB.incorrect + '</td></tr>';
+    if (decideB.n) html += '<tr><td>Triage practice</td><td>' + decideB.n + '</td><td>' + decideB.correct + '</td>' + partialCells(decideB, totalUnsupported, totalWrongReason) + '<td>' + decideB.incorrect + '</td></tr>';
     html += '</tbody></table>';
   }
+
+  html += partialNote(totalUnsupported, totalWrongReason);
+  html += processSummary(all);
 
   /* Which parts of the card decide the cases this learner gets right or wrong. */
   var parts = {};
@@ -876,9 +883,7 @@ function renderProgress() {
   recent.forEach(function (r) {
     var c = caseById(r.case_id);
     var title = c ? ((c.population === "adult" ? "Adult" : "Paediatric") + ", " + c.age) : r.case_id;
-    var resultLabel = r.response_classification === "correct" ? "Correct"
-      : r.response_classification === "correct_unsupported" ? "No basis yet"
-      : "Incorrect";
+    var resultLabel = outcomeLabel(r.response_classification);
     var resultColor = "var(--ink)";
     html += '<div class="recent-row"><span class="recent-title">' + esc(title) + '</span><span class="recent-badge" style="color:' + resultColor + '">' + resultLabel + '</span></div>';
   });
@@ -1053,6 +1058,18 @@ function advanceCheckpoint() {
    the card shows the findings recorded for this case (neutral observations,
    never a yes/no verdict). Checking is never penalised, and a triage category
    can be chosen at any time. */
+/* The order the IITT is worked in: red, then yellow, then high-risk vital signs. */
+function canonicalGroups() {
+  return TIERS.reduce(function (list, t) { return list.concat(groupsInTier(t.level)); }, []);
+}
+function readyToSubmit() {
+  return !!(state.selected && state.confidence && (!state.checked.length || state.reason));
+}
+function selectReason(g) {
+  if (state.locked) return;
+  state.reason = g;
+  renderKeepingScroll();
+}
 var TIERS = [
   { level: "red",    title: "Red criteria",           all: "Check all red" },
   { level: "yellow", title: "Yellow criteria",        all: "Check all yellow" },
@@ -1128,7 +1145,7 @@ function renderReady(c) {
   html += '<div class="divider"></div>';
   html += '<div class="stage-tag">Work through the card</div>';
   html += renderReferenceLinks();
-  html += '<p class="tp-howto">Check any part of the IITT card to see what you find. Choose a triage category whenever you feel you have enough information.</p>';
+  html += '<p class="tp-howto">Work through the card in order: red, then yellow, then high-risk vital signs. Tap a part to see what you find. Stop and decide as soon as you have enough information.</p>';
 
   html += renderTiers(c);
 
@@ -1147,8 +1164,15 @@ function renderReady(c) {
     html += '<button type="button" class="tp-conf-btn' + (on ? ' selected' : '') + '" aria-pressed="' + on + '" onclick="selectConfidence(\'' + o.k + '\')">' + o.label + '</button>';
   });
   html += '</div>';
-  html += '<div class="submit-row"><button class="btn btn-primary" ' + (state.selected && state.confidence ? '' : 'disabled') + ' onclick="submitDecision()">Submit decision</button></div>';
-  if (!(state.selected && state.confidence)) html += '<p class="submit-help">' + (!state.selected ? 'Choose a category and how sure you are to submit.' : 'Choose how sure you are to submit.') + '</p>';
+  if (state.checked.length) {
+    html += '<h4 class="tp-conf-title">Which part of the card decided it?</h4><div class="reason-list" role="group" aria-label="Which part of the card decided it?">';
+    canonicalGroups().filter(isChecked).forEach(function (g) {
+      html += '<button type="button" class="reason-btn' + (state.reason === g ? ' selected' : '') + '" aria-pressed="' + (state.reason === g) + '" onclick="selectReason(\'' + g + '\')">' + esc(GROUP_META[g].label) + ' <span class="reason-level">(' + esc(GROUP_META[g].level) + ')</span></button>';
+    });
+    html += '<button type="button" class="reason-btn' + (state.reason === "none" ? ' selected' : '') + '" aria-pressed="' + (state.reason === "none") + '" onclick="selectReason(\'none\')">Nothing I checked met a criterion</button></div>';
+  }
+  html += '<div class="submit-row"><button class="btn btn-primary" ' + (readyToSubmit() ? '' : 'disabled') + ' onclick="submitDecision()">Submit decision</button></div>';
+  if (!readyToSubmit()) html += '<p class="submit-help">' + (!state.selected ? 'Choose a category, how sure you are' + (state.checked.length ? ' and which part decided it' : '') + ' to submit.' : (!state.confidence ? 'Choose how sure you are to submit.' : 'Choose which part of the card decided it to submit.')) + '</p>';
   html += '</div>';
   html += endSessionRow();
   html += '</div>';
@@ -1220,13 +1244,20 @@ function selectConfidence(k) {
 }
 function submitDecision() {
   if (!state.selected || state.locked) return;
-  if (isFreeMode() && !state.confidence) return;
+  if (isFreeMode() && (!state.confidence || (state.checked.length && !state.reason))) return;
   state.locked = true;
   var c = caseById(state.queue[state.qIndex]);
   var cls = classify(c.correct, state.selected);
   var result = cls.result;
   var deciding = decidingGroup(c);
   var checkedGroups = state.checked.map(function (e) { return e.g; });
+  /* A right category only counts as fully correct when the learner also had a basis for it. */
+  if (isFreeMode() && result === "correct") {
+    var reasonWrong = !!state.reason && (state.reason === "none" ? !!deciding : state.reason !== deciding);
+    var noBasis = !checkedGroups.length || (!!deciding && checkedGroups.indexOf(deciding) === -1);
+    if (reasonWrong) result = "correct_wrong_reason";
+    else if (noBasis) result = "correct_unsupported";
+  }
   var responseTimeMs = state.answerStart ? (Date.now() - state.answerStart) : null;
   var rec = {
     anonymous_session_id: getSessionId(),
@@ -1244,10 +1275,16 @@ function submitDecision() {
     info_items_gathered: isFreeMode() ? checkedGroups.length : state.cpLog.length,
     info_items_available: isFreeMode() ? Object.keys(GROUP_META).length : c.checkpoints.length,
     checked_groups: isFreeMode() ? checkedGroups : null,
+    reason_group: isFreeMode() ? (state.reason || null) : null,
+    check_order: isFreeMode() ? checkedGroups.slice() : null,
     deciding_group: deciding,
     deciding_group_checked: isFreeMode() ? (deciding ? checkedGroups.indexOf(deciding) !== -1 : null) : null,
     timestamp: new Date().toISOString()
   };
+  var facts = processFacts({ deciding_group: rec.deciding_group, reason_group: rec.reason_group, check_order: rec.check_order });
+  rec.reason_correct = facts.reasonRight;
+  rec.in_order = isFreeMode() ? !facts.outOfOrder : null;
+  rec.extra_checked = isFreeMode() ? facts.extra.length : null;
   addResponse(rec);
   state.results.push(rec);
   logEvent("decision_submitted", {
@@ -1267,6 +1304,68 @@ function submitDecision() {
   renderPractice();
 }
 
+function outcomeLabel(cl) {
+  return cl === "correct" ? "Correct"
+    : cl === "correct_unsupported" ? "Right category, not enough checked"
+    : cl === "correct_wrong_reason" ? "Right category, wrong reason"
+    : "Incorrect";
+}
+function partialHead(u, w) { return (u ? '<th>Not enough checked</th>' : '') + (w ? '<th>Wrong reason</th>' : ''); }
+function partialCells(b, u, w) { return (u ? '<td>' + b.unsupported + '</td>' : '') + (w ? '<td>' + b.wrongReason + '</td>' : ''); }
+function partialNote(u, w) {
+  var t = '';
+  if (u) t += '<b>Right category, not enough checked</b> means you chose the correct category without opening the part of the card that decides it. ';
+  if (w) t += '<b>Right category, wrong reason</b> means the category was correct but the part you named did not decide it. ';
+  return t ? '<p class="partial-note">' + t + 'These are not counted as correct.</p>' : '';
+}
+/* How the learner worked on a case: did they name the deciding part, work in order, and stop in time. */
+function processFacts(rec) {
+  var canon = canonicalGroups();
+  var d = rec.deciding_group;
+  var checked = rec.check_order || [];
+  var reasonRight = rec.reason_group ? (rec.reason_group === "none" ? !d : rec.reason_group === d) : null;
+  var outOfOrder = null;
+  for (var i = 1; i < checked.length && !outOfOrder; i++) {
+    if (canon.indexOf(checked[i]) < canon.indexOf(checked[i - 1])) outOfOrder = [checked[i - 1], checked[i]];
+  }
+  var extra = d ? checked.filter(function (g) { return canon.indexOf(g) > canon.indexOf(d); }) : [];
+  return { reasonRight: reasonRight, outOfOrder: outOfOrder, extra: extra, checkedCount: checked.length };
+}
+/* One block summarising Triage Practice process across many cases. */
+function processSummary(list) {
+  var pts = list.filter(function (r) { return r.practice_mode === "decide" && r.in_order !== undefined && r.in_order !== null; });
+  if (!pts.length) return "";
+  var withReason = pts.filter(function (r) { return r.reason_correct !== null && r.reason_correct !== undefined; });
+  var reasonOk = withReason.filter(function (r) { return r.reason_correct; }).length;
+  var ordered = pts.filter(function (r) { return r.in_order; }).length;
+  var stopCases = pts.filter(function (r) { return r.deciding_group; });
+  var stopped = stopCases.filter(function (r) { return r.deciding_group_checked && r.extra_checked === 0; }).length;
+  var lines = [];
+  if (withReason.length) lines.push('You named the part that decided the case in <b>' + reasonOk + ' of ' + withReason.length + '</b> case' + (withReason.length === 1 ? '' : 's') + '.');
+  lines.push('You worked through the card in order in <b>' + ordered + ' of ' + pts.length + '</b> case' + (pts.length === 1 ? '' : 's') + '.');
+  if (stopCases.length) lines.push('You stopped at the deciding part, without opening more, in <b>' + stopped + ' of ' + stopCases.length + '</b> case' + (stopCases.length === 1 ? '' : 's') + ' where one applies.');
+  return '<div class="reassess-note how-you-worked" style="margin-top:12px;"><h4>How you worked</h4><ul>' + lines.map(function (l) { return '<li>' + l + '</li>'; }).join('') + '</ul></div>';
+}
+/* Feedback on how the learner worked, not only what they chose. */
+function processFeedback(c, rec) {
+  var lines = [];
+  var d = rec.deciding_group;
+  var f = processFacts(rec);
+  function nm(g) { return GROUP_META[g].label + ' (' + GROUP_META[g].level + ')'; }
+  if (rec.reason_group) {
+    var named = rec.reason_group === "none" ? "nothing you checked met a criterion" : nm(rec.reason_group);
+    var truth = d ? nm(d) : "nothing on the card met a criterion";
+    lines.push(f.reasonRight
+      ? 'You named the part that decided it: <b>' + esc(truth) + '</b>.'
+      : 'You said <b>' + esc(named) + '</b> decided it. In this case: <b>' + esc(truth) + '</b>.');
+  }
+  if (f.checkedCount) {
+    if (f.outOfOrder) lines.push('You opened <b>' + esc(nm(f.outOfOrder[0])) + '</b> before <b>' + esc(nm(f.outOfOrder[1])) + '</b>. The IITT is worked red, then yellow, then high-risk vital signs.');
+    else lines.push('You worked through the card in order.');
+    if (d && f.extra.length) lines.push('You could have stopped at <b>' + esc(nm(d)) + '</b>. You opened ' + f.extra.length + ' further part' + (f.extra.length === 1 ? '' : 's') + ' that did not change the answer.');
+  }
+  return lines;
+}
 function renderFeedback(c) {
   var num = state.qIndex + 1;
   var rec = state.results[state.results.length - 1];
@@ -1274,7 +1373,7 @@ function renderFeedback(c) {
   var meta = CATEGORY_META[c.correct];
   var selMeta = CATEGORY_META[state.selected];
   var bannerClass = result === "correct" ? "correct" : (result === "incorrect" ? "incorrect" : "partial");
-  var bannerTitle = result === "correct" ? "Correct" : (result === "correct_unsupported" ? "Right category \u2014 not enough basis yet" : "Incorrect");
+  var bannerTitle = outcomeLabel(result);
 
   var rightCount = state.cpLog.filter(function (l) { return l.isRight; }).length;
   var infoLine;
@@ -1286,21 +1385,21 @@ function renderFeedback(c) {
     infoLine = 'You correctly identified ' + rightCount + ' of ' + c.checkpoints.length + ' criteria checks along the way.';
   }
 
+  var processLines = isFreeMode() ? processFeedback(c, rec) : [];
   var html = '<div class="card">';
   html += caseHeader(c, num, Math.round(num / state.queue.length * 100));
   html += miniImageRow(c);
   var bannerSub = "You selected <b>" + selMeta.label + "</b>";
   if (result === "incorrect") bannerSub += ".";
-  else if (result === "correct_unsupported") bannerSub += ". That is the correct category, but not on the information you had at that point";
+  else if (result === "correct_unsupported") bannerSub += ". That is the correct category, but you did not open the part of the card that decides it";
+  else if (result === "correct_wrong_reason") bannerSub += ". That is the correct category, but the part you named is not the one that decided it";
   html += '<div class="feedback-banner ' + bannerClass + '"><div class="f-title">' + bannerTitle + '</div><div class="f-sub">' + bannerSub + '</div>' +
     (result === "incorrect" ? '<span class="answer-chip ' + meta.chip + '">Correct category: ' + meta.label + '</span>' : '') + '</div>';
-  html += '<div class="reassess-note" style="margin-top:10px;"><span>' + infoLine + '</span></div>';
+  var howLines = [infoLine].concat(processLines);
   if (rec.confidence) {
-    var confLine = 'You said you were <b>' + esc(confidenceLabel(rec.confidence).toLowerCase()) + '</b>';
-    if (result === "correct") confLine += ' and the category was correct.';
-    else confLine += ' and the category was not correct.';
-    html += '<div class="reassess-note" style="margin-top:6px;"><span>' + confLine + '</span></div>';
+    howLines.push('You said you were <b>' + esc(confidenceLabel(rec.confidence).toLowerCase()) + '</b> and the category was ' + (state.selected === c.correct ? 'correct' : 'not correct') + '.');
   }
+  html += '<div class="reassess-note how-you-worked" style="margin-top:10px;"><h4>How you worked</h4><ul>' + howLines.map(function (l) { return '<li>' + l + '</li>'; }).join('') + '</ul></div>';
 
   html += '<div class="detail-section"><h4>Why</h4><p><b>' + esc(c.keyCriterion) + '.</b> ' + esc(c.feedbackWhy) + '</p></div>';
   var dgFb = decidingGroup(c);
@@ -1338,6 +1437,7 @@ function renderPracticeSummary() {
   var results = state.results;
   var totalCorrect = results.filter(function (r) { return r.response_classification === "correct"; }).length;
   var totalUnsupported = results.filter(function (r) { return r.response_classification === "correct_unsupported"; }).length;
+  var totalWrongReason = results.filter(function (r) { return r.response_classification === "correct_wrong_reason"; }).length;
   var totalIncorrect = results.filter(isIncorrect).length;
 
   function bucketFor(pop) {
@@ -1345,6 +1445,7 @@ function renderPracticeSummary() {
     return {
       correct: subset.filter(function (r) { return r.response_classification === "correct"; }).length,
       unsupported: subset.filter(function (r) { return r.response_classification === "correct_unsupported"; }).length,
+      wrongReason: subset.filter(function (r) { return r.response_classification === "correct_wrong_reason"; }).length,
       incorrect: subset.filter(isIncorrect).length
     };
   }
@@ -1358,26 +1459,26 @@ function renderPracticeSummary() {
   html += '<h2 class="section-title">Practice complete</h2>';
   var modeLabel = state.practiceMode === "decide" ? "Triage practice" : "Guided triage practice";
   html += '<p class="section-sub">Mode: ' + modeLabel + '. Cases completed: ' + results.length + '</p>';
-  html += '<div class="summary-stat-grid' + (totalUnsupported ? ' summary-stat-grid-4' : '') + '">';
+  html += '<div class="summary-stat-grid' + ((totalUnsupported || totalWrongReason) ? ' summary-stat-grid-4' : '') + '">';
   html += '<div class="summary-stat correct"><div class="s-num">' + totalCorrect + '</div><div class="s-label">Correct</div></div>';
-  if (totalUnsupported) html += '<div class="summary-stat unsupported"><div class="s-num">' + totalUnsupported + '</div><div class="s-label">Right answer, no basis</div></div>';
+  if (totalUnsupported) html += '<div class="summary-stat unsupported"><div class="s-num">' + totalUnsupported + '</div><div class="s-label">Not enough checked</div></div>';
+  if (totalWrongReason) html += '<div class="summary-stat unsupported"><div class="s-num">' + totalWrongReason + '</div><div class="s-label">Wrong reason</div></div>';
   html += '<div class="summary-stat incorrect"><div class="s-num">' + totalIncorrect + '</div><div class="s-label">Incorrect</div></div>';
   html += '</div>';
   html += directionNote(results);
   html += confidenceNote(results);
 
-  html += '<table class="pop-table"><thead><tr><th>Population</th><th>Correct</th>' + (totalUnsupported ? '<th>No basis</th>' : '') + '<th>Incorrect</th></tr></thead><tbody>';
-  html += '<tr><td>Adult</td><td>' + adultB.correct + '</td>' + (totalUnsupported ? '<td>' + adultB.unsupported + '</td>' : '') + '<td>' + adultB.incorrect + '</td></tr>';
-  html += '<tr><td>Paediatric</td><td>' + pedsB.correct + '</td>' + (totalUnsupported ? '<td>' + pedsB.unsupported + '</td>' : '') + '<td>' + pedsB.incorrect + '</td></tr>';
+  html += '<table class="pop-table"><thead><tr><th>Population</th><th>Correct</th>' + partialHead(totalUnsupported, totalWrongReason) + '<th>Incorrect</th></tr></thead><tbody>';
+  html += '<tr><td>Adult</td><td>' + adultB.correct + '</td>' + partialCells(adultB, totalUnsupported, totalWrongReason) + '<td>' + adultB.incorrect + '</td></tr>';
+  html += '<tr><td>Paediatric</td><td>' + pedsB.correct + '</td>' + partialCells(pedsB, totalUnsupported, totalWrongReason) + '<td>' + pedsB.incorrect + '</td></tr>';
   html += '</tbody></table>';
-  if (totalUnsupported) {
-    html += '<p style="font-size:14px; color:var(--ink-soft); line-height:1.5; margin-top:8px;">&ldquo;Right answer, no basis&rdquo; means you picked the correct category, but hadn\u2019t yet checked the specific finding that determines it \u2014 these are not counted as correct.</p>';
-  }
+  html += partialNote(totalUnsupported, totalWrongReason);
 
   if (uptriageResults.length) {
     html += '<div class="reassess-note" style="margin-top:16px;"><span>High-risk vital sign (up-triage) cases: ' + uptriageCorrect + ' of ' + uptriageResults.length + ' correctly identified as needing up-triage.</span></div>';
   }
 
+  html += processSummary(results);
   if (isFreeMode()) {
     var totalGathered = results.reduce(function (sum, r) { return sum + (r.info_items_gathered || 0); }, 0);
     var totalAvailable = results.reduce(function (sum, r) { return sum + (r.info_items_available || 0); }, 0);
@@ -1394,10 +1495,14 @@ function renderPracticeSummary() {
     var good = r.response_classification === "correct";
     if (!good) missedIds.push(r.case_id);
     var rowTitle = (cc.population === "adult" ? "Adult" : "Paediatric") + ", " + cc.age;
-    var verdict = good ? "Correct" : (r.response_classification === "correct_unsupported" ? "Right category, not enough checked" : "Incorrect");
+    var verdict = outcomeLabel(r.response_classification);
+    var dgR = decidingGroup(cc);
+    var decidedBy = dgR ? GROUP_META[dgR].label + " (" + GROUP_META[dgR].level + ")" : "Nothing on the card met a criterion";
+    var namedR = r.reason_group ? (r.reason_group === "none" ? "nothing you checked met a criterion" : GROUP_META[r.reason_group].label + " (" + GROUP_META[r.reason_group].level + ")") : "";
     html += '<details class="case-review-item"><summary><span class="cr-title">' + esc(rowTitle) + '</span><span class="cr-verdict">' + (good ? "\u2713 " : "\u2717 ") + verdict + '</span></summary>' +
       '<div class="cr-body"><p class="reading">' + esc(cc.arrival) + '</p>' +
       '<p class="reading">You chose <b>' + CATEGORY_META[r.selected_triage_category].label + '</b>. Correct category: <b>' + CATEGORY_META[cc.correct].label + '</b>.</p>' +
+      '<p class="reading">Decided by: <b>' + esc(decidedBy) + '</b>.' + (namedR ? ' You named: <b>' + esc(namedR) + '</b>.' : '') + '</p>' +
       '<p class="reading"><b>' + esc(cc.keyCriterion) + '.</b> ' + esc(cc.feedbackWhy) + '</p></div></details>';
   });
   html += '</div>';

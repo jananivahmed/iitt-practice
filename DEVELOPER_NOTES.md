@@ -158,3 +158,6 @@ The look follows Adobe Spectrum principles: flat neutral surfaces, an 8px grid, 
 ## Motion rules
 
 Motion only answers an action: feedback banners fade in, a newly checked card section reveals, the progress bar grows to its new value, buttons press down 2%. Easing is ease-out-quart (no bounce), only `transform` and `opacity` animate, and `prefers-reduced-motion` turns it all off. Do not add entrance animations to screens.
+
+## Triage Practice outcomes (v0.9.0)
+In Triage Practice a right category is classed `correct` only if the learner opened the deciding part and named it as the reason. Otherwise: `correct_unsupported` (deciding part not opened, or nothing checked) or `correct_wrong_reason` (named a different part). Neither counts as correct. Each record also stores `reason_correct`, `in_order` and `extra_checked`, used by the "How you worked" blocks. CLINICIAN REVIEW REQUIRED: confirm this is the intended standard, including green cases where only some parts were checked.

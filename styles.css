@@ -506,3 +506,24 @@ h1.t1{font-size:inherit; font-weight:700; margin:0; line-height:1.3;}
 .decision-btn.uptriage.selected{box-shadow:inset 0 0 0 1px #B8976F, 0 0 0 3px var(--page), 0 0 0 6px var(--ink);}
 .tp-vitals .tp-sec.open,.tp-vitals .tp-sec.done{box-shadow:none; border-bottom-color:#B8976F;}
 .tp-sec.open .tp-state,.tp-vitals .tp-sec .tp-state{font-weight:700;}
+
+/* ---------- v0.8.0: naming the deciding part ---------- */
+.reason-list{display:flex; flex-direction:column; gap:8px; margin-top:8px;}
+.reason-btn{font:inherit; font-size:16px; font-weight:700; text-align:left; min-height:48px; padding:10px 16px; border:2px solid var(--ink); border-radius:4px; background:transparent; color:var(--ink); cursor:pointer; transition:transform .12s var(--ease-out), background-color .15s var(--ease-out);}
+.reason-btn:hover{background:var(--tile);}
+.reason-btn:active{transform:scale(.99);}
+.reason-btn.selected{background:var(--ink); color:var(--page);}
+.reason-btn:focus-visible{outline:3px solid var(--action); outline-offset:2px;}
+.reason-level{font-weight:400;}
+
+/* ---------- v0.9.0 ---------- */
+.tp-conf-title{margin:24px 0 8px;}
+.reason-list{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; margin-top:8px;}
+.reason-btn{min-height:48px;}
+.how-you-worked{text-align:left;}
+.how-you-worked h4{margin:0 0 6px; font-size:16px;}
+.how-you-worked ul{margin:0; padding-left:20px;}
+.how-you-worked li{margin-bottom:6px; line-height:1.5;}
+.how-you-worked li:last-child{margin-bottom:0;}
+.partial-note{font-size:15px; color:var(--ink-soft); line-height:1.5; margin:8px 0 0; text-align:left;}
+.summary-stat-grid-4{grid-template-columns:repeat(auto-fit,minmax(96px,1fr));}
