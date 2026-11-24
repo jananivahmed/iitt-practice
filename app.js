@@ -270,6 +270,7 @@ var state = {
   results: [],
   reviewOpenId: null,
   caseInfoOpen: false,
+  example: null,
   refCardOpen: null,
   refZoomed: false,
   progressOpen: false,
@@ -305,6 +306,7 @@ function caseById(id) {
   return null;
 }
 function startPractice(mode) {
+  state.example = null;
   state.practiceMode = mode || state.practiceMode || "walkthrough";
   state.queue = shuffledCaseOrder();
   state.qIndex = 0;
@@ -580,7 +582,7 @@ function renderEndSessionConfirm() {
    to the new content and screen readers are told; when it stays the same (for
    example a card was checked), focus stays on the same control. */
 function screenSignature() {
-  return [state.resetConfirmOpen, state.endSessionConfirmOpen, state.progressOpen, state.queue.length, state.qIndex, state.refCardOpen, state.ageBandOpen, state.caseInfoOpen, state.phase, state.cpIndex, state.cpLocked, state.locked].join("|");
+  return [state.example ? state.example.id + ":" + state.example.step : "", state.resetConfirmOpen, state.endSessionConfirmOpen, state.progressOpen, state.queue.length, state.qIndex, state.refCardOpen, state.ageBandOpen, state.caseInfoOpen, state.phase, state.cpIndex, state.cpLocked, state.locked].join("|");
 }
 var lastSignature = null;
 function renderPractice() {
@@ -634,6 +636,7 @@ function renderPracticeScreen() {
   if (state.resetConfirmOpen) { renderResetConfirm(); return; }
   if (state.endSessionConfirmOpen) { renderEndSessionConfirm(); return; }
   if (state.progressOpen) { renderProgress(); return; }
+  if (state.example) { if (state.refCardOpen) renderRefCardViewer(); else renderExample(); return; }
   if (!state.queue.length) { renderPracticeHome(); return; }
   if (state.qIndex >= state.queue.length) { renderPracticeSummary(); return; }
   var c = caseById(state.queue[state.qIndex]);
@@ -730,20 +733,21 @@ function renderAgeBandVitals() {
   appEl.innerHTML = html;
 }
 function renderReferenceLinks() {
-  return '<details class="ref-panel ref-collapsible">' +
-    '<summary class="ref-summary">Reference cards</summary>' +
+  return '<div class="ref-panel ref-open">' +
+    '<div class="ref-summary">Reference cards (use them as you work)</div>' +
     '<div class="ref-links">' +
     '<button type="button" class="ref-link" onclick="openRefCard(\'adult\')">Adult IITT card (age \u226512)</button>' +
     '<button type="button" class="ref-link" onclick="openRefCard(\'pediatric\')">Paediatric IITT card (age &lt;12)</button>' +
     '<button type="button" class="ref-link" onclick="openRefCard(\'reference\')">Reference card (trauma, burns &amp; other high-risk criteria)</button>' +
-    '</div></details>';
+    '</div></div>';
 }
 
 function introCard() {
   if (safeGet(STORE_INTRO, false)) return '';
   return '<div class="card intro-card"><h3>How this works</h3>' +
-    '<p class="reading">You will practise using the IITT card to place a patient in a triage category: red, yellow, green or up-triage.</p>' +
+    '<p class="reading">You will practise using the IITT card to place a patient in a triage category: red, yellow, green or up-triage. The card is always available. You are practising using it, not memorising it.</p>' +
     '<ul class="intro-list">' +
+    '<li><b>Worked Example</b> shows the card applied to one patient, with the reasoning, before you try it yourself.</li>' +
     '<li><b>Guided Triage Practice</b> takes you through the card one step at a time and tells you straight away whether each answer is right.</li>' +
     '<li><b>Triage Practice</b> lets you check the parts of the card you choose, then decide. You will see how much you checked before deciding.</li>' +
     '</ul>' +
@@ -761,6 +765,11 @@ function renderPracticeHome() {
     '<p>Choose how you want to practice.</p>' +
     '</div>' +
     introCard() +
+    '<div class="card mode-card">' +
+    '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.guided + '" alt=""> Worked Example</h3>' +
+    '<p>Watch the IITT card applied to one patient, step by step, with the reasoning shown. Nothing is scored. A good place to start.</p>' +
+    '<div class="example-btns"><button class="btn btn-primary" onclick="startExample(\'adult\')">Adult example</button><button class="btn btn-primary" onclick="startExample(\'pediatric\')">Paediatric example</button></div>' +
+    '</div>' +
     '<div class="card mode-card">' +
     '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.guided + '" alt=""> Guided Triage Practice</h3>' +
     '<p>You will be guided through each criteria in order before making a triage decision.</p>' +
@@ -919,6 +928,96 @@ function renderArrival(c) {
   html += '</div>';
   appEl.innerHTML = html;
 }
+/* ---- Worked example ----
+   An unscored walkthrough of one case, built only from the case's own findings,
+   checkpoints, criteria and explanation. Step 0 is the arrival, steps 1..n are the
+   checkpoints, and the last step is the decision. */
+var EXAMPLE_CASES = { adult: "adult-1", pediatric: "peds-3" };
+function startExample(pop) {
+  var id = EXAMPLE_CASES[pop];
+  if (!caseById(id)) return;
+  state.example = { id: id, step: 0 };
+  logEvent("example_started", { practice_mode: "example", case_id: id });
+  renderPractice();
+}
+function exampleStep(delta) {
+  if (!state.example) return;
+  var c = caseById(state.example.id);
+  var last = c.checkpoints.length + 1;
+  state.example.step = Math.max(0, Math.min(last, state.example.step + delta));
+  if (state.example.step === last) logEvent("example_completed", { practice_mode: "example", case_id: c.id });
+  renderPractice();
+}
+function leaveExample() { state.example = null; renderPractice(); }
+function exampleThenGuided() { state.example = null; startPractice("walkthrough"); }
+function renderExample() {
+  var c = caseById(state.example.id);
+  var n = c.checkpoints.length;
+  var step = state.example.step;
+  var popLabel = c.population === "adult" ? "Adult" : "Paediatric";
+  var html = '<div class="card">';
+  html += '<div class="progress-row"><span class="progress-label">Worked example</span><span class="pop-badge">' + popLabel + ', ' + esc(c.age) + '</span></div>';
+  var pct = Math.round(step / (n + 1) * 100);
+  html += '<div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><div class="progress-fill" style="--to:' + (pct / 100) + ';--from:' + (pct / 100) + '"></div></div>';
+
+  if (step === 0) {
+    html += '<img class="case-image" src="' + IMAGES[c.image] + '" alt="Illustration of the patient described in this case" loading="lazy">';
+    html += '<p class="vignette">' + esc(c.arrival) + '</p>';
+    html += '<div class="reassess-note how-you-worked"><h4>What you will see</h4><ul>' +
+      '<li>The card is worked in order: red criteria, then yellow, then high-risk vital signs.</li>' +
+      '<li>At each part, you see what is found for this patient and what the card lists.</li>' +
+      '<li>You stop at the first part where a criterion is met.</li></ul></div>';
+    html += '<div class="cta-row"><button class="btn btn-primary" onclick="exampleStep(1)">Show the first step</button></div>';
+  } else if (step <= n) {
+    var cp = c.checkpoints[step - 1];
+    var meta = GROUP_META[cp.g];
+    var crit = CRITERIA[c.population][cp.g];
+    var find = (c.findings || {})[cp.g];
+    var chips = find ? find.chips : cp.chips;
+    html += miniImageRow(c, false, true);
+    html += '<div class="stage-tag">' + (meta.level === "red" ? "Red criteria" : meta.level === "yellow" ? "Yellow criteria" : "High-risk vital signs") + ' \u00b7 step ' + step + ' of ' + n + '</div>';
+    html += renderReferenceLinks();
+    if (step > 1) {
+      html += '<div class="cp-trail">';
+      for (var i = 0; i < step - 1; i++) {
+        html += '<div class="cp-trail-item right"><span class="cp-trail-icon">\u2713</span><span class="cp-trail-label">' + esc(GROUP_META[c.checkpoints[i].g].label) + ' (' + GROUP_META[c.checkpoints[i].g].level + ')</span><span class="cp-trail-answer">No criterion met</span></div>';
+      }
+      html += '</div>';
+    }
+    html += '<div class="cp-current"><div class="cp-group-label ' + meta.level + '">' + esc(meta.label) + '</div>';
+    if (chips) {
+      html += '<div class="vitals-grid">';
+      Object.keys(chips).forEach(function (k) { html += '<div class="vital"><div class="v-label">' + esc(k) + '</div><div class="v-value">' + esc(chips[k]) + '</div></div>'; });
+      html += '</div>';
+    }
+    if (find && find.text) html += findingList(find.text, "cp-find-text");
+    if (crit && crit.length) {
+      html += '<div class="criteria-open"><div class="cp-why-title">The IITT card lists, for ' + esc(meta.label) + ':</div><ul class="criteria-list">' + crit.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
+    }
+    if (cp.correct === "yes") {
+      html += '<div class="cp-feedback right"><div class="cp-feedback-title">A criterion is met here</div><div class="cp-feedback-body">' + esc(c.keyCriterion) + '. You can stop. Nothing further on the card needs checking.</div></div>';
+    } else {
+      html += '<div class="cp-feedback right"><div class="cp-feedback-title">No criterion met here</div><div class="cp-feedback-body">What is found does not match anything the card lists for this part, so move on to the next part.</div></div>';
+    }
+    html += '</div>';
+    html += '<div class="cta-row">' + (step > 1 ? '<button class="btn btn-ghost" onclick="exampleStep(-1)">Previous step</button>' : '') +
+      '<button class="btn btn-primary" onclick="exampleStep(1)">' + (step === n ? 'See the decision' : 'Next step') + '</button></div>';
+  } else {
+    var meta2 = CATEGORY_META[c.correct];
+    html += miniImageRow(c, false, true);
+    html += '<div class="feedback-banner correct"><div class="f-title">' + meta2.label + '</div><div class="f-sub">This is the triage category for this patient.</div></div>';
+    html += '<div class="detail-section"><h4>Why</h4><p><b>' + esc(c.keyCriterion) + '.</b> ' + esc(c.feedbackWhy) + '</p></div>';
+    html += '<div class="reassess-note how-you-worked"><h4>What this example shows</h4><ul>' +
+      '<li>The card is worked in order: red, then yellow, then high-risk vital signs.</li>' +
+      '<li>You stop at the first part where a criterion is met.</li>' +
+      '<li>The card was open the whole time. Using it is the skill, not remembering it.</li></ul></div>';
+    html += '<div class="cta-row"><button class="btn btn-primary" onclick="exampleThenGuided()">Try Guided Triage Practice</button>' +
+      '<button class="btn btn-ghost" onclick="exampleStep(-1)">Previous step</button></div>';
+  }
+  html += '<div class="end-session-row"><button type="button" class="end-session-link" onclick="leaveExample()">Leave the example</button></div>';
+  html += '</div>';
+  appEl.innerHTML = html;
+}
 function beginAssessment() {
   state.caseAttemptId = getSessionId() + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 7);
   state.caseAttemptStart = Date.now();
@@ -988,15 +1087,13 @@ function renderCheckpoint(c) {
     html += '<div class="age-ref">High-risk thresholds for <b>' + esc(c.ageBandRef.band) + '</b>: heart rate outside <b>' + esc(c.ageBandRef.hr) + '</b>, respiratory rate outside <b>' + esc(c.ageBandRef.rr) + '</b>.</div>';
   }
 
-  /* Try the judgement first: the card's criteria stay closed until an answer is
-     confirmed, so the learner recalls the criteria rather than reading them off. */
+  /* The card's criteria are shown up front: the skill is applying the card, not recalling it. */
   var critHtml = '';
   if (critList && critList.length) {
     critHtml = '<ul class="criteria-list">' + critList.map(function (item) { return '<li>' + esc(item) + '</li>'; }).join('') + '</ul>';
   }
-  if (critHtml && !state.cpLocked) {
-    html += '<details class="criteria-peek"><summary>Show the criteria for this step</summary>' + critHtml + '</details>';
-    html += '<p class="criteria-hint">Try to answer from what you remember of the card first.</p>';
+  if (critHtml) {
+    html += '<div class="criteria-open"><div class="cp-why-title">The IITT card lists, for ' + esc(meta.label) + ':</div>' + critHtml + '</div>';
   }
 
   html += '<div class="decision-prompt" style="margin-top:16px;">' + esc(meta.question) + '</div>';
@@ -1015,7 +1112,7 @@ function renderCheckpoint(c) {
     html += '<div class="cp-feedback ' + (isRight ? "right" : "wrong") + '">' +
       '<div class="cp-feedback-title">' + (isRight ? "Correct" : "Not quite") + '</div>' +
       '<div class="cp-feedback-body">Answer: <b>' + (cp.correct === "yes" ? "Yes" : "No") + '.</b></div>' +
-      ((critHtml || (stepFind && stepFind.text) || stepChips) ? '<div class="cp-feedback-why">' + (critHtml ? '<div class="cp-why-title">The IITT card lists, for ' + esc(meta.label) + ':</div>' + critHtml : '') + '<div class="cp-why-title">What you found:</div>' + (stepFind && stepFind.text ? findingList(stepFind.text, '') : '') + (stepChips ? '<div class="cp-chip-line">' + Object.keys(stepChips).map(function (k) { return esc(k) + ' ' + esc(stepChips[k]); }).join(', ') + '</div>' : '') + '</div>' : '') +
+      (((stepFind && stepFind.text) || stepChips) ? '<div class="cp-feedback-why">' + '<div class="cp-why-title">What you found:</div>' + (stepFind && stepFind.text ? findingList(stepFind.text, '') : '') + (stepChips ? '<div class="cp-chip-line">' + Object.keys(stepChips).map(function (k) { return esc(k) + ' ' + esc(stepChips[k]); }).join(', ') + '</div>' : '') + '</div>' : '') +
       '</div>';
     html += '<div class="submit-row"><button class="btn btn-primary" onclick="advanceCheckpoint()">Continue</button></div>';
   }
@@ -1380,7 +1477,7 @@ function renderFeedback(c) {
   if (isFreeMode()) {
     var dg = rec.deciding_group;
     infoLine = 'You checked ' + rec.info_items_gathered + ' of ' + rec.info_items_available + ' parts of the card.';
-    if (dg) infoLine += ' The finding that decides this case is under <b>' + esc(GROUP_META[dg].label) + ' (' + GROUP_META[dg].level + ')</b>. ' + (rec.deciding_group_checked ? 'You looked at it.' : 'You did not open it this time.');
+    if (dg) infoLine += ' The finding that decides this case is under <b>' + esc(GROUP_META[dg].label) + ' (' + GROUP_META[dg].level + ')</b>. ' + (rec.deciding_group_checked ? 'You checked it.' : 'You did not check it this time. Open the card whenever you need to: the aim is to use it, not to remember it.');
   } else {
     infoLine = 'You correctly identified ' + rightCount + ' of ' + c.checkpoints.length + ' criteria checks along the way.';
   }
@@ -1785,6 +1882,7 @@ function setupBackButton() {
     else if (state.ageBandOpen) { state.ageBandOpen = false; }
     else if (state.caseInfoOpen) { state.caseInfoOpen = false; }
     else if (state.progressOpen) { state.progressOpen = false; }
+    else if (state.example) { state.example = null; }
     else if (inCase) { state.endSessionConfirmOpen = true; }
     else if (state.queue.length) { state.queue = []; safeRemove(STORE_RUN); }
     else { return; }

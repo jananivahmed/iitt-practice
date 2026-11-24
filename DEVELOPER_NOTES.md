@@ -161,3 +161,6 @@ Motion only answers an action: feedback banners fade in, a newly checked card se
 
 ## Triage Practice outcomes (v0.9.0)
 In Triage Practice a right category is classed `correct` only if the learner opened the deciding part and named it as the reason. Otherwise: `correct_unsupported` (deciding part not opened, or nothing checked) or `correct_wrong_reason` (named a different part). Neither counts as correct. Each record also stores `reason_correct`, `in_order` and `extra_checked`, used by the "How you worked" blocks. CLINICIAN REVIEW REQUIRED: confirm this is the intended standard, including green cases where only some parts were checked.
+
+## Worked example (v0.10.0)
+`state.example` drives an unscored walkthrough (`renderExample`). It uses only the case's own arrival, findings, checkpoints, criteria, `keyCriterion` and `feedbackWhy`; no new clinical content. Examples are set in `EXAMPLE_CASES` (adult-1, peds-3). Events logged: `example_started`, `example_completed` (practice_mode "example"). CLINICIAN REVIEW REQUIRED: the example cases, and the generic wording ("No criterion met here", "You can stop").

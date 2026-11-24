@@ -527,3 +527,13 @@ h1.t1{font-size:inherit; font-weight:700; margin:0; line-height:1.3;}
 .how-you-worked li:last-child{margin-bottom:0;}
 .partial-note{font-size:15px; color:var(--ink-soft); line-height:1.5; margin:8px 0 0; text-align:left;}
 .summary-stat-grid-4{grid-template-columns:repeat(auto-fit,minmax(96px,1fr));}
+
+/* ---------- v0.9.1 ---------- */
+.criteria-open{margin:12px 0 4px; text-align:left;}
+.ref-open .ref-summary{font-weight:700; min-height:0; padding:0 0 6px;}
+.ref-open .ref-summary::after, .ref-open .ref-summary::marker{content:none;}
+.ref-open .ref-summary{display:block; cursor:default;}
+
+/* ---------- v0.10.0 worked example ---------- */
+.example-btns{display:flex; flex-wrap:wrap; gap:8px; justify-content:center;}
+.example-btns .btn{flex:1 1 140px;}
