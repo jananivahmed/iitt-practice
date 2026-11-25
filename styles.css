@@ -537,3 +537,40 @@ h1.t1{font-size:inherit; font-weight:700; margin:0; line-height:1.3;}
 /* ---------- v0.10.0 worked example ---------- */
 .example-btns{display:flex; flex-wrap:wrap; gap:8px; justify-content:center;}
 .example-btns .btn{flex:1 1 140px;}
+
+/* ---------- v0.10.2 formatting pass ---------- */
+.tp-state{white-space:nowrap; flex:0 0 auto;}
+.tp-sec-btn > span:first-child{flex:1 1 auto; min-width:0;}
+.tp-sec.open .tp-state::after,.tp-sec-btn.tp-collapsed .tp-state::after{content:""; display:inline-block; width:7px; height:7px; margin-left:8px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg) translateY(-2px); transition:transform .2s var(--ease-out);}
+.tp-sec.open .tp-state::after{transform:rotate(225deg) translate(-1px,-1px);}
+.vital .v-nw{white-space:nowrap;}
+.vital .v-unit{font-size:14px; font-weight:400; color:var(--ink-soft);}
+.tp-pick .tp-conf-title{margin:24px 0 8px;}
+.reason-btn:last-child:nth-child(odd){grid-column:1/-1;}
+@media (max-width:420px){
+  .case-info-btn{font-size:14px; padding:6px 10px;}
+  .case-info-row{flex-wrap:nowrap !important;}
+}
+
+table.age-table th,table.age-table td{white-space:nowrap; padding-left:6px; padding-right:6px;}
+table.age-table td:first-child,table.age-table th:first-child{padding-left:0;}
+table.pop-table:not(.age-table){table-layout:auto; width:100%;}
+table.pop-table:not(.age-table) th,table.pop-table:not(.age-table) td{padding-left:4px; padding-right:4px; text-align:center; overflow-wrap:normal; word-break:normal; hyphens:none;}
+table.pop-table:not(.age-table) th{font-size:14px;}
+table.pop-table:not(.age-table) th:first-child,table.pop-table:not(.age-table) td:first-child{text-align:left;}
+.tp-jump-count{white-space:nowrap;}
+.recent-title{flex:1 1 auto; min-width:0; white-space:normal !important; overflow:visible !important; text-overflow:clip !important;}
+.recent-badge{flex:0 1 52%; text-align:right;}
+.tp-jump{gap:12px;}
+.tp-sec.open .tp-state::after,.tp-sec-btn.tp-collapsed .tp-state::after{margin-left:6px; width:6px; height:6px; vertical-align:middle;}
+.tp-state{overflow:visible;}
+.tp-jump{flex-wrap:wrap; justify-content:center;}
+.vitals-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));} @media (max-width:420px){.vitals-grid{grid-template-columns:repeat(2,1fr);}} .vital{padding:10px 6px;}
+
+/* ---------- v0.10.3 ---------- */
+.example-list{display:flex; flex-direction:column; gap:8px; text-align:left;}
+.example-btn{font:inherit; text-align:left; background:transparent; color:var(--ink); border:2px solid var(--ink); border-radius:4px; padding:10px 14px; min-height:56px; cursor:pointer; display:flex; flex-direction:column; gap:2px;}
+.example-btn:hover{background:var(--tile);}
+.example-btn:focus-visible{outline:3px solid var(--link); outline-offset:2px;}
+.example-title{font-weight:700; font-size:17px;}
+.example-note{font-size:15px; color:var(--ink-soft); line-height:1.4;}

@@ -650,8 +650,11 @@ function renderPracticeScreen() {
   else renderFeedback(c);
 }
 function toggleCaseInfo() {
+  var opening = !state.caseInfoOpen;
+  if (opening) state.returnY = window.pageYOffset;
   state.caseInfoOpen = !state.caseInfoOpen;
   renderPractice();
+  if (!opening) window.scrollTo(0, state.returnY || 0);
 }
 function renderCaseInfo(c) {
   var num = state.qIndex + 1;
@@ -679,6 +682,7 @@ var REF_CARD_META = {
   reference: { label: "Reference card (trauma, burns & other high-risk criteria)", url: PDF_REFS.reference }
 };
 function openRefCard(key) {
+  state.returnY = window.pageYOffset;
   state.refCardOpen = key;
   state.refZoomed = false;
   renderPractice();
@@ -687,6 +691,7 @@ function closeRefCard() {
   state.refCardOpen = null;
   state.refZoomed = false;
   renderPractice();
+  window.scrollTo(0, state.returnY || 0);
 }
 function toggleRefZoom() {
   state.refZoomed = !state.refZoomed;
@@ -709,20 +714,23 @@ function renderRefCardViewer() {
   appEl.innerHTML = html;
 }
 function openAgeBandVitals() {
+  state.returnY = window.pageYOffset;
   state.ageBandOpen = true;
   renderPractice();
 }
 function closeAgeBandVitals() {
   state.ageBandOpen = false;
   renderPractice();
+  window.scrollTo(0, state.returnY || 0);
 }
 function renderAgeBandVitals() {
   var html = '<div class="card">';
   html += '<button type="button" class="back-link" onclick="closeAgeBandVitals()">← Back</button>';
   html += '<h3 class="case-title">Paediatric age-band vital sign thresholds</h3>';
   html += '<p class="ref-viewer-hint">High-risk heart rate and respiratory rate ranges by age band, as used in this case set.</p>';
-  html += '<table class="pop-table"><thead><tr><th>Age band</th><th>Heart rate</th><th>Respiratory rate</th></tr></thead><tbody>';
-  AGE_BAND_VITALS.forEach(function (b) {
+  html += '<table class="pop-table age-table"><thead><tr><th>Age band</th><th>Heart rate</th><th>Respiratory rate</th></tr></thead><tbody>';
+  function bandKey(b) { return /</.test(b.band) ? 0 : parseInt(String(b.band).replace(/\D*(\d+).*/, '$1'), 10) || 0; }
+  AGE_BAND_VITALS.slice().sort(function (x, y) { return bandKey(x) - bandKey(y); }).forEach(function (b) {
     html += '<tr><td>' + esc(b.band) + '</td><td>' + esc(b.hr) + '</td><td>' + esc(b.rr) + '</td></tr>';
   });
   html += '</tbody></table>';
@@ -749,7 +757,7 @@ function introCard() {
     '<ul class="intro-list">' +
     '<li><b>Worked Example</b> shows the card applied to one patient, with the reasoning, before you try it yourself.</li>' +
     '<li><b>Guided Triage Practice</b> takes you through the card one step at a time and tells you straight away whether each answer is right.</li>' +
-    '<li><b>Triage Practice</b> lets you check the parts of the card you choose, then decide. You will see how much you checked before deciding.</li>' +
+    '<li><b>Triage Practice</b> is the full task. Open the parts of the card you need, stop when you can decide, then choose a category and the part that decided it. You get feedback on how you worked as well as your answer.</li>' +
     '</ul>' +
     '<p class="reading">Each case ends with an explanation and a link back to the part of the card that decides it. Pick how many cases you want below.</p>' +
     '<button type="button" class="btn btn-ghost" onclick="dismissIntro()">Got it</button></div>';
@@ -768,7 +776,7 @@ function renderPracticeHome() {
     '<div class="card mode-card">' +
     '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.guided + '" alt=""> Worked Example</h3>' +
     '<p>Watch the IITT card applied to one patient, step by step, with the reasoning shown. Nothing is scored. A good place to start.</p>' +
-    '<div class="example-btns"><button class="btn btn-primary" onclick="startExample(\'adult\')">Adult example</button><button class="btn btn-primary" onclick="startExample(\'pediatric\')">Paediatric example</button></div>' +
+    '<div class="example-list">' + EXAMPLES.map(function (e) { return '<button type="button" class="example-btn" onclick="startExample(\'' + e.id + '\')"><span class="example-title">' + esc(e.title) + '</span><span class="example-note">' + esc(e.note) + '</span></button>'; }).join('') + '</div>' +
     '</div>' +
     '<div class="card mode-card">' +
     '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.guided + '" alt=""> Guided Triage Practice</h3>' +
@@ -777,7 +785,7 @@ function renderPracticeHome() {
     '</div>' +
     '<div class="card mode-card">' +
     '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.triage + '" alt=""> Triage Practice</h3>' +
-    '<p>Work through the IITT card in any order, check the parts you want to know more about, and choose a triage category when you have enough information.</p>' +
+    '<p>The full task. Open the parts of the IITT card you need, from red to yellow to vital signs. Stop when you can decide, choose a category, and say which part decided it. You get feedback on your reasoning as well as your answer.</p>' +
     '<button class="btn btn-primary" onclick="startPractice(\'decide\')">Start</button>' +
     '</div>' +
     '<div class="card count-card" role="group" aria-labelledby="count-label">' +
@@ -932,9 +940,13 @@ function renderArrival(c) {
    An unscored walkthrough of one case, built only from the case's own findings,
    checkpoints, criteria and explanation. Step 0 is the arrival, steps 1..n are the
    checkpoints, and the last step is the decision. */
-var EXAMPLE_CASES = { adult: "adult-1", pediatric: "peds-3" };
-function startExample(pop) {
-  var id = EXAMPLE_CASES[pop];
+var EXAMPLES = [
+  { id: "adult-1", title: "Adult: a yellow criterion", note: "Red parts clear, then a yellow criterion is met." },
+  { id: "peds-3",  title: "Paediatric: a red criterion", note: "A red criterion is met, so you stop." },
+  { id: "adult-4", title: "Adult: a high-risk vital sign", note: "Red and yellow clear, then vital signs decide." },
+  { id: "adult-5", title: "Adult: no criteria met", note: "Every part is checked before choosing green." }
+];
+function startExample(id) {
   if (!caseById(id)) return;
   state.example = { id: id, step: 0 };
   logEvent("example_started", { practice_mode: "example", case_id: id });
@@ -966,7 +978,7 @@ function renderExample() {
     html += '<div class="reassess-note how-you-worked"><h4>What you will see</h4><ul>' +
       '<li>The card is worked in order: red criteria, then yellow, then high-risk vital signs.</li>' +
       '<li>At each part, you see what is found for this patient and what the card lists.</li>' +
-      '<li>You stop at the first part where a criterion is met.</li></ul></div>';
+      '<li>You stop at the first part where a criterion is met. If none is met, you check every part.</li></ul></div>';
     html += '<div class="cta-row"><button class="btn btn-primary" onclick="exampleStep(1)">Show the first step</button></div>';
   } else if (step <= n) {
     var cp = c.checkpoints[step - 1];
@@ -987,7 +999,7 @@ function renderExample() {
     html += '<div class="cp-current"><div class="cp-group-label ' + meta.level + '">' + esc(meta.label) + '</div>';
     if (chips) {
       html += '<div class="vitals-grid">';
-      Object.keys(chips).forEach(function (k) { html += '<div class="vital"><div class="v-label">' + esc(k) + '</div><div class="v-value">' + esc(chips[k]) + '</div></div>'; });
+      Object.keys(chips).forEach(function (k) { html += '<div class="vital"><div class="v-label">' + esc(k) + '</div><div class="v-value">' + vitalValue(chips[k]) + '</div></div>'; });
       html += '</div>';
     }
     if (find && find.text) html += findingList(find.text, "cp-find-text");
@@ -997,7 +1009,7 @@ function renderExample() {
     if (cp.correct === "yes") {
       html += '<div class="cp-feedback right"><div class="cp-feedback-title">A criterion is met here</div><div class="cp-feedback-body">' + esc(c.keyCriterion) + '. You can stop. Nothing further on the card needs checking.</div></div>';
     } else {
-      html += '<div class="cp-feedback right"><div class="cp-feedback-title">No criterion met here</div><div class="cp-feedback-body">What is found does not match anything the card lists for this part, so move on to the next part.</div></div>';
+      html += '<div class="cp-feedback right"><div class="cp-feedback-title">No criterion met here</div><div class="cp-feedback-body">' + (step === n ? 'What is found does not match anything the card lists for this part. That was the last part of the card, so nothing is met.' : 'What is found does not match anything the card lists for this part, so move on to the next part.') + '</div></div>';
     }
     html += '</div>';
     html += '<div class="cta-row">' + (step > 1 ? '<button class="btn btn-ghost" onclick="exampleStep(-1)">Previous step</button>' : '') +
@@ -1007,10 +1019,12 @@ function renderExample() {
     html += miniImageRow(c, false, true);
     html += '<div class="feedback-banner correct"><div class="f-title">' + meta2.label + '</div><div class="f-sub">This is the triage category for this patient.</div></div>';
     html += '<div class="detail-section"><h4>Why</h4><p><b>' + esc(c.keyCriterion) + '.</b> ' + esc(c.feedbackWhy) + '</p></div>';
-    html += '<div class="reassess-note how-you-worked"><h4>What this example shows</h4><ul>' +
-      '<li>The card is worked in order: red, then yellow, then high-risk vital signs.</li>' +
-      '<li>You stop at the first part where a criterion is met.</li>' +
-      '<li>The card was open the whole time. Using it is the skill, not remembering it.</li></ul></div>';
+    var shows = ['The card is worked in order: red, then yellow, then high-risk vital signs.'];
+    if (c.correct === "green") shows.push('Green is only reached after every part of the card has been checked and nothing is met.');
+    else if (c.correct === "uptriage") shows.push('High-risk vital signs come last. They matter even when no red or yellow criterion is met.');
+    else shows.push('You stop at the first part where a criterion is met.');
+    shows.push('The card was open the whole time. Using it is the skill, not remembering it.');
+    html += '<div class="reassess-note how-you-worked"><h4>What this example shows</h4><ul>' + shows.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div>';
     html += '<div class="cta-row"><button class="btn btn-primary" onclick="exampleThenGuided()">Try Guided Triage Practice</button>' +
       '<button class="btn btn-ghost" onclick="exampleStep(-1)">Previous step</button></div>';
   }
@@ -1027,6 +1041,11 @@ function beginAssessment() {
   renderPractice();
 }
 
+/* A vital sign value with its unit in a lighter weight, kept on one line: "18" then "breaths/min". */
+function vitalValue(v) {
+  var m = String(v).match(/^(\S+)\s+(\S+)$/);
+  return m ? '<span class="v-nw">' + esc(m[1]) + ' <span class="v-unit">' + esc(m[2]) + '</span></span>' : esc(v);
+}
 function renderCheckpointTrail(c) {
   if (!state.cpLog.length) return "";
   var html = '<div class="cp-trail">';
@@ -1061,7 +1080,7 @@ function renderCheckpoint(c) {
   var html = '<div class="card">';
   html += caseHeader(c, num, stepPct);
   html += miniImageRow(c, true);
-  html += '<div class="stage-tag">' + (meta.level === "red" ? "Red criteria" : meta.level === "yellow" ? "Yellow criteria" : "High-risk vital signs") + '</div>';
+  if (meta.level !== "vitals") html += '<div class="stage-tag">' + (meta.level === "red" ? "Red criteria" : "Yellow criteria") + '</div>';
   html += renderReferenceLinks();
 
   html += renderCheckpointTrail(c);
@@ -1078,15 +1097,11 @@ function renderCheckpoint(c) {
   if (stepChips) {
     html += '<div class="vitals-grid">';
     Object.keys(stepChips).forEach(function (k) {
-      html += '<div class="vital"><div class="v-label">' + esc(k) + '</div><div class="v-value">' + esc(stepChips[k]) + '</div></div>';
+      html += '<div class="vital"><div class="v-label">' + esc(k) + '</div><div class="v-value">' + vitalValue(stepChips[k]) + '</div></div>';
     });
     html += '</div>';
   }
   if (stepFind && stepFind.text) html += findingList(stepFind.text, "cp-find-text");
-  if (cp.g === "vitals" && c.ageBandRef) {
-    html += '<div class="age-ref">High-risk thresholds for <b>' + esc(c.ageBandRef.band) + '</b>: heart rate outside <b>' + esc(c.ageBandRef.hr) + '</b>, respiratory rate outside <b>' + esc(c.ageBandRef.rr) + '</b>.</div>';
-  }
-
   /* The card's criteria are shown up front: the skill is applying the card, not recalling it. */
   var critHtml = '';
   if (critList && critList.length) {
@@ -1094,6 +1109,9 @@ function renderCheckpoint(c) {
   }
   if (critHtml) {
     html += '<div class="criteria-open"><div class="cp-why-title">The IITT card lists, for ' + esc(meta.label) + ':</div>' + critHtml + '</div>';
+  }
+  if (cp.g === "vitals" && c.ageBandRef) {
+    html += '<div class="age-ref">High-risk thresholds for <b>' + esc(c.ageBandRef.band) + '</b>: heart rate outside <b>' + esc(c.ageBandRef.hr) + '</b>, respiratory rate outside <b>' + esc(c.ageBandRef.rr) + '</b>.</div>';
   }
 
   html += '<div class="decision-prompt" style="margin-top:16px;">' + esc(meta.question) + '</div>';
@@ -1112,7 +1130,6 @@ function renderCheckpoint(c) {
     html += '<div class="cp-feedback ' + (isRight ? "right" : "wrong") + '">' +
       '<div class="cp-feedback-title">' + (isRight ? "Correct" : "Not quite") + '</div>' +
       '<div class="cp-feedback-body">Answer: <b>' + (cp.correct === "yes" ? "Yes" : "No") + '.</b></div>' +
-      (((stepFind && stepFind.text) || stepChips) ? '<div class="cp-feedback-why">' + '<div class="cp-why-title">What you found:</div>' + (stepFind && stepFind.text ? findingList(stepFind.text, '') : '') + (stepChips ? '<div class="cp-chip-line">' + Object.keys(stepChips).map(function (k) { return esc(k) + ' ' + esc(stepChips[k]); }).join(', ') + '</div>' : '') + '</div>' : '') +
       '</div>';
     html += '<div class="submit-row"><button class="btn btn-primary" onclick="advanceCheckpoint()">Continue</button></div>';
   }
@@ -1198,7 +1215,7 @@ function renderFindings(c, g) {
     if (f.chips) {
       html += '<div class="vitals-grid">';
       Object.keys(f.chips).forEach(function (k) {
-        html += '<div class="vital"><div class="v-label">' + esc(k) + '</div><div class="v-value">' + esc(f.chips[k]) + '</div></div>';
+        html += '<div class="vital"><div class="v-label">' + esc(k) + '</div><div class="v-value">' + vitalValue(f.chips[k]) + '</div></div>';
       });
       html += '</div>';
     }
@@ -1224,7 +1241,7 @@ function renderTiers(c) {
       var enter = open && justOpened[g] ? ' enter' : '';
       html += '<div class="tp-sec' + (open ? ' open' : '') + (wasChecked && !open ? ' done' : '') + enter + '">' +
         '<button type="button" class="tp-sec-btn' + (wasChecked && !open ? ' tp-collapsed' : '') + '" aria-expanded="' + open + '" onclick="checkItem(\'' + g + '\')">' +
-        '<span>' + esc(GROUP_META[g].label) + '</span><span class="tp-state">' + (open ? '✓ Checked, tap to hide' : (wasChecked ? '✓ Checked, tap to show' : 'Tap to check')) + '</span></button>' +
+        '<span>' + esc(GROUP_META[g].label) + '</span><span class="tp-state">' + (open || wasChecked ? '✓ Checked' : 'Tap to check') + '</span></button>' +
         (open ? renderFindings(c, g) : '') + '</div>';
     });
     html += '</div>';
@@ -1351,7 +1368,9 @@ function submitDecision() {
   /* A right category only counts as fully correct when the learner also had a basis for it. */
   if (isFreeMode() && result === "correct") {
     var reasonWrong = !!state.reason && (state.reason === "none" ? !!deciding : state.reason !== deciding);
-    var noBasis = !checkedGroups.length || (!!deciding && checkedGroups.indexOf(deciding) === -1);
+    /* Green is only reached once every part of the card has been checked. */
+    var noBasis = !checkedGroups.length || (!!deciding && checkedGroups.indexOf(deciding) === -1) ||
+      (!deciding && checkedGroups.length < Object.keys(GROUP_META).length);
     if (reasonWrong) result = "correct_wrong_reason";
     else if (noBasis) result = "correct_unsupported";
   }
@@ -1411,7 +1430,7 @@ function partialHead(u, w) { return (u ? '<th>Not enough checked</th>' : '') + (
 function partialCells(b, u, w) { return (u ? '<td>' + b.unsupported + '</td>' : '') + (w ? '<td>' + b.wrongReason + '</td>' : ''); }
 function partialNote(u, w) {
   var t = '';
-  if (u) t += '<b>Right category, not enough checked</b> means you chose the correct category without opening the part of the card that decides it. ';
+  if (u) t += '<b>Right category, not enough checked</b> means you chose the correct category without opening the part of the card that decides it. For green, that means every part of the card. ';
   if (w) t += '<b>Right category, wrong reason</b> means the category was correct but the part you named did not decide it. ';
   return t ? '<p class="partial-note">' + t + 'These are not counted as correct.</p>' : '';
 }
@@ -1430,16 +1449,17 @@ function processFacts(rec) {
 }
 /* One block summarising Triage Practice process across many cases. */
 function processSummary(list) {
-  var pts = list.filter(function (r) { return r.practice_mode === "decide" && r.in_order !== undefined && r.in_order !== null; });
-  if (!pts.length) return "";
-  var withReason = pts.filter(function (r) { return r.reason_correct !== null && r.reason_correct !== undefined; });
+  var all = list.filter(function (r) { return r.practice_mode === "decide" && r.in_order !== undefined && r.in_order !== null; });
+  var pts = all.filter(function (r) { return (r.check_order || []).length >= 2; });
+  if (!all.length) return "";
+  var withReason = all.filter(function (r) { return r.reason_correct !== null && r.reason_correct !== undefined; });
   var reasonOk = withReason.filter(function (r) { return r.reason_correct; }).length;
   var ordered = pts.filter(function (r) { return r.in_order; }).length;
-  var stopCases = pts.filter(function (r) { return r.deciding_group; });
+  var stopCases = all.filter(function (r) { return r.deciding_group; });
   var stopped = stopCases.filter(function (r) { return r.deciding_group_checked && r.extra_checked === 0; }).length;
   var lines = [];
   if (withReason.length) lines.push('You named the part that decided the case in <b>' + reasonOk + ' of ' + withReason.length + '</b> case' + (withReason.length === 1 ? '' : 's') + '.');
-  lines.push('You worked through the card in order in <b>' + ordered + ' of ' + pts.length + '</b> case' + (pts.length === 1 ? '' : 's') + '.');
+  if (pts.length) lines.push('In cases where you checked two or more parts, you worked through the card in order in <b>' + ordered + ' of ' + pts.length + '</b>.');
   if (stopCases.length) lines.push('You stopped at the deciding part, without opening more, in <b>' + stopped + ' of ' + stopCases.length + '</b> case' + (stopCases.length === 1 ? '' : 's') + ' where one applies.');
   return '<div class="reassess-note how-you-worked" style="margin-top:12px;"><h4>How you worked</h4><ul>' + lines.map(function (l) { return '<li>' + l + '</li>'; }).join('') + '</ul></div>';
 }
@@ -1477,6 +1497,7 @@ function renderFeedback(c) {
   if (isFreeMode()) {
     var dg = rec.deciding_group;
     infoLine = 'You checked ' + rec.info_items_gathered + ' of ' + rec.info_items_available + ' parts of the card.';
+    if (!dg) infoLine += (rec.info_items_gathered >= rec.info_items_available ? ' You checked every part, which is what green needs.' : ' Nothing on the card is met in this case, and green needs every part checked first. Open the card whenever you need to: the aim is to use it, not to remember it.');
     if (dg) infoLine += ' The finding that decides this case is under <b>' + esc(GROUP_META[dg].label) + ' (' + GROUP_META[dg].level + ')</b>. ' + (rec.deciding_group_checked ? 'You checked it.' : 'You did not check it this time. Open the card whenever you need to: the aim is to use it, not to remember it.');
   } else {
     infoLine = 'You correctly identified ' + rightCount + ' of ' + c.checkpoints.length + ' criteria checks along the way.';
@@ -1488,7 +1509,7 @@ function renderFeedback(c) {
   html += miniImageRow(c);
   var bannerSub = "You selected <b>" + selMeta.label + "</b>";
   if (result === "incorrect") bannerSub += ".";
-  else if (result === "correct_unsupported") bannerSub += ". That is the correct category, but you did not open the part of the card that decides it";
+  else if (result === "correct_unsupported") bannerSub += (decidingGroup(c) ? ". That is the correct category, but you did not open the part of the card that decides it" : ". That is the correct category, but green needs every part of the card checked");
   else if (result === "correct_wrong_reason") bannerSub += ". That is the correct category, but the part you named is not the one that decided it";
   html += '<div class="feedback-banner ' + bannerClass + '"><div class="f-title">' + bannerTitle + '</div><div class="f-sub">' + bannerSub + '</div>' +
     (result === "incorrect" ? '<span class="answer-chip ' + meta.chip + '">Correct category: ' + meta.label + '</span>' : '') + '</div>';

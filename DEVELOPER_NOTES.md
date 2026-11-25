@@ -164,3 +164,6 @@ In Triage Practice a right category is classed `correct` only if the learner ope
 
 ## Worked example (v0.10.0)
 `state.example` drives an unscored walkthrough (`renderExample`). It uses only the case's own arrival, findings, checkpoints, criteria, `keyCriterion` and `feedbackWhy`; no new clinical content. Examples are set in `EXAMPLE_CASES` (adult-1, peds-3). Events logged: `example_started`, `example_completed` (practice_mode "example"). CLINICIAN REVIEW REQUIRED: the example cases, and the generic wording ("No criterion met here", "You can stop").
+
+## Green rule and examples (v0.10.3)
+In Triage Practice, a green answer (no deciding part) is only `correct` when all 10 parts were checked; fewer is `correct_unsupported`. CLINICIAN REVIEW REQUIRED: confirm this standard. Worked examples are listed in `EXAMPLES` (adult-1 yellow, peds-3 red, adult-4 up-triage, adult-5 green). The "in order" count in "How you worked" only includes cases where two or more parts were checked.
