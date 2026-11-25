@@ -574,3 +574,23 @@ table.pop-table:not(.age-table) th:first-child,table.pop-table:not(.age-table) t
 .example-btn:focus-visible{outline:3px solid var(--link); outline-offset:2px;}
 .example-title{font-weight:700; font-size:17px;}
 .example-note{font-size:15px; color:var(--ink-soft); line-height:1.4;}
+
+/* ---------- v0.11.0 card pictures ---------- */
+.crit-img-block{margin:12px 0 4px;}
+.crit-img-btn{display:block; width:100%; padding:0; margin:6px 0 0; border:0; background:transparent; cursor:zoom-in; overflow-x:auto; overflow-y:hidden; border-radius:4px; -webkit-tap-highlight-color:transparent;}
+.crit-img-btn:focus-visible{outline:3px solid var(--link); outline-offset:2px;}
+.crit-img{display:block; width:100%; height:auto; border-radius:4px; transition:width .25s var(--ease-out);}
+.crit-img-btn.zoomed{cursor:zoom-out;}
+.crit-img-btn.zoomed .crit-img{width:190%; max-width:none;}
+.crit-hint{font-size:14px; color:var(--ink-soft); margin:6px 0 0; text-align:left;}
+.crit-fallback{display:none;}
+.crit-fail .crit-fallback{display:block;}
+.crit-fail .crit-img-btn,.crit-fail .crit-hint{display:none;}
+@media (prefers-reduced-motion:reduce){.crit-img{transition:none;}}
+
+.crit-text-btn{font:inherit; font-size:14px; color:var(--link); background:none; border:0; padding:0; text-decoration:underline; cursor:pointer;}
+.crit-img-block.show-text .crit-fallback{display:block; margin-top:8px;}
+@media (max-width:480px){
+  .crit-img-btn{margin-left:-20px; margin-right:-20px; width:calc(100% + 40px);}
+  .crit-img{border-radius:0;}
+}

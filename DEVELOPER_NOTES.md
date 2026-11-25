@@ -167,3 +167,6 @@ In Triage Practice a right category is classed `correct` only if the learner ope
 
 ## Green rule and examples (v0.10.3)
 In Triage Practice, a green answer (no deciding part) is only `correct` when all 10 parts were checked; fewer is `correct_unsupported`. CLINICIAN REVIEW REQUIRED: confirm this standard. Worked examples are listed in `EXAMPLES` (adult-1 yellow, peds-3 red, adult-4 up-triage, adult-5 green). The "in order" count in "How you worked" only includes cases where two or more parts were checked.
+
+## Card pictures in Guided and Worked Example (v0.11.0)
+The criteria for each part are shown as pictures cropped from refcard-adult.png / refcard-pediatric.png (crit-<population>-<group>.png), with the typed list as alt text, a "show as text" toggle, and a fallback if a picture fails. If the cards are ever updated, regenerate the crops. The adult "Other" crop includes the "Pregnant with any of" section, which the typed list in app.js omits. CLINICIAN REVIEW REQUIRED: confirm that section belongs to the Other (red) checkpoint.

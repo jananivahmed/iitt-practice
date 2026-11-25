@@ -1003,9 +1003,7 @@ function renderExample() {
       html += '</div>';
     }
     if (find && find.text) html += findingList(find.text, "cp-find-text");
-    if (crit && crit.length) {
-      html += '<div class="criteria-open"><div class="cp-why-title">The IITT card lists, for ' + esc(meta.label) + ':</div><ul class="criteria-list">' + crit.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
-    }
+    html += critBlock(c, cp.g, meta);
     if (cp.correct === "yes") {
       html += '<div class="cp-feedback right"><div class="cp-feedback-title">A criterion is met here</div><div class="cp-feedback-body">' + esc(c.keyCriterion) + '. You can stop. Nothing further on the card needs checking.</div></div>';
     } else {
@@ -1045,6 +1043,19 @@ function beginAssessment() {
 function vitalValue(v) {
   var m = String(v).match(/^(\S+)\s+(\S+)$/);
   return m ? '<span class="v-nw">' + esc(m[1]) + ' <span class="v-unit">' + esc(m[2]) + '</span></span>' : esc(v);
+}
+/* The criteria for one part of the card, shown as the card's own picture (cropped from the official IITT card),
+   with the typed list as the screen-reader text and as a fallback if the picture does not load. */
+function critBlock(c, g, meta) {
+  var list = CRITERIA[c.population][g];
+  if (!list || !list.length) return "";
+  var src = "crit-" + c.population + "-" + g + ".png";
+  var alt = "IITT card, " + meta.label + " (" + meta.level + "): " + list.join("; ");
+  return '<div class="criteria-open crit-img-block"><div class="cp-why-title">The IITT card, for ' + esc(meta.label) + ':</div>' +
+    '<button type="button" class="crit-img-btn" onclick="this.classList.toggle(\'zoomed\')">' +
+    '<img class="crit-img" src="' + src + '" alt="' + esc(alt) + '" onerror="this.parentNode.parentNode.classList.add(\'crit-fail\')"></button>' +
+    '<p class="crit-hint">Tap the picture to enlarge it. <button type="button" class="crit-text-btn" onclick="this.parentNode.parentNode.classList.toggle(\'show-text\')">Show or hide as a text list</button></p>' +
+    '<ul class="criteria-list crit-fallback">' + list.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
 }
 function renderCheckpointTrail(c) {
   if (!state.cpLog.length) return "";
@@ -1102,14 +1113,8 @@ function renderCheckpoint(c) {
     html += '</div>';
   }
   if (stepFind && stepFind.text) html += findingList(stepFind.text, "cp-find-text");
-  /* The card's criteria are shown up front: the skill is applying the card, not recalling it. */
-  var critHtml = '';
-  if (critList && critList.length) {
-    critHtml = '<ul class="criteria-list">' + critList.map(function (item) { return '<li>' + esc(item) + '</li>'; }).join('') + '</ul>';
-  }
-  if (critHtml) {
-    html += '<div class="criteria-open"><div class="cp-why-title">The IITT card lists, for ' + esc(meta.label) + ':</div>' + critHtml + '</div>';
-  }
+  /* The card's criteria are shown up front, as the card's own picture: the skill is applying the card, not recalling it. */
+  html += critBlock(c, cp.g, meta);
   if (cp.g === "vitals" && c.ageBandRef) {
     html += '<div class="age-ref">High-risk thresholds for <b>' + esc(c.ageBandRef.band) + '</b>: heart rate outside <b>' + esc(c.ageBandRef.hr) + '</b>, respiratory rate outside <b>' + esc(c.ageBandRef.rr) + '</b>.</div>';
   }
