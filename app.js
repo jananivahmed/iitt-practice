@@ -606,12 +606,15 @@ function renderPractice() {
 function announceScreen() {
   var live = document.getElementById("sr-live");
   if (!live) return;
-  var el = appEl.querySelector(".f-title") || appEl.querySelector(".cp-feedback-title") || appEl.querySelector("h2, h3, .decision-prompt");
+  var say = appEl.querySelector("[data-announce]");
+  if (say) { live.textContent = say.getAttribute("data-announce"); return; }
+  var el = appEl.querySelector(".f-title") || appEl.querySelector(".cp-feedback-title") || appEl.querySelector("h2, h3, .decision-prompt, .vignette");
   live.textContent = el ? el.textContent : "";
 }
 
 /* ---- Keeping a run in progress across a reload ---- */
 function saveRun() {
+  if (!state.queue.length && state.example) { safeSet(STORE_RUN, { email: getLearnerEmail(), example: state.example }); return; }
   if (!state.queue.length) { safeRemove(STORE_RUN); return; }
   safeSet(STORE_RUN, {
     email: getLearnerEmail(),
@@ -623,6 +626,7 @@ function saveRun() {
 }
 function restoreRun() {
   var r = safeGet(STORE_RUN, null);
+  if (r && r.email === getLearnerEmail() && r.example && (!r.queue || !r.queue.length) && caseById(r.example.id)) { state.example = r.example; return true; }
   if (!r || r.email !== getLearnerEmail() || !r.queue || !r.queue.length) return false;
   for (var i = 0; i < r.queue.length; i++) if (!caseById(r.queue[i])) return false;
   ["practiceMode", "queue", "qIndex", "phase", "cpIndex", "cpSelected", "cpLocked", "reason", "cpLog", "checked", "gatherSeq", "selected", "confidence", "locked", "caseAttemptId", "caseAttemptStart", "results"].forEach(function (k) {
@@ -635,7 +639,7 @@ function renderPracticeScreen() {
   if (state.resetConfirmOpen) { renderResetConfirm(); return; }
   if (state.endSessionConfirmOpen) { renderEndSessionConfirm(); return; }
   if (state.progressOpen) { renderProgress(); return; }
-  if (state.example) { if (state.refCardOpen) renderRefCardViewer(); else renderExample(); return; }
+  if (state.example) { if (state.refCardOpen) renderRefCardViewer(); else if (state.ageBandOpen) renderAgeBandVitals(); else renderExample(); return; }
   if (!state.queue.length) { renderPracticeHome(); return; }
   if (state.qIndex >= state.queue.length) { renderPracticeSummary(); return; }
   var c = caseById(state.queue[state.qIndex]);
@@ -785,7 +789,7 @@ function renderPracticeHome() {
     '</div>' +
     '<div class="card mode-card">' +
     '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.triage + '" alt=""> Triage Practice</h3>' +
-    '<p>You choose which parts of the IITT card to look at and when to stop. Each part you look at gives you the relevant patient findings. Then you choose a triage category and the part that decided it.</p>' +
+    '<p>You choose which parts of the IITT card to check and when to stop. Each part you check gives you the relevant patient findings. Then you choose a triage category and the part that decided it.</p>' +
     '<button class="btn btn-primary" onclick="startPractice(\'decide\')">Start</button>' +
     '</div>' +
     '<div class="card count-card" role="group" aria-labelledby="count-label">' +
@@ -986,24 +990,28 @@ function renderExample() {
       '<li>The card is worked in order: red criteria, then yellow, then high-risk vital signs.</li>' +
       '<li>At each part, you see what is found for this patient and what the card lists.</li>' +
       '<li>You stop at the first part where a criterion is met. If none are met, you check every part.</li></ul></div>';
-    html += '<div class="cta-row"><button class="btn btn-primary" onclick="exampleStep(1)">Show the first step</button></div>';
+    html += '<div class="cta-row"><button class="btn btn-primary" onclick="exampleStep(1)">Show the first part</button></div>';
   } else if (step <= n) {
     var cp = c.checkpoints[step - 1];
     var meta = GROUP_META[cp.g];
-    var crit = CRITERIA[c.population][cp.g];
     var find = (c.findings || {})[cp.g];
     var chips = find ? find.chips : cp.chips;
-    html += miniImageRow(c, false, true);
-    html += '<div class="stage-tag">' + (meta.level === "red" ? "Red criteria" : meta.level === "yellow" ? "Yellow criteria" : "High-risk vital signs") + ' \u00b7 step ' + step + ' of ' + n + '</div>';
-    html += renderReferenceLinks();
+    var met = cp.correct === "yes";
+    var say = 'Part ' + step + ' of ' + n + ': ' + levelWord(meta, cp.g) + meta.label + '. ' + (met ? 'A criterion is met here.' : 'No criterion met here.');
+    html += '<div data-announce="' + esc(say) + '">';
+    html += miniImageRow(c, true, true);
+    html += '<div class="stage-tag">Part ' + step + ' of ' + n + '</div>';
+    html += renderReferenceLinks(step > 1);
     if (step > 1) {
-      html += '<div class="cp-trail">';
+      var rows = [];
       for (var i = 0; i < step - 1; i++) {
-        html += '<div class="cp-trail-item right"><span class="cp-trail-icon">\u2713</span><span class="cp-trail-label">' + esc(GROUP_META[c.checkpoints[i].g].label) + ' (' + GROUP_META[c.checkpoints[i].g].level + ')</span><span class="cp-trail-answer">No criterion met</span></div>';
+        var mi = GROUP_META[c.checkpoints[i].g];
+        rows.push({ fold: true, html: '<div class="cp-trail-item right"><span class="cp-trail-icon">\u2713</span><span class="cp-trail-label">' + esc(levelWord(mi, c.checkpoints[i].g) + mi.label) + '</span><span class="cp-trail-answer">None met</span></div>' });
       }
-      html += '</div>';
+      html += '<div class="cp-trail">' + trailHtml({ items: rows, noWord: 'none met' }) + '</div>';
     }
-    html += '<div class="cp-current"><div class="cp-group-label ' + meta.level + '">' + esc(meta.label) + '</div>';
+    html += '<div class="cp-current"><div class="cp-group-label ' + meta.level + '">' + esc(levelWord(meta, cp.g) + meta.label) + '</div>';
+    if (chips || (find && find.text)) html += '<div class="cp-find-label">What you found</div>';
     if (chips) {
       html += '<div class="vitals-grid">';
       Object.keys(chips).forEach(function (k) { html += '<div class="vital"><div class="v-label">' + esc(k) + '</div><div class="v-value">' + vitalValue(chips[k]) + '</div></div>'; });
@@ -1011,14 +1019,18 @@ function renderExample() {
     }
     if (find && find.text) html += findingList(find.text, "cp-find-text");
     html += critBlock(c, cp.g, meta);
-    if (cp.correct === "yes") {
+    if (cp.g === "vitals" && c.ageBandRef) {
+      html += '<div class="age-ref">High-risk thresholds for <b>' + esc(c.ageBandRef.band) + '</b>: heart rate outside <b>' + esc(c.ageBandRef.hr) + '</b>, respiratory rate outside <b>' + esc(c.ageBandRef.rr) + '</b>.</div>';
+    }
+    if (met) {
       html += '<div class="cp-feedback right"><div class="cp-feedback-title">A criterion is met here</div><div class="cp-feedback-body">' + esc(c.keyCriterion) + '. You can stop. Nothing further on the card needs checking.</div></div>';
     } else {
       html += '<div class="cp-feedback right"><div class="cp-feedback-title">No criterion met here</div><div class="cp-feedback-body">' + (step === n ? 'What is found does not match anything the card lists for this part. That was the last part of the card, so nothing is met.' : 'What is found does not match anything the card lists for this part, so move on to the next part.') + '</div></div>';
     }
     html += '</div>';
-    html += '<div class="cta-row">' + (step > 1 ? '<button class="btn btn-ghost" onclick="exampleStep(-1)">Previous step</button>' : '') +
-      '<button class="btn btn-primary" onclick="exampleStep(1)">' + (step === n ? 'See the decision' : 'Next step') + '</button></div>';
+    html += '<div class="cta-row">' + (step > 1 ? '<button class="btn btn-ghost" onclick="exampleStep(-1)">Previous part</button>' : '') +
+      '<button class="btn btn-primary" onclick="exampleStep(1)">' + (step === n ? 'See the decision' : 'Next part') + '</button></div>';
+    html += '</div>';
   } else {
     var meta2 = CATEGORY_META[c.correct];
     html += miniImageRow(c, false, true);
@@ -1030,10 +1042,11 @@ function renderExample() {
     else shows.push('You stop at the first part where a criterion is met.');
     shows.push('The card was open the whole time. Using it is the skill, not remembering it.');
     html += '<div class="reassess-note how-you-worked"><h4>What this example shows</h4><ul>' + shows.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div>';
-    html += '<div class="cta-row"><button class="btn btn-primary" onclick="exampleThenGuided()">Try Guided Triage Practice</button>' +
-      '<button class="btn btn-ghost" onclick="exampleStep(-1)">Previous step</button></div>';
+    html += '<div class="cta-row cta-stack"><button class="btn btn-primary" onclick="leaveExample()">Back to home</button>' +
+      '<button class="btn btn-ghost" onclick="exampleThenGuided()">Try Guided Triage Practice</button>' +
+      '<button class="btn btn-ghost" onclick="exampleStep(-1)">Previous part</button></div>';
   }
-  html += '<div class="end-session-row"><button type="button" class="end-session-link" onclick="leaveExample()">Leave the example</button></div>';
+  if (step <= n) html += '<div class="end-session-row"><button type="button" class="end-session-link" onclick="leaveExample()">Leave the example</button></div>';
   html += '</div>';
   appEl.innerHTML = html;
 }
@@ -1055,57 +1068,56 @@ function vitalValue(v) {
    with the typed list as the screen-reader text and as a fallback if the picture does not load. */
 var CRIT_SIZES = {"adult-airway_red":[769,122],"adult-airway_yellow":[779,182],"adult-circulation_red":[769,181],"adult-circulation_yellow":[779,223],"adult-disability_red":[769,218],"adult-disability_yellow":[779,223],"adult-other_red":[769,596],"adult-other_yellow":[779,501],"adult-unresponsive":[769,71],"adult-vitals":[539,550],"pediatric-airway_red":[769,139],"pediatric-airway_yellow":[779,182],"pediatric-circulation_red":[769,353],"pediatric-circulation_yellow":[779,223],"pediatric-disability_red":[769,223],"pediatric-disability_yellow":[779,137],"pediatric-other_red":[769,407],"pediatric-other_yellow":[779,596],"pediatric-unresponsive":[769,71],"pediatric-vitals":[539,598]};
 function preloadCrit(c, g) {
-  if (!c || !g || !CRIT_SIZES[c.population + "-" + g] || !(CRITERIA[c.population][g] || []).length) return;
+  if (!c || !g || !CRIT_SIZES[c.population + "-" + g]) return;
   try { var im = new Image(); im.src = "crit-" + c.population + "-" + g + ".png"; } catch (e) {}
 }
 function critBlock(c, g, meta) {
-  var list = CRITERIA[c.population][g];
-  if (!list || !list.length) return "";
+  var list = CRITERIA[c.population][g] || [];
+  if (!list.length && !CRIT_SIZES[c.population + "-" + g]) return "";
   var src = "crit-" + c.population + "-" + g + ".png";
-  var alt = "IITT card, " + meta.label + " (" + meta.level + "): " + list.join("; ");
+  var alt = "IITT card, " + meta.label + (meta.level === "vitals" ? "" : " (" + meta.level + ")") + (list && list.length ? ": " + list.join("; ") : "");
+  var tiny = CRIT_SIZES[c.population + "-" + g] && CRIT_SIZES[c.population + "-" + g][1] < 100;
   return '<div class="criteria-open crit-img-block"><div class="cp-why-title">The IITT card, for ' + esc(meta.label) + ':</div>' +
-    '<button type="button" class="crit-img-btn" onclick="this.classList.toggle(\'zoomed\')">' +
-    '<img class="crit-img" src="' + src + '"' + (CRIT_SIZES[c.population + "-" + g] ? ' width="' + CRIT_SIZES[c.population + "-" + g][0] + '" height="' + CRIT_SIZES[c.population + "-" + g][1] + '"' : '') + ' alt="' + esc(alt) + '" onerror="this.parentNode.parentNode.classList.add(\'crit-fail\')"></button>' +
-    '<div class="crit-hint"><button type="button" class="crit-act" onclick="this.parentNode.parentNode.querySelector(\'.crit-img-btn\').classList.toggle(\'zoomed\')">Enlarge or shrink picture</button>' +
-    '<button type="button" class="crit-act" onclick="this.parentNode.parentNode.classList.toggle(\'show-text\')">Show or hide as text list</button></div>' +
+    '<' + (tiny ? 'div class="crit-img-btn crit-static"' : 'button type="button" class="crit-img-btn" onclick="this.classList.toggle(\'zoomed\')"') + '>' +
+    '<img class="crit-img" src="' + src + '"' + (CRIT_SIZES[c.population + "-" + g] ? ' width="' + CRIT_SIZES[c.population + "-" + g][0] + '" height="' + CRIT_SIZES[c.population + "-" + g][1] + '"' : '') + ' alt="' + esc(alt) + '" onerror="this.parentNode.parentNode.classList.add(\'crit-fail\')"></' + (tiny ? 'div' : 'button') + '>' +
+    (tiny ? '' : '<div class="crit-hint"><button type="button" class="crit-act" onclick="this.parentNode.parentNode.querySelector(\'.crit-img-btn\').classList.toggle(\'zoomed\')">Enlarge or shrink picture</button>' +
+    (list.length ? '<button type="button" class="crit-act" onclick="this.parentNode.parentNode.classList.toggle(\'show-text\')">Show or hide as text list</button>' : '') + '</div>') +
     '<ul class="criteria-list crit-fallback">' + list.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
 }
 function levelWord(meta, g) {
   if (g === "unresponsive" || meta.level === "vitals") return "";
   return meta.level === "red" ? "Red: " : meta.level === "yellow" ? "Yellow: " : "";
 }
+function levelWord(meta, g) {
+  if (g === "unresponsive" || meta.level === "vitals") return "";
+  return meta.level === "red" ? "Red: " : meta.level === "yellow" ? "Yellow: " : "";
+}
+/* Rows of answered parts. Runs of three or more routine "No" rows fold into one line so the step being worked on stays near the top; a "Yes" or a wrong answer always stays in view, and the order is never changed. */
+function trailHtml(rows) {
+  var html = "", run = [];
+  function flush() {
+    if (run.length >= 3) html += '<details class="cp-trail-fold"><summary>' + run.length + ' earlier parts checked, ' + (rows.noWord || 'all No') + '</summary>' + run.join('') + '</details>';
+    else html += run.join('');
+    run = [];
+  }
+  rows.items.forEach(function (it) { if (it.fold) run.push(it.html); else { flush(); html += it.html; } });
+  flush();
+  return html;
+}
 function renderCheckpointTrail(c) {
   if (!state.cpLog.length) return "";
-  var html = '<div class="cp-trail">';
-  var foldRows = "", foldN = 0, restRows = "";
+  var items = [];
   state.cpLog.forEach(function (log) {
     var meta = GROUP_META[log.g];
     if (isFreeMode()) {
-      html += '<div class="cp-trail-item right">' +
-        '<span class="cp-trail-icon">\u2713</span>' +
-        '<span class="cp-trail-label">' + esc(levelWord(meta, log.g) + meta.label) + '</span>' +
-        '<span class="cp-trail-answer">Checked</span>' +
-        '</div>';
+      items.push({ fold: false, html: '<div class="cp-trail-item right"><span class="cp-trail-icon">\u2713</span><span class="cp-trail-label">' + esc(levelWord(meta, log.g) + meta.label) + '</span><span class="cp-trail-answer">Checked</span></div>' });
     } else {
       var icon2 = log.isRight ? "\u2713" : "\u2717";
-      var row = '<div class="cp-trail-item ' + (log.isRight ? "right" : "wrong") + (log.selected === "yes" ? " yes" : "") + '">' +
-        '<span class="cp-trail-icon">' + icon2 + '</span>' +
-        '<span class="cp-trail-label">' + esc(levelWord(meta, log.g) + meta.label) + '</span>' +
-        '<span class="cp-trail-answer">' + (log.selected === "yes" ? "Yes" : "No") + '</span>' +
-        '</div>';
-      if (log.isRight && log.selected !== "yes") { foldRows += row; foldN++; } else { restRows += row; }
+      items.push({ fold: log.isRight && log.selected !== "yes", html: '<div class="cp-trail-item ' + (log.isRight ? "right" : "wrong") + (log.selected === "yes" ? " yes" : "") + '">' +
+        '<span class="cp-trail-icon">' + icon2 + '</span><span class="cp-trail-label">' + esc(levelWord(meta, log.g) + meta.label) + '</span><span class="cp-trail-answer">' + (log.selected === "yes" ? "Yes" : "No") + '</span></div>' });
     }
   });
-  if (!isFreeMode()) {
-    /* Routine "No" rows fold away so the step being worked on stays near the top; a "Yes" or a wrong answer always stays in view. */
-    if (foldN >= 3) {
-      html += '<details class="cp-trail-fold"><summary>' + foldN + ' earlier parts checked, all No</summary>' + foldRows + '</details>' + restRows;
-    } else {
-      html += foldRows + restRows;
-    }
-  }
-  html += '</div>';
-  return html;
+  return '<div class="cp-trail">' + trailHtml({ items: items }) + '</div>';
 }
 
 function renderCheckpoint(c) {
@@ -1123,7 +1135,7 @@ function renderCheckpoint(c) {
 
   html += renderCheckpointTrail(c);
 
-  html += '<div class="cp-current">';
+  html += '<div class="cp-current"' + (state.cpLocked ? '' : ' data-announce="' + esc('Part ' + (state.cpIndex + 1) + ' of ' + c.checkpoints.length + ': ' + levelWord(meta, cp.g) + meta.label + '. ' + meta.question) + '"') + '>';
   html += '<div class="cp-group-label ' + meta.level + '">' + esc(levelWord(meta, cp.g) + meta.label) + '</div>';
 
   /* Show what the learner would find at this step. These are the same
@@ -1185,6 +1197,20 @@ function submitCheckpoint() {
   state.cpLog.push({ g: cp.g, selected: state.cpSelected, isRight: isRight });
   logEvent("checkpoint_answered", { group: cp.g, selected: state.cpSelected, correct_answer: cp.correct, is_right: isRight, seq: nextGatherSeq() });
   renderPractice();
+  revealFeedback();
+}
+/* After Confirm the verdict and the Continue button are brought into view, and focus moves to the verdict so a screen reader reads it first. */
+function revealFeedback() {
+  var fb = appEl.querySelector(".cp-feedback");
+  if (!fb) return;
+  fb.setAttribute("tabindex", "-1");
+  fb.focus({ preventScroll: true });
+  var btn = appEl.querySelector(".submit-row .btn") || fb;
+  var over = btn.getBoundingClientRect().bottom - window.innerHeight + 16;
+  var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (over > 0) window.scrollTo({ top: window.pageYOffset + over, behavior: calm ? "auto" : "smooth" });
+  var live = document.getElementById("sr-live");
+  if (live) live.textContent = (fb.innerText || "").replace(/\s+/g, " ").trim();
 }
 function advanceCheckpoint() {
   var c = caseById(state.queue[state.qIndex]);
@@ -1314,7 +1340,7 @@ function renderReady(c) {
   if (state.checked.length) {
     html += '<h4 class="tp-conf-title">Which part of the card decided it?</h4><div class="reason-list" role="group" aria-label="Which part of the card decided it?">';
     canonicalGroups().filter(isChecked).forEach(function (g) {
-      html += '<button type="button" class="reason-btn' + (state.reason === g ? ' selected' : '') + '" aria-pressed="' + (state.reason === g) + '" onclick="selectReason(\'' + g + '\')">' + esc(GROUP_META[g].label) + ' <span class="reason-level">(' + esc(GROUP_META[g].level) + ')</span></button>';
+      html += '<button type="button" class="reason-btn' + (state.reason === g ? ' selected' : '') + '" aria-pressed="' + (state.reason === g) + '" onclick="selectReason(\'' + g + '\')">' + esc(GROUP_META[g].label) + (GROUP_META[g].level === 'vitals' ? '' : ' <span class="reason-level">(' + esc(GROUP_META[g].level) + ')</span>') + '</button>';
     });
     html += '<button type="button" class="reason-btn' + (state.reason === "none" ? ' selected' : '') + '" aria-pressed="' + (state.reason === "none") + '" onclick="selectReason(\'none\')">Nothing I checked met a criterion</button></div>';
   }
@@ -1470,7 +1496,7 @@ function requiredParts(deciding) {
   var can = canonicalGroups();
   return deciding ? can.slice(0, can.indexOf(deciding) + 1) : can;
 }
-function partName(g) { return GROUP_META[g].label + ' (' + GROUP_META[g].level + ')'; }
+function partName(g) { return GROUP_META[g].label + (GROUP_META[g].level === 'vitals' ? '' : ' (' + GROUP_META[g].level + ')'); }
 function nameList(arr) {
   var n = arr.map(partName);
   if (n.length <= 3) return n.join(', ');
@@ -1530,7 +1556,7 @@ function processFeedback(c, rec) {
   var lines = [];
   var d = rec.deciding_group;
   var f = processFacts(rec);
-  function nm(g) { return GROUP_META[g].label + ' (' + GROUP_META[g].level + ')'; }
+  function nm(g) { return partName(g); }
   if (rec.reason_group) {
     var named = rec.reason_group === "none" ? "nothing you checked met a criterion" : nm(rec.reason_group);
     var truth = d ? nm(d) : "nothing on the card met a criterion";
@@ -1706,8 +1732,8 @@ function renderPracticeSummary() {
     var rowTitle = (cc.population === "adult" ? "Adult" : "Paediatric") + ", " + cc.age;
     var verdict = outcomeLabel(r.response_classification);
     var dgR = decidingGroup(cc);
-    var decidedBy = dgR ? GROUP_META[dgR].label + " (" + GROUP_META[dgR].level + ")" : "Nothing on the card met a criterion";
-    var namedR = r.reason_group ? (r.reason_group === "none" ? "nothing you checked met a criterion" : GROUP_META[r.reason_group].label + " (" + GROUP_META[r.reason_group].level + ")") : "";
+    var decidedBy = dgR ? partName(dgR) : "Nothing on the card met a criterion";
+    var namedR = r.reason_group ? (r.reason_group === "none" ? "nothing you checked met a criterion" : partName(r.reason_group)) : "";
     html += '<details class="case-review-item"><summary><span class="cr-title">' + esc(rowTitle) + '</span><span class="cr-verdict">' + (good ? "\u2713 " : "\u2717 ") + verdict + '</span></summary>' +
       '<div class="cr-body"><p class="reading">' + esc(cc.arrival) + '</p>' +
       '<p class="reading">You chose <b>' + CATEGORY_META[r.selected_triage_category].label + '</b>. Correct category: <b>' + CATEGORY_META[cc.correct].label + '</b>.</p>' +

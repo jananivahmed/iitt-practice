@@ -633,3 +633,5 @@ table.pop-table:not(.age-table) th:first-child,table.pop-table:not(.age-table) t
 .example-group-body{display:flex; flex-direction:column; gap:8px; padding:0 10px 10px;}
 .example-group-body .example-btn{border-width:1.5px;}
 @media (prefers-reduced-motion:reduce){.example-group summary::after{transition:none;}}
+.cta-row.cta-stack{display:flex; flex-direction:column; gap:10px;}
+.crit-static{cursor:default;}

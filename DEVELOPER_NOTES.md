@@ -177,3 +177,13 @@ In Triage Practice a right category is `correct` only if the learner checked the
 ## Worked examples: all cases (v0.12.5)
 
 Every case in cases.json is now offered as a worked example, grouped Adult / Paediatric and labelled by its case title only (no category or hint). The list is built from CASES by `exampleListHtml()`; the old hand-picked EXAMPLES array is gone. Planned for deployment: the current 10 cases stay as worked examples and new, separate cases are used for Guided and Triage Practice, so a learner never practises on a case they have already seen solved. Until then, all three modes draw on the same 10 cases.
+
+## Journey review fixes (v0.13.0)
+
+- Guided: after Confirm the verdict and Continue are scrolled into view (`revealFeedback`), focus moves to the verdict, and it is announced. Before, the page jumped to the top and Continue sat below the fold.
+- Answered-parts list (`trailHtml`): runs of three or more routine "No" rows fold into one line; a "Yes" or a wrong answer stays visible and the order is never changed.
+- Worked example now uses the same layout as Guided: compact reference link after part 1, folded earlier parts, "What you found" label, level in the coloured pill, Age-band vitals button and threshold box, "Part n of N" with Next part / Previous part. An example in progress survives a reload.
+- Screen readers: screens set `data-announce` (for example "Part 6 of 10: Yellow: Airway & breathing. No criterion met here.") which `announceScreen` reads out.
+- `partName(g)` is the one place part names are built; vital signs no longer show "(vitals)".
+- The Unresponsive card crop is shown (as a static picture) so every part has its card picture.
+- Triage Practice home text says "check", matching the rows ("Tap to check") and the report.
