@@ -594,3 +594,28 @@ table.pop-table:not(.age-table) th:first-child,table.pop-table:not(.age-table) t
   .crit-img-btn{margin-left:-20px; margin-right:-20px; width:calc(100% + 40px);}
   .crit-img{border-radius:0;}
 }
+
+.crit-img{height:auto;}
+
+/* ---------- v0.12.0 ---------- */
+.under-triage{text-align:left; margin-top:12px; border-left:4px solid var(--ink);}
+.under-triage h4{margin:0 0 6px; font-size:16px;}
+.under-triage p{margin:0 0 6px; line-height:1.5;}
+.under-triage p:last-child{margin-bottom:0;}
+
+.decision-link{font-size:16px; line-height:1.5; color:var(--ink-soft); background:var(--tile); border-radius:4px; padding:10px 12px; margin:0 0 12px; text-align:left;}
+.decision-link b{color:var(--ink);}
+
+/* v0.12.3 salience */
+.ref-compact{margin:0 0 10px; font-size:15px; text-align:left;}
+.ref-compact summary{cursor:pointer; color:var(--link); font-weight:700; min-height:32px; display:flex; align-items:center;}
+.ref-compact .ref-links{margin-top:6px;}
+.cp-trail-fold{border-bottom:1px solid var(--line);}
+.cp-trail-fold summary{cursor:pointer; padding:10px 0; font-size:15px; color:var(--ink-soft); min-height:44px; display:flex; align-items:center; border-top:1px solid var(--line);}
+.cp-trail-fold .cp-trail-item:first-of-type{border-top:0;}
+.cp-trail-item.yes{background:var(--tile); border-left:4px solid var(--ink); padding:8px 10px 8px 8px; font-weight:700;}
+.cp-trail-item.yes .cp-trail-label{font-weight:700;}
+.cp-trail-item.yes .cp-trail-answer{font-size:17px;}
+.cp-find-label{font-size:15px; font-weight:700; color:var(--ink-soft); margin:12px 0 6px; text-align:left;}
+.crit-hint{display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 0;}
+.crit-act{font:inherit; font-size:15px; font-weight:600; color:var(--ink); background:var(--surface,#fff); border:1.5px solid var(--ink); border-radius:4px; padding:8px 12px; min-height:44px; cursor:pointer;}

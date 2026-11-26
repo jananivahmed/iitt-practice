@@ -170,3 +170,6 @@ In Triage Practice, a green answer (no deciding part) is only `correct` when all
 
 ## Card pictures in Guided and Worked Example (v0.11.0)
 The criteria for each part are shown as pictures cropped from refcard-adult.png / refcard-pediatric.png (crit-<population>-<group>.png), with the typed list as alt text, a "show as text" toggle, and a fallback if a picture fails. If the cards are ever updated, regenerate the crops. The adult "Other" crop includes the "Pregnant with any of" section, which the typed list in app.js omits. CLINICIAN REVIEW REQUIRED: confirm that section belongs to the Other (red) checkpoint.
+
+## Prerequisite parts and under-triage (v0.12.0)
+In Triage Practice a right category is `correct` only if the learner checked the deciding part AND every part before it in the card order (red, then yellow, then vitals); for green, all 10. Otherwise `correct_unsupported`; the feedback names the skipped parts. Under-triage means a less urgent category than needed; urgency runs green, yellow, up-triage, red (`URGENCY_RANK`, confirmed by the clinician), so yellow for an up-triage case is under-triage and up-triage for a yellow case is over-triage. Feedback (both modes) shows an "Under-triage" box using the card's own destination wording (`CATEGORY_DEST`). CLINICIAN REVIEW REQUIRED: confirm the prerequisite-parts rule.

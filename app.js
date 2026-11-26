@@ -336,14 +336,13 @@ function resetCaseState() {
 }
 
 /* ---------------- scoring ---------------- */
+/* Urgency order, least to most: green, yellow, up-triage, red. */
+var URGENCY_RANK = { green: 0, yellow: 1, uptriage: 2, red: 3 };
 function classify(correct, selected) {
   if (correct === selected) return { result: "correct", direction: null };
-  /* Wrong answers are recorded as "incorrect". The direction is a secondary
-     detail: under or over relative to the correct category, or "na" when the
-     correct answer is up-triage (which has no place on the red/yellow/green scale). */
-  if (correct === "uptriage") return { result: "incorrect", direction: "na" };
-  var rank = { green: 0, yellow: 1, red: 2 };
-  return { result: "incorrect", direction: rank[selected] < rank[correct] ? "under" : "over" };
+  /* Wrong answers are recorded as "incorrect". The direction is a secondary detail:
+     under-triage (a less urgent category than needed) or over-triage (a more urgent one). */
+  return { result: "incorrect", direction: URGENCY_RANK[selected] < URGENCY_RANK[correct] ? "under" : "over" };
 }
 /* Older saved records used "under" / "over" as the classification. Read them
    as incorrect with that direction so earlier practice still counts. */
@@ -380,7 +379,7 @@ function confidenceNote(list) {
 function directionNote(list) {
   var d = directionCounts(list);
   if (!d.incorrect) return "";
-  return '<p class="dir-note">Of the ' + d.incorrect + ' incorrect: ' + d.under + ' under-triaged, ' + d.over + ' over-triaged, ' + d.na + ' not applicable (up-triage cases).</p>';
+  return '<p class="dir-note">Of the ' + d.incorrect + ' incorrect: ' + d.under + ' under-triaged, ' + d.over + ' over-triaged' + (d.na ? ', ' + d.na + ' not classed (older answers)' : '') + '.' + (d.under ? ' Under-triage is the most important error to learn from, because it delays care for the sickest patients.' : '') + '</p>';
 }
 /* "decide" (Triage practice) gathers freely rather than walking every
    checkpoint in order; walkthrough mode does not. */
@@ -740,7 +739,14 @@ function renderAgeBandVitals() {
   html += '</div>';
   appEl.innerHTML = html;
 }
-function renderReferenceLinks() {
+function renderReferenceLinks(compact) {
+  if (compact) {
+    return '<details class="ref-compact"><summary>Reference cards</summary><div class="ref-links">' +
+      '<button type="button" class="ref-link" onclick="openRefCard(\'adult\')">Adult IITT card (age \u226512)</button>' +
+      '<button type="button" class="ref-link" onclick="openRefCard(\'pediatric\')">Paediatric IITT card (age &lt;12)</button>' +
+      '<button type="button" class="ref-link" onclick="openRefCard(\'reference\')">Reference card (trauma, burns &amp; other high-risk criteria)</button>' +
+      '</div></details>';
+  }
   return '<div class="ref-panel ref-open">' +
     '<div class="ref-summary">Reference cards (use them as you work)</div>' +
     '<div class="ref-links">' +
@@ -925,6 +931,7 @@ function endSessionRow() {
   return '<div class="end-session-row"><button type="button" class="end-session-link" onclick="openEndSessionConfirm()">End session and see report</button></div>';
 }
 function renderArrival(c) {
+  if (c.checkpoints && c.checkpoints.length) preloadCrit(c, c.checkpoints[0].g);
   var num = state.qIndex + 1;
   var pct = Math.round((num - 1) / state.queue.length * 100);
   var html = '<div class="card">';
@@ -966,6 +973,7 @@ function renderExample() {
   var c = caseById(state.example.id);
   var n = c.checkpoints.length;
   var step = state.example.step;
+  if (c.checkpoints[step]) preloadCrit(c, c.checkpoints[step].g);
   var popLabel = c.population === "adult" ? "Adult" : "Paediatric";
   var html = '<div class="card">';
   html += '<div class="progress-row"><span class="progress-label">Worked example</span><span class="pop-badge">' + popLabel + ', ' + esc(c.age) + '</span></div>';
@@ -1046,6 +1054,11 @@ function vitalValue(v) {
 }
 /* The criteria for one part of the card, shown as the card's own picture (cropped from the official IITT card),
    with the typed list as the screen-reader text and as a fallback if the picture does not load. */
+var CRIT_SIZES = {"adult-airway_red":[769,122],"adult-airway_yellow":[779,182],"adult-circulation_red":[769,181],"adult-circulation_yellow":[779,223],"adult-disability_red":[769,218],"adult-disability_yellow":[779,223],"adult-other_red":[769,596],"adult-other_yellow":[779,501],"adult-unresponsive":[769,71],"adult-vitals":[539,550],"pediatric-airway_red":[769,139],"pediatric-airway_yellow":[779,182],"pediatric-circulation_red":[769,353],"pediatric-circulation_yellow":[779,223],"pediatric-disability_red":[769,223],"pediatric-disability_yellow":[779,137],"pediatric-other_red":[769,407],"pediatric-other_yellow":[779,596],"pediatric-unresponsive":[769,71],"pediatric-vitals":[539,598]};
+function preloadCrit(c, g) {
+  if (!c || !g || !CRIT_SIZES[c.population + "-" + g] || !(CRITERIA[c.population][g] || []).length) return;
+  try { var im = new Image(); im.src = "crit-" + c.population + "-" + g + ".png"; } catch (e) {}
+}
 function critBlock(c, g, meta) {
   var list = CRITERIA[c.population][g];
   if (!list || !list.length) return "";
@@ -1053,30 +1066,45 @@ function critBlock(c, g, meta) {
   var alt = "IITT card, " + meta.label + " (" + meta.level + "): " + list.join("; ");
   return '<div class="criteria-open crit-img-block"><div class="cp-why-title">The IITT card, for ' + esc(meta.label) + ':</div>' +
     '<button type="button" class="crit-img-btn" onclick="this.classList.toggle(\'zoomed\')">' +
-    '<img class="crit-img" src="' + src + '" alt="' + esc(alt) + '" onerror="this.parentNode.parentNode.classList.add(\'crit-fail\')"></button>' +
-    '<p class="crit-hint">Tap the picture to enlarge it. <button type="button" class="crit-text-btn" onclick="this.parentNode.parentNode.classList.toggle(\'show-text\')">Show or hide as a text list</button></p>' +
+    '<img class="crit-img" src="' + src + '"' + (CRIT_SIZES[c.population + "-" + g] ? ' width="' + CRIT_SIZES[c.population + "-" + g][0] + '" height="' + CRIT_SIZES[c.population + "-" + g][1] + '"' : '') + ' alt="' + esc(alt) + '" onerror="this.parentNode.parentNode.classList.add(\'crit-fail\')"></button>' +
+    '<div class="crit-hint"><button type="button" class="crit-act" onclick="this.parentNode.parentNode.querySelector(\'.crit-img-btn\').classList.toggle(\'zoomed\')">Enlarge or shrink picture</button>' +
+    '<button type="button" class="crit-act" onclick="this.parentNode.parentNode.classList.toggle(\'show-text\')">Show or hide as text list</button></div>' +
     '<ul class="criteria-list crit-fallback">' + list.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
+}
+function levelWord(meta, g) {
+  if (g === "unresponsive" || meta.level === "vitals") return "";
+  return meta.level === "red" ? "Red: " : meta.level === "yellow" ? "Yellow: " : "";
 }
 function renderCheckpointTrail(c) {
   if (!state.cpLog.length) return "";
   var html = '<div class="cp-trail">';
+  var foldRows = "", foldN = 0, restRows = "";
   state.cpLog.forEach(function (log) {
     var meta = GROUP_META[log.g];
     if (isFreeMode()) {
       html += '<div class="cp-trail-item right">' +
         '<span class="cp-trail-icon">\u2713</span>' +
-        '<span class="cp-trail-label">' + esc(meta.label) + '</span>' +
+        '<span class="cp-trail-label">' + esc(levelWord(meta, log.g) + meta.label) + '</span>' +
         '<span class="cp-trail-answer">Checked</span>' +
         '</div>';
     } else {
       var icon2 = log.isRight ? "\u2713" : "\u2717";
-      html += '<div class="cp-trail-item ' + (log.isRight ? "right" : "wrong") + '">' +
+      var row = '<div class="cp-trail-item ' + (log.isRight ? "right" : "wrong") + (log.selected === "yes" ? " yes" : "") + '">' +
         '<span class="cp-trail-icon">' + icon2 + '</span>' +
-        '<span class="cp-trail-label">' + esc(meta.label) + '</span>' +
+        '<span class="cp-trail-label">' + esc(levelWord(meta, log.g) + meta.label) + '</span>' +
         '<span class="cp-trail-answer">' + (log.selected === "yes" ? "Yes" : "No") + '</span>' +
         '</div>';
+      if (log.isRight && log.selected !== "yes") { foldRows += row; foldN++; } else { restRows += row; }
     }
   });
+  if (!isFreeMode()) {
+    /* Routine "No" rows fold away so the step being worked on stays near the top; a "Yes" or a wrong answer always stays in view. */
+    if (foldN >= 3) {
+      html += '<details class="cp-trail-fold"><summary>' + foldN + ' earlier parts checked, all No</summary>' + foldRows + '</details>' + restRows;
+    } else {
+      html += foldRows + restRows;
+    }
+  }
   html += '</div>';
   return html;
 }
@@ -1084,6 +1112,7 @@ function renderCheckpointTrail(c) {
 function renderCheckpoint(c) {
   var num = state.qIndex + 1;
   var cp = c.checkpoints[state.cpIndex];
+  if (c.checkpoints[state.cpIndex + 1]) preloadCrit(c, c.checkpoints[state.cpIndex + 1].g);
   var meta = GROUP_META[cp.g];
   var critList = CRITERIA[c.population][cp.g];
   var stepPct = Math.round((num - 1) / state.queue.length * 100 + (1 / state.queue.length) * ((state.cpIndex + (state.cpLocked ? 1 : 0.5)) / c.checkpoints.length) * 100);
@@ -1091,13 +1120,12 @@ function renderCheckpoint(c) {
   var html = '<div class="card">';
   html += caseHeader(c, num, stepPct);
   html += miniImageRow(c, true);
-  if (meta.level !== "vitals") html += '<div class="stage-tag">' + (meta.level === "red" ? "Red criteria" : "Yellow criteria") + '</div>';
-  html += renderReferenceLinks();
+  html += renderReferenceLinks(state.cpIndex > 0);
 
   html += renderCheckpointTrail(c);
 
   html += '<div class="cp-current">';
-  html += '<div class="cp-group-label ' + meta.level + '">' + esc(meta.label) + '</div>';
+  html += '<div class="cp-group-label ' + meta.level + '">' + esc(levelWord(meta, cp.g) + meta.label) + '</div>';
 
   /* Show what the learner would find at this step. These are the same
      findings Triage Practice shows when a card section is opened, so both
@@ -1105,6 +1133,7 @@ function renderCheckpoint(c) {
      checkpoint's own values. */
   var stepFind = (c.findings || {})[cp.g];
   var stepChips = stepFind ? stepFind.chips : cp.chips;
+  if (stepChips || (stepFind && stepFind.text)) html += '<div class="cp-find-label">What you found</div>';
   if (stepChips) {
     html += '<div class="vitals-grid">';
     Object.keys(stepChips).forEach(function (k) {
@@ -1336,6 +1365,10 @@ function renderDecision(c) {
   html += caseHeader(c, num, pct);
   html += miniImageRow(c, true);
   html += renderCheckpointTrail(c);
+  var dgD = decidingGroup(c);
+  html += '<p class="decision-link">' + (dgD
+    ? 'A criterion was met at <b>' + esc(partName(dgD)) + '</b>. Which category does that point to?'
+    : 'No criterion was met at any part of the card. Which category does that point to?') + '</p>';
   html += '<div class="decision-prompt">Based on everything you found, what is the appropriate IITT triage category?</div>';
   html += '<div class="decision-grid">';
   ["red", "yellow", "green", "uptriage"].forEach(function (k) {
@@ -1374,8 +1407,7 @@ function submitDecision() {
   if (isFreeMode() && result === "correct") {
     var reasonWrong = !!state.reason && (state.reason === "none" ? !!deciding : state.reason !== deciding);
     /* Green is only reached once every part of the card has been checked. */
-    var noBasis = !checkedGroups.length || (!!deciding && checkedGroups.indexOf(deciding) === -1) ||
-      (!deciding && checkedGroups.length < Object.keys(GROUP_META).length);
+    var noBasis = !checkedGroups.length || requiredParts(deciding).some(function (g) { return checkedGroups.indexOf(g) === -1; });
     if (reasonWrong) result = "correct_wrong_reason";
     else if (noBasis) result = "correct_unsupported";
   }
@@ -1404,6 +1436,8 @@ function submitDecision() {
   };
   var facts = processFacts({ deciding_group: rec.deciding_group, reason_group: rec.reason_group, check_order: rec.check_order });
   rec.reason_correct = facts.reasonRight;
+  rec.skipped_before = isFreeMode() ? facts.skipped.length : null;
+  rec.under_triage = isUnderTriage(rec.selected_triage_category, c.correct);
   rec.in_order = isFreeMode() ? !facts.outOfOrder : null;
   rec.extra_checked = isFreeMode() ? facts.extra.length : null;
   addResponse(rec);
@@ -1431,11 +1465,34 @@ function outcomeLabel(cl) {
     : cl === "correct_wrong_reason" ? "Right category, wrong reason"
     : "Incorrect";
 }
+/* Parts of the card a learner needs to have checked before a category is supported:
+   the deciding part and everything before it, or every part for green. */
+function requiredParts(deciding) {
+  var can = canonicalGroups();
+  return deciding ? can.slice(0, can.indexOf(deciding) + 1) : can;
+}
+function partName(g) { return GROUP_META[g].label + ' (' + GROUP_META[g].level + ')'; }
+function nameList(arr) {
+  var n = arr.map(partName);
+  if (n.length <= 3) return n.join(', ');
+  return n.slice(0, 3).join(', ') + ' and ' + (n.length - 3) + ' more';
+}
+var CATEGORY_DEST = {
+  red: "Move to high acuity resuscitation area immediately",
+  yellow: "Move to clinical treatment area",
+  green: "Move to low acuity or waiting area",
+  uptriage: "Up-triage or immediate review by supervising clinician"
+};
+/* Under-triage: a less urgent category than the patient needed. Urgency runs green, yellow, up-triage, red. */
+function isUnderTriage(selected, correct) {
+  if (!selected || selected === correct) return false;
+  return URGENCY_RANK[selected] < URGENCY_RANK[correct];
+}
 function partialHead(u, w) { return (u ? '<th>Not enough checked</th>' : '') + (w ? '<th>Wrong reason</th>' : ''); }
 function partialCells(b, u, w) { return (u ? '<td>' + b.unsupported + '</td>' : '') + (w ? '<td>' + b.wrongReason + '</td>' : ''); }
 function partialNote(u, w) {
   var t = '';
-  if (u) t += '<b>Right category, not enough checked</b> means you chose the correct category without opening the part of the card that decides it. For green, that means every part of the card. ';
+  if (u) t += '<b>Right category, not enough checked</b> means you chose the correct category without checking everything the answer depends on: the part that decides it and every part before it on the card (for green, every part). ';
   if (w) t += '<b>Right category, wrong reason</b> means the category was correct but the part you named did not decide it. ';
   return t ? '<p class="partial-note">' + t + 'These are not counted as correct.</p>' : '';
 }
@@ -1450,7 +1507,8 @@ function processFacts(rec) {
     if (canon.indexOf(checked[i]) < canon.indexOf(checked[i - 1])) outOfOrder = [checked[i - 1], checked[i]];
   }
   var extra = d ? checked.filter(function (g) { return canon.indexOf(g) > canon.indexOf(d); }) : [];
-  return { reasonRight: reasonRight, outOfOrder: outOfOrder, extra: extra, checkedCount: checked.length };
+  var skipped = requiredParts(d).filter(function (g) { return g !== d && checked.indexOf(g) === -1; });
+  return { reasonRight: reasonRight, outOfOrder: outOfOrder, extra: extra, skipped: skipped, checkedCount: checked.length };
 }
 /* One block summarising Triage Practice process across many cases. */
 function processSummary(list) {
@@ -1501,9 +1559,19 @@ function renderFeedback(c) {
   var infoLine;
   if (isFreeMode()) {
     var dg = rec.deciding_group;
+    var f0 = processFacts(rec);
     infoLine = 'You checked ' + rec.info_items_gathered + ' of ' + rec.info_items_available + ' parts of the card.';
-    if (!dg) infoLine += (rec.info_items_gathered >= rec.info_items_available ? ' You checked every part, which is what green needs.' : ' Nothing on the card is met in this case, and green needs every part checked first. Open the card whenever you need to: the aim is to use it, not to remember it.');
-    if (dg) infoLine += ' The finding that decides this case is under <b>' + esc(GROUP_META[dg].label) + ' (' + GROUP_META[dg].level + ')</b>. ' + (rec.deciding_group_checked ? 'You checked it.' : 'You did not check it this time. Open the card whenever you need to: the aim is to use it, not to remember it.');
+    var catWord = CATEGORY_META[c.correct].label;
+    if (dg) {
+      infoLine += ' The finding that decides this case is under <b>' + esc(partName(dg)) + '</b>. ';
+      if (!rec.deciding_group_checked) infoLine += 'You did not check it this time. Open the card whenever you need to: the aim is to use it, not to remember it.';
+      else if (f0.skipped.length) infoLine += 'You checked it, but to be sure of ' + catWord + ' you also need to rule out the parts before it. You skipped <b>' + esc(nameList(f0.skipped)) + '</b>.';
+      else infoLine += 'You checked it.';
+    } else if (f0.skipped.length) {
+      infoLine += ' Nothing on the card is met in this case, and green needs every part checked first. You skipped <b>' + esc(nameList(f0.skipped)) + '</b>.';
+    } else {
+      infoLine += ' You checked every part, which is what green needs.';
+    }
   } else {
     infoLine = 'You correctly identified ' + rightCount + ' of ' + c.checkpoints.length + ' criteria checks along the way.';
   }
@@ -1514,7 +1582,11 @@ function renderFeedback(c) {
   html += miniImageRow(c);
   var bannerSub = "You selected <b>" + selMeta.label + "</b>";
   if (result === "incorrect") bannerSub += ".";
-  else if (result === "correct_unsupported") bannerSub += (decidingGroup(c) ? ". That is the correct category, but you did not open the part of the card that decides it" : ". That is the correct category, but green needs every part of the card checked");
+  else if (result === "correct_unsupported") {
+    bannerSub += !decidingGroup(c) ? ". That is the correct category, but green needs every part of the card checked"
+      : (!rec.deciding_group_checked ? ". That is the correct category, but you did not open the part of the card that decides it"
+      : ". That is the correct category, but you skipped parts before it that need ruling out");
+  }
   else if (result === "correct_wrong_reason") bannerSub += ". That is the correct category, but the part you named is not the one that decided it";
   html += '<div class="feedback-banner ' + bannerClass + '"><div class="f-title">' + bannerTitle + '</div><div class="f-sub">' + bannerSub + '</div>' +
     (result === "incorrect" ? '<span class="answer-chip ' + meta.chip + '">Correct category: ' + meta.label + '</span>' : '') + '</div>';
@@ -1524,6 +1596,18 @@ function renderFeedback(c) {
   }
   html += '<div class="reassess-note how-you-worked" style="margin-top:10px;"><h4>How you worked</h4><ul>' + howLines.map(function (l) { return '<li>' + l + '</li>'; }).join('') + '</ul></div>';
 
+  if (rec.under_triage) {
+    var lastYes = null;
+    state.cpLog.forEach(function (l) { if (l.selected === "yes" && l.isRight) lastYes = l.g; });
+    var link = '';
+    if (isFreeMode() && rec.deciding_group && rec.reason_group === rec.deciding_group) lastYes = rec.deciding_group;
+    if (lastYes && GROUP_META[lastYes]) {
+      var lvl = GROUP_META[lastYes].level;
+      link = ' You found the part that decided it (<b>' + esc(partName(lastYes)) + '</b>). A criterion met under ' + (lvl === 'vitals' ? 'high-risk vital signs' : 'a ' + lvl + ' part') + ' means <b>' + CATEGORY_META[c.correct].label + '</b>.';
+    }
+    html += '<div class="reassess-note under-triage"><h4>Under-triage</h4><p>You chose <b>' + selMeta.label + '</b>, which on the card means \u201c' + esc(CATEGORY_DEST[state.selected]) + '\u201d. This patient needed <b>' + meta.label + '</b>: \u201c' + esc(CATEGORY_DEST[c.correct]) + '\u201d.' + link + '</p>' +
+      '<p>Under-triage delays care for the patients who most need it, so it is the most important error to learn from.</p></div>';
+  }
   html += '<div class="detail-section"><h4>Why</h4><p><b>' + esc(c.keyCriterion) + '.</b> ' + esc(c.feedbackWhy) + '</p></div>';
   var dgFb = decidingGroup(c);
   var cardKey = c.population === "adult" ? "adult" : "pediatric";
