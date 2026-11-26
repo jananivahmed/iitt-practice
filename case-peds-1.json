@@ -73,5 +73,9 @@
       }
     }
   },
-  "findingsReviewed": true
+  "findingsReviewed": true,
+  "exampleShows": [
+    "Chest indrawing meets a red criterion in Airway & breathing.",
+    "Chest indrawing indicates accessory muscle use and respiratory distress."
+  ]
 }

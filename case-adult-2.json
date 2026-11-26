@@ -84,5 +84,9 @@
       "text": "Not obtained: unsafe to approach."
     }
   },
-  "findingsReviewed": true
+  "findingsReviewed": true,
+  "exampleShows": [
+    "Violent or aggressive behaviour meets a red criterion under Other.",
+    "The category is decided by his behaviour and the immediate safety risk it poses."
+  ]
 }

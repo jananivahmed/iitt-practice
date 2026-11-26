@@ -115,5 +115,9 @@
       }
     }
   },
-  "findingsReviewed": true
+  "findingsReviewed": true,
+  "exampleShows": [
+    "No red or yellow criterion is met.",
+    "Her heart rate of 165 is above the 160 high-risk threshold for ages 1–4 years, so she needs immediate review by a supervising clinician. The clinician or local protocol decides her final category."
+  ]
 }

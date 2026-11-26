@@ -65,5 +65,9 @@
       }
     }
   },
-  "findingsReviewed": true
+  "findingsReviewed": true,
+  "exampleShows": [
+    "Unresponsive is the first red criterion on the card.",
+    "Once it is met, you stop checking and move her to the high acuity area immediately."
+  ]
 }

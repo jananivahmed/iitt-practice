@@ -88,5 +88,9 @@
       }
     }
   },
-  "findingsReviewed": true
+  "findingsReviewed": true,
+  "exampleShows": [
+    "Wheezing meets a yellow criterion in Airway & breathing.",
+    "No red criterion is met, so the category is yellow, not red."
+  ]
 }

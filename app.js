@@ -1079,11 +1079,13 @@ function renderExample() {
     html += miniImageRow(c, false, true);
     html += '<div class="feedback-banner correct"><div class="f-title">' + meta2.label + '</div><div class="f-sub">This is the triage category for this patient.</div></div>';
     html += '<div class="detail-section"><h4>Why</h4><p><b>' + esc(c.keyCriterion) + '.</b> ' + esc(c.feedbackWhy) + '</p></div>';
-    var shows = ['The card is worked in order: red, then yellow, then high-risk vital signs.'];
-    if (c.correct === "green") shows.push('Green is only reached after every part of the card has been checked and nothing is met.');
-    else if (c.correct === "uptriage") shows.push('High-risk vital signs come last. They matter even when no red or yellow criterion is met.');
-    else shows.push('You stop at the first part where a criterion is met.');
-    shows.push('The card was open the whole time. Using it is the skill, not remembering it.');
+    /* Case-specific lines live in the case file (exampleShows). The generic outcome lines are only a fallback for a case without them. */
+    var shows = (c.exampleShows && c.exampleShows.length) ? c.exampleShows.slice() : [];
+    if (!shows.length) {
+      if (c.correct === "green") shows.push('Green is only reached after every part of the card has been checked and nothing is met.');
+      else if (c.correct === "uptriage") shows.push('High-risk vital signs come last. They matter even when no red or yellow criterion is met.');
+      else shows.push('You stop at the first part where a criterion is met.');
+    }
     html += '<div class="reassess-note how-you-worked"><h4>What this example shows</h4><ul>' + shows.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div>';
     html += '<div class="cta-row cta-stack"><button class="btn btn-primary" onclick="leaveExample()">Back to home</button>' +
       '<button class="btn btn-ghost" onclick="exampleThenGuided()">Try Guided Triage Practice</button>' +

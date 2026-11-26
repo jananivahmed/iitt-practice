@@ -197,3 +197,6 @@ Every case in cases.json is now offered as a worked example, grouped Adult / Pae
 
 ## v0.13.2
 - Worked Example home card has its own icon (ui-mode-example.png, cropped from the supplied illustration); MODE_ICONS.example.
+
+## v0.13.3
+- "What this example shows" now uses per-case lines from `exampleShows` (two strings) in each case-*.json, built from keyCriterion and feedbackWhy. The old generic outcome line is only a fallback when a case has no `exampleShows`. New worked-example cases should include it. CLINICIAN REVIEW REQUIRED: adult-2 wording rests on the "violent or aggressive" criterion only.

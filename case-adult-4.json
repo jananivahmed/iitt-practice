@@ -111,5 +111,9 @@
       }
     }
   },
-  "findingsReviewed": true
+  "findingsReviewed": true,
+  "exampleShows": [
+    "No red or yellow criterion is met.",
+    "Her temperature of 39.4°C is above the 39°C high-risk threshold, so she needs immediate review by a supervising clinician rather than going straight to the waiting area."
+  ]
 }

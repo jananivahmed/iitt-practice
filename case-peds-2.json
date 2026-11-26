@@ -110,5 +110,9 @@
       }
     }
   },
-  "findingsReviewed": true
+  "findingsReviewed": true,
+  "exampleShows": [
+    "At 10 days old, he falls in the 8-days-to-6-months age band.",
+    "Age alone meets a yellow criterion, even though he is well appearing and has no high-risk vital signs."
+  ]
 }

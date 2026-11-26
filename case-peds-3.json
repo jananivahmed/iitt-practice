@@ -94,5 +94,9 @@
       }
     }
   },
-  "findingsReviewed": true
+  "findingsReviewed": true,
+  "exampleShows": [
+    "She is under 2 months old, and her temperature of 40.5°C is above the 39° threshold.",
+    "Age and temperature together meet a red criterion under Other."
+  ]
 }

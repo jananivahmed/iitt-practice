@@ -111,5 +111,9 @@
       }
     }
   },
-  "findingsReviewed": true
+  "findingsReviewed": true,
+  "exampleShows": [
+    "Every part of the card was checked and nothing was met.",
+    "Green is reached only after red, yellow and high-risk vital signs are all clear."
+  ]
 }
