@@ -140,7 +140,7 @@ function getProfile() { return safeGet(STORE_PROFILE, null); }
 function setProfile(p) { safeSet(STORE_PROFILE, p); }
 function getLearnerEmail() { return safeGet(STORE_LEARNER_EMAIL, null); }
 function setLearnerEmail(email) { safeSet(STORE_LEARNER_EMAIL, email); }
-/* Clears everything specific to the person currently practicing on this
+/* Clears everything specific to the person currently practising on this
    device — their responses, event log, and anonymous session id — so the
    next person starts from a clean slate and doesn't see (or get mixed into)
    the previous learner's progress. Clinician metadata overrides (case review
@@ -468,7 +468,7 @@ window.addEventListener("online", function () { flushOutbox(); });
 function renderLogin() {
   var html = '<div class="card empty-hero" style="padding-bottom:24px;">' +
     '<img class="login-avatar" src="' + LOGIN_AVATAR + '" alt="">' +
-    '<h2 class="section-title">Who’s practicing?</h2>' +
+    '<h2 class="section-title">Who’s practising?</h2>' +
     '<p class="reading">Enter your name and email so your progress stays separate from other learners using this device, and so your feedback reports are tied to you.</p>' +
     '<div class="field-row" style="text-align:left;">' +
     '<input type="text" id="login-name-input" placeholder="Your name" maxlength="60" autocomplete="off" onkeydown="if(event.key===\'Enter\'){event.preventDefault();submitLogin();}">' +
@@ -569,7 +569,7 @@ function renderEndSessionConfirm() {
     ? 'You’ll get a feedback report on the ' + doneCount + ' case' + (doneCount === 1 ? "" : "s") + ' you’ve completed so far. The case in progress won’t be scored.'
     : 'You haven’t completed a case yet, so there is no report to show. Leaving takes you back to the start.') + '</p>';
   html += '<div class="restart-row">' +
-    '<button class="btn btn-ghost" onclick="closeEndSessionConfirm()">Keep practicing</button>' +
+    '<button class="btn btn-ghost" onclick="closeEndSessionConfirm()">Keep practising</button>' +
     '<button class="btn btn-primary" onclick="endSessionNow()">' + (doneCount ? 'End &amp; see report' : 'Leave practice') + '</button>' +
     '</div>';
   html += '</div>';
@@ -781,12 +781,12 @@ function renderPracticeHome() {
     introCard() +
     '<div class="card mode-card">' +
     '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.guided + '" alt=""> Worked Example</h3>' +
-    '<p>Watch the IITT card applied to one patient, step by step, with the reasoning shown. Nothing is scored. A good place to start.</p>' +
-    '<div class="example-list">' + EXAMPLES.map(function (e) { return '<button type="button" class="example-btn" onclick="startExample(\'' + e.id + '\')"><span class="example-title">' + esc(e.title) + '</span><span class="example-note">' + esc(e.note) + '</span></button>'; }).join('') + '</div>' +
+    '<p>Pick a case and watch the IITT card applied to that patient, step by step, with the reasoning shown. Nothing is scored. A good place to start.</p>' +
+    exampleListHtml() +
     '</div>' +
     '<div class="card mode-card">' +
     '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.guided + '" alt=""> Guided Triage Practice</h3>' +
-    '<p>You will be guided through each criteria in order before making a triage decision.</p>' +
+    '<p>You will be guided through each criterion in order before making a triage decision.</p>' +
     '<button class="btn btn-primary" onclick="startPractice(\'walkthrough\')">Start</button>' +
     '</div>' +
     '<div class="card mode-card">' +
@@ -947,12 +947,17 @@ function renderArrival(c) {
    An unscored walkthrough of one case, built only from the case's own findings,
    checkpoints, criteria and explanation. Step 0 is the arrival, steps 1..n are the
    checkpoints, and the last step is the decision. */
-var EXAMPLES = [
-  { id: "adult-1", title: "Adult: a yellow criterion", note: "Red parts clear, then a yellow criterion is met." },
-  { id: "peds-3",  title: "Paediatric: a red criterion", note: "A red criterion is met, so you stop." },
-  { id: "adult-4", title: "Adult: a high-risk vital sign", note: "Red and yellow clear, then vital signs decide." },
-  { id: "adult-5", title: "Adult: no criteria met", note: "Every part is checked before choosing green." }
-];
+/* Every case is offered as a worked example, labelled with its overview only (the case title), so the label never gives away the answer. */
+function exampleListHtml() {
+  function btn(c) { return '<button type="button" class="example-btn" onclick="startExample(\'' + c.id + '\')"><span class="example-title">' + esc(c.title) + '</span></button>'; }
+  var html = '';
+  [["adult", "Adult cases"], ["pediatric", "Paediatric cases"]].forEach(function (g) {
+    var list = CASES.filter(function (c) { return c.population === g[0]; });
+    if (!list.length) return;
+    html += '<div class="example-group-label">' + g[1] + '</div>' + list.map(btn).join('');
+  });
+  return '<div class="example-list">' + html + '</div>';
+}
 function startExample(id) {
   if (!caseById(id)) return;
   state.example = { id: id, step: 0 };
@@ -986,7 +991,7 @@ function renderExample() {
     html += '<div class="reassess-note how-you-worked"><h4>What you will see</h4><ul>' +
       '<li>The card is worked in order: red criteria, then yellow, then high-risk vital signs.</li>' +
       '<li>At each part, you see what is found for this patient and what the card lists.</li>' +
-      '<li>You stop at the first part where a criterion is met. If none is met, you check every part.</li></ul></div>';
+      '<li>You stop at the first part where a criterion is met. If none are met, you check every part.</li></ul></div>';
     html += '<div class="cta-row"><button class="btn btn-primary" onclick="exampleStep(1)">Show the first step</button></div>';
   } else if (step <= n) {
     var cp = c.checkpoints[step - 1];
@@ -1537,7 +1542,9 @@ function processFeedback(c, rec) {
     var truth = d ? nm(d) : "nothing on the card met a criterion";
     lines.push(f.reasonRight
       ? 'You named the part that decided it: <b>' + esc(truth) + '</b>.'
-      : 'You said <b>' + esc(named) + '</b> decided it. In this case: <b>' + esc(truth) + '</b>.');
+      : (rec.reason_group === "none"
+        ? 'You said that <b>' + esc(named) + '</b>. In this case: <b>' + esc(truth) + '</b>.'
+        : 'You said <b>' + esc(named) + '</b> decided it. In this case: <b>' + esc(truth) + '</b>.'));
   }
   if (f.checkedCount) {
     if (f.outOfOrder) lines.push('You opened <b>' + esc(nm(f.outOfOrder[0])) + '</b> before <b>' + esc(nm(f.outOfOrder[1])) + '</b>. The IITT is worked red, then yellow, then high-risk vital signs.');
@@ -1573,7 +1580,7 @@ function renderFeedback(c) {
       infoLine += ' You checked every part, which is what green needs.';
     }
   } else {
-    infoLine = 'You correctly identified ' + rightCount + ' of ' + c.checkpoints.length + ' criteria checks along the way.';
+    infoLine = 'You correctly identified ' + rightCount + ' of ' + c.checkpoints.length + (c.checkpoints.length === 1 ? ' criterion check' : ' criteria checks') + ' along the way.';
   }
 
   var processLines = isFreeMode() ? processFeedback(c, rec) : [];
@@ -1588,6 +1595,7 @@ function renderFeedback(c) {
       : ". That is the correct category, but you skipped parts before it that need ruling out");
   }
   else if (result === "correct_wrong_reason") bannerSub += ". That is the correct category, but the part you named is not the one that decided it";
+  if (!/\.$/.test(bannerSub)) bannerSub += ".";
   html += '<div class="feedback-banner ' + bannerClass + '"><div class="f-title">' + bannerTitle + '</div><div class="f-sub">' + bannerSub + '</div>' +
     (result === "incorrect" ? '<span class="answer-chip ' + meta.chip + '">Correct category: ' + meta.label + '</span>' : '') + '</div>';
   var howLines = [infoLine].concat(processLines);
@@ -1603,7 +1611,7 @@ function renderFeedback(c) {
     if (isFreeMode() && rec.deciding_group && rec.reason_group === rec.deciding_group) lastYes = rec.deciding_group;
     if (lastYes && GROUP_META[lastYes]) {
       var lvl = GROUP_META[lastYes].level;
-      link = ' You found the part that decided it (<b>' + esc(partName(lastYes)) + '</b>). A criterion met under ' + (lvl === 'vitals' ? 'high-risk vital signs' : 'a ' + lvl + ' part') + ' means <b>' + CATEGORY_META[c.correct].label + '</b>.';
+      link = ' You found the part that decided it: <b>' + esc(partName(lastYes)) + '</b>. A criterion met under ' + (lvl === 'vitals' ? 'high-risk vital signs' : 'a ' + lvl + ' part') + ' means <b>' + CATEGORY_META[c.correct].label + '</b>.';
     }
     html += '<div class="reassess-note under-triage"><h4>Under-triage</h4><p>You chose <b>' + selMeta.label + '</b>, which on the card means \u201c' + esc(CATEGORY_DEST[state.selected]) + '\u201d. This patient needed <b>' + meta.label + '</b>: \u201c' + esc(CATEGORY_DEST[c.correct]) + '\u201d.' + link + '</p>' +
       '<p>Under-triage delays care for the patients who most need it, so it is the most important error to learn from.</p></div>';

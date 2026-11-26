@@ -619,3 +619,6 @@ table.pop-table:not(.age-table) th:first-child,table.pop-table:not(.age-table) t
 .cp-find-label{font-size:15px; font-weight:700; color:var(--ink-soft); margin:12px 0 6px; text-align:left;}
 .crit-hint{display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 0;}
 .crit-act{font:inherit; font-size:15px; font-weight:600; color:var(--ink); background:var(--surface,#fff); border:1.5px solid var(--ink); border-radius:4px; padding:8px 12px; min-height:44px; cursor:pointer;}
+
+.example-group-label{font-size:15px; font-weight:700; color:var(--ink-soft); margin:6px 0 0;}
+.example-group-label:first-child{margin-top:0;}

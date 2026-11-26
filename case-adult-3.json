@@ -20,7 +20,7 @@
   ],
   "correct": "red",
   "keyCriterion": "Red — Unresponsive",
-  "feedbackWhy": "She becomes unresponsive during the assessment, this is the first red criterion and the patient should be moved to the high acuity area immediately.",
+  "feedbackWhy": "She becomes unresponsive during the assessment. This is the first red criterion, and the patient should be moved to the high acuity area immediately.",
   "reassessment": null,
   "needsReview": false,
   "reviewNote": "",

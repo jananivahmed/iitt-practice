@@ -173,3 +173,7 @@ The criteria for each part are shown as pictures cropped from refcard-adult.png 
 
 ## Prerequisite parts and under-triage (v0.12.0)
 In Triage Practice a right category is `correct` only if the learner checked the deciding part AND every part before it in the card order (red, then yellow, then vitals); for green, all 10. Otherwise `correct_unsupported`; the feedback names the skipped parts. Under-triage means a less urgent category than needed; urgency runs green, yellow, up-triage, red (`URGENCY_RANK`, confirmed by the clinician), so yellow for an up-triage case is under-triage and up-triage for a yellow case is over-triage. Feedback (both modes) shows an "Under-triage" box using the card's own destination wording (`CATEGORY_DEST`). CLINICIAN REVIEW REQUIRED: confirm the prerequisite-parts rule.
+
+## Worked examples: all cases (v0.12.5)
+
+Every case in cases.json is now offered as a worked example, grouped Adult / Paediatric and labelled by its case title only (no category or hint). The list is built from CASES by `exampleListHtml()`; the old hand-picked EXAMPLES array is gone. Planned for deployment: the current 10 cases stay as worked examples and new, separate cases are used for Guided and Triage Practice, so a learner never practises on a case they have already seen solved. Until then, all three modes draw on the same 10 cases.
