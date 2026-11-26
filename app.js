@@ -759,13 +759,7 @@ function renderReferenceLinks(compact) {
 function introCard() {
   if (safeGet(STORE_INTRO, false)) return '';
   return '<div class="card intro-card"><h3>How this works</h3>' +
-    '<p class="reading">You will practise using the IITT card to place a patient in a triage category: red, yellow, green or up-triage. The card is always available. You are practising using it, not memorising it.</p>' +
-    '<ul class="intro-list">' +
-    '<li><b>Worked Example</b> shows the card applied to one patient, with the reasoning, before you try it yourself.</li>' +
-    '<li><b>Guided Triage Practice</b> takes you through the card one step at a time and tells you straight away whether each answer is right.</li>' +
-    '<li><b>Triage Practice</b> is the full task. Open the parts of the card you need, stop when you can decide, then choose a category and the part that decided it. You get feedback on how you worked as well as your answer.</li>' +
-    '</ul>' +
-    '<p class="reading">Each case ends with an explanation and a link back to the part of the card that decides it. Pick how many cases you want below.</p>' +
+    '<p class="reading">The IITT card is always available. You are practising using it, not memorising it.</p>' +
     '<button type="button" class="btn btn-ghost" onclick="dismissIntro()">Got it</button></div>';
 }
 function dismissIntro() { safeSet(STORE_INTRO, true); renderPracticeHome(); }
@@ -781,17 +775,17 @@ function renderPracticeHome() {
     introCard() +
     '<div class="card mode-card">' +
     '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.guided + '" alt=""> Worked Example</h3>' +
-    '<p>Pick a case and watch the IITT card applied to that patient, step by step, with the reasoning shown. Nothing is scored. A good place to start.</p>' +
+    '<p>Pick a case and watch the triage process applied. At each part you will see the criteria on the IITT card and the relevant patient findings. The findings then decide the triage category.</p>' +
     exampleListHtml() +
     '</div>' +
     '<div class="card mode-card">' +
     '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.guided + '" alt=""> Guided Triage Practice</h3>' +
-    '<p>You will be guided through each criterion in order before making a triage decision.</p>' +
+    '<p>For each part of the IITT card, you will be given the relevant patient findings and answer one question: &ldquo;Is a criterion in this part met?&rdquo; Working through the parts will help you choose a triage category.</p>' +
     '<button class="btn btn-primary" onclick="startPractice(\'walkthrough\')">Start</button>' +
     '</div>' +
     '<div class="card mode-card">' +
     '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.triage + '" alt=""> Triage Practice</h3>' +
-    '<p>The full task. Open the parts of the IITT card you need, from red to yellow to vital signs. Stop when you can decide, choose a category, and say which part decided it. You get feedback on your reasoning as well as your answer.</p>' +
+    '<p>You choose which parts of the IITT card to look at and when to stop. Each part you look at gives you the relevant patient findings. Then you choose a triage category and the part that decided it.</p>' +
     '<button class="btn btn-primary" onclick="startPractice(\'decide\')">Start</button>' +
     '</div>' +
     '<div class="card count-card" role="group" aria-labelledby="count-label">' +
@@ -954,7 +948,7 @@ function exampleListHtml() {
   [["adult", "Adult cases"], ["pediatric", "Paediatric cases"]].forEach(function (g) {
     var list = CASES.filter(function (c) { return c.population === g[0]; });
     if (!list.length) return;
-    html += '<div class="example-group-label">' + g[1] + '</div>' + list.map(btn).join('');
+    html += '<details class="example-group"><summary>' + g[1] + ' <span class="example-count">(' + list.length + ')</span></summary><div class="example-group-body">' + list.map(btn).join('') + '</div></details>';
   });
   return '<div class="example-list">' + html + '</div>';
 }

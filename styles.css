@@ -622,3 +622,14 @@ table.pop-table:not(.age-table) th:first-child,table.pop-table:not(.age-table) t
 
 .example-group-label{font-size:15px; font-weight:700; color:var(--ink-soft); margin:6px 0 0;}
 .example-group-label:first-child{margin-top:0;}
+
+.example-group{border:2px solid var(--ink); border-radius:4px;}
+.example-group summary{list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:52px; padding:10px 14px; font-weight:700; font-size:17px; color:var(--ink);}
+.example-group summary::-webkit-details-marker{display:none;}
+.example-group summary::after{content:""; width:9px; height:9px; border-right:2.5px solid var(--ink); border-bottom:2.5px solid var(--ink); transform:rotate(45deg); margin:-4px 4px 0 auto; transition:transform .2s cubic-bezier(.25,1,.5,1);}
+.example-group[open] summary::after{transform:rotate(-135deg); margin-top:4px;}
+.example-group summary:focus-visible{outline:3px solid var(--link); outline-offset:2px;}
+.example-count{font-weight:400; color:var(--ink-soft); margin-right:auto;}
+.example-group-body{display:flex; flex-direction:column; gap:8px; padding:0 10px 10px;}
+.example-group-body .example-btn{border-width:1.5px;}
+@media (prefers-reduced-motion:reduce){.example-group summary::after{transition:none;}}
