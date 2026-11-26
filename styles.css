@@ -635,3 +635,11 @@ table.pop-table:not(.age-table) th:first-child,table.pop-table:not(.age-table) t
 @media (prefers-reduced-motion:reduce){.example-group summary::after{transition:none;}}
 .cta-row.cta-stack{display:flex; flex-direction:column; gap:10px;}
 .crit-static{cursor:default;}
+
+/* v0.13.1 */
+.case-review-item summary{flex-wrap:wrap;}
+.cr-verdict{white-space:normal; text-align:right; margin-left:auto;}
+.example-btn{display:flex; justify-content:space-between; align-items:center; gap:12px;}
+.example-seen{font-size:15px; font-weight:400; opacity:.8; flex:none;}
+.skip-link{position:absolute; left:-9999px; top:8px; background:#1a1a1a; color:#fff; padding:10px 14px; border-radius:4px; z-index:100; font-weight:700;}
+.skip-link:focus{left:8px;}

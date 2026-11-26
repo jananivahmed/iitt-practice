@@ -187,3 +187,13 @@ Every case in cases.json is now offered as a worked example, grouped Adult / Pae
 - `partName(g)` is the one place part names are built; vital signs no longer show "(vitals)".
 - The Unresponsive card crop is shown (as a static picture) so every part has its card picture.
 - Triage Practice home text says "check", matching the rows ("Tap to check") and the report.
+
+## v0.13.1: second journey review fixes
+- Triage Practice summary: `.cr-verdict` can now wrap, so long outcome labels no longer push the page sideways on phones.
+- Guided Yes/No buttons are a labelled group (`role="group"`, `aria-labelledby="cp-question"`).
+- Each screen sets `document.title` and has a visually hidden `h2` (`screenTitle()` / `markScreen()` in app.js). `h4` elements get `aria-level="3"`. A skip link was added to index.html.
+- `levelWord` no longer excludes `unresponsive`, so the pill and trail read "Red: Unresponsive".
+- Worked Example dropdowns stay open after returning home (`exampleOpen`, in memory). Cases reached to the final step are marked "Watched" (`STORE_EX_SEEN`, cleared by `resetForNewUser()`).
+
+## v0.13.2
+- Worked Example home card has its own icon (ui-mode-example.png, cropped from the supplied illustration); MODE_ICONS.example.

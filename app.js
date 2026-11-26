@@ -12,7 +12,7 @@
 var IMAGES = {"adult-1": "picture-adult-1.jpg", "adult-2": "picture-adult-2.jpg", "adult-3": "picture-adult-3.jpg", "adult-4": "picture-adult-4.jpg", "adult-5": "picture-adult-5.jpg", "peds-1": "picture-peds-1.jpg", "peds-2": "picture-peds-2.jpg", "peds-3": "picture-peds-3.jpg", "peds-4": "picture-peds-4.jpg", "peds-5": "picture-peds-5.jpg"};
 var FACE_IMAGES = {"adult-1": "portrait-adult-1.jpg", "adult-2": "portrait-adult-2.jpg", "adult-3": "portrait-adult-3.jpg", "adult-4": "portrait-adult-4.jpg", "adult-5": "portrait-adult-5.jpg", "peds-1": "portrait-peds-1.jpg", "peds-2": "portrait-peds-2.jpg", "peds-3": "portrait-peds-3.jpg", "peds-4": "portrait-peds-4.jpg", "peds-5": "portrait-peds-5.jpg"};
 var PDF_REFS = {"adult": "refcard-adult.png", "pediatric": "refcard-pediatric.png", "reference": "refcard-reference.png"};
-var MODE_ICONS = {"guided": "ui-mode-guided.png", "triage": "ui-mode-triage.png"};
+var MODE_ICONS = {"example": "ui-mode-example.png", "guided": "ui-mode-guided.png", "triage": "ui-mode-triage.png"};
 var LOGIN_AVATAR = "ui-login-avatar.jpg";
 
 /* ---------------- fixed IITT criteria & question text ---------------- */
@@ -103,6 +103,7 @@ var STORE_OUTBOX = "iitt_outbox_v1";
 var STORE_CASE_COUNT = "iitt_case_count_v1";
 var STORE_RUN = "iitt_run_in_progress_v1";
 var STORE_INTRO = "iitt_intro_seen_v1";
+var STORE_EX_SEEN = "iitt_examples_watched_v1";
 var ROLES = ["Nurse", "Physician", "Clinical officer or other clinician", "Student", "Other"];
 var COUNTRIES = ["Afghanistan", "Albania", "Algeria", "American Samoa", "Andorra", "Angola", "Anguilla", "Antarctica", "Antigua & Barbuda", "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan", "Bolivia", "Bosnia & Herzegovina", "Botswana", "Bouvet Island", "Brazil", "British Indian Ocean Territory", "British Virgin Islands", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Caribbean Netherlands", "Cayman Islands", "Central African Republic", "Chad", "Chile", "China", "Christmas Island", "Cocos (Keeling) Islands", "Colombia", "Comoros", "Congo - Brazzaville", "Congo - Kinshasa", "Cook Islands", "Costa Rica", "Croatia", "Cuba", "Curaçao", "Cyprus", "Czechia", "Côte d’Ivoire", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Falkland Islands", "Faroe Islands", "Fiji", "Finland", "France", "French Guiana", "French Polynesia", "French Southern Territories", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Gibraltar", "Greece", "Greenland", "Grenada", "Guadeloupe", "Guam", "Guatemala", "Guernsey", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Heard & McDonald Islands", "Honduras", "Hong Kong SAR China", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Isle of Man", "Israel", "Italy", "Jamaica", "Japan", "Jersey", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macao SAR China", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Martinique", "Mauritania", "Mauritius", "Mayotte", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Montserrat", "Morocco", "Mozambique", "Myanmar (Burma)", "Namibia", "Nauru", "Nepal", "Netherlands", "New Caledonia", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue", "Norfolk Island", "North Korea", "North Macedonia", "Northern Mariana Islands", "Norway", "Oman", "Pakistan", "Palau", "Palestinian Territories", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Pitcairn Islands", "Poland", "Portugal", "Puerto Rico", "Qatar", "Romania", "Russia", "Rwanda", "Réunion", "Samoa", "San Marino", "Sark", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Sint Maarten", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Georgia & South Sandwich Islands", "South Korea", "South Sudan", "Spain", "Sri Lanka", "St. Barthélemy", "St. Helena", "St. Kitts & Nevis", "St. Lucia", "St. Martin", "St. Pierre & Miquelon", "St. Vincent & Grenadines", "Sudan", "Suriname", "Svalbard & Jan Mayen", "Sweden", "Switzerland", "Syria", "São Tomé & Príncipe", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tokelau", "Tonga", "Trinidad & Tobago", "Tunisia", "Turkmenistan", "Turks & Caicos Islands", "Tuvalu", "Türkiye", "U.S. Outlying Islands", "U.S. Virgin Islands", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Wallis & Futuna", "Western Sahara", "Yemen", "Zambia", "Zimbabwe", "Åland Islands"];
 /* Data collection is off unless collection.json says otherwise. */
@@ -148,6 +149,7 @@ function setLearnerEmail(email) { safeSet(STORE_LEARNER_EMAIL, email); }
    deliberately left untouched here. */
 function resetForNewUser() {
   safeRemove(STORE_RUN);
+  safeRemove(STORE_EX_SEEN);
   safeRemove(STORE_RESPONSES);
   safeRemove(STORE_EVENTS);
   safeRemove(STORE_SESSION);
@@ -602,6 +604,37 @@ function renderPractice() {
     appEl.focus({ preventScroll: true });
     announceScreen();
   }
+  markScreen();
+}
+/* A short name for the screen being shown. It becomes the page title and a hidden heading, so browser tabs and screen-reader heading lists say where the learner is. */
+function screenTitle() {
+  if (state.resetConfirmOpen) return "Clear progress on this device?";
+  if (state.endSessionConfirmOpen) return "End this practice session?";
+  if (state.progressOpen) return "My progress";
+  if (state.refCardOpen) return "Reference card";
+  if (state.ageBandOpen) return "Age-band vital sign thresholds";
+  if (state.example) {
+    var ec = caseById(state.example.id), en = ec ? ec.checkpoints.length : 0;
+    if (state.example.step === 0) return "Worked example: patient arrival";
+    if (state.example.step <= en) return "Worked example: part " + state.example.step + " of " + en;
+    return "Worked example: decision";
+  }
+  if (!state.queue.length) return "Choose how to practise";
+  if (state.qIndex >= state.queue.length) return "Practice summary";
+  var c = caseById(state.queue[state.qIndex]);
+  var lead = "Case " + (state.qIndex + 1) + " of " + state.queue.length;
+  if (state.caseInfoOpen && state.phase !== "arrival") return lead + ": case information";
+  if (state.phase === "arrival") return lead + ": patient arrival";
+  if (state.phase === "checkpoint" && c) return lead + ": part " + (state.cpIndex + 1) + " of " + c.checkpoints.length;
+  if (state.phase === "decision") return lead + ": choose a category";
+  return lead + ": work through the card";
+}
+function markScreen() {
+  var t = screenTitle();
+  try { document.title = t + " | IITT Practice Companion"; } catch (e) {}
+  appEl.insertAdjacentHTML("afterbegin", '<h2 class="sr-only">' + esc(t) + '</h2>');
+  var hs = appEl.querySelectorAll("h4");
+  for (var i = 0; i < hs.length; i++) hs[i].setAttribute("aria-level", "3");
 }
 function announceScreen() {
   var live = document.getElementById("sr-live");
@@ -766,7 +799,7 @@ function introCard() {
     '<p class="reading">The IITT card is always available. You are practising using it, not memorising it.</p>' +
     '<button type="button" class="btn btn-ghost" onclick="dismissIntro()">Got it</button></div>';
 }
-function dismissIntro() { safeSet(STORE_INTRO, true); renderPracticeHome(); }
+function dismissIntro() { safeSet(STORE_INTRO, true); renderPracticeHome(); markScreen(); }
 function renderPracticeHome() {
   var name = getLearnerName();
   appEl.innerHTML =
@@ -778,7 +811,7 @@ function renderPracticeHome() {
     '</div>' +
     introCard() +
     '<div class="card mode-card">' +
-    '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.guided + '" alt=""> Worked Example</h3>' +
+    '<h3 class="mode-card-title"><img class="mode-card-icon" src="' + MODE_ICONS.example + '" alt=""> Worked Example</h3>' +
     '<p>Pick a case and watch the triage process applied. At each part you will see the criteria on the IITT card and the relevant patient findings. The findings then decide the triage category.</p>' +
     exampleListHtml() +
     '</div>' +
@@ -946,13 +979,19 @@ function renderArrival(c) {
    checkpoints, criteria and explanation. Step 0 is the arrival, steps 1..n are the
    checkpoints, and the last step is the decision. */
 /* Every case is offered as a worked example, labelled with its overview only (the case title), so the label never gives away the answer. */
+var exampleOpen = {};
 function exampleListHtml() {
-  function btn(c) { return '<button type="button" class="example-btn" onclick="startExample(\'' + c.id + '\')"><span class="example-title">' + esc(c.title) + '</span></button>'; }
+  var seen = safeGet(STORE_EX_SEEN, []);
+  function btn(c) {
+    var done = seen.indexOf(c.id) !== -1;
+    return '<button type="button" class="example-btn" onclick="startExample(\'' + c.id + '\')"><span class="example-title">' + esc(c.title) + '</span>' + (done ? '<span class="example-seen">Watched</span>' : '') + '</button>';
+  }
   var html = '';
   [["adult", "Adult cases"], ["pediatric", "Paediatric cases"]].forEach(function (g) {
     var list = CASES.filter(function (c) { return c.population === g[0]; });
     if (!list.length) return;
-    html += '<details class="example-group"><summary>' + g[1] + ' <span class="example-count">(' + list.length + ')</span></summary><div class="example-group-body">' + list.map(btn).join('') + '</div></details>';
+    var n = list.filter(function (c) { return seen.indexOf(c.id) !== -1; }).length;
+    html += '<details class="example-group"' + (exampleOpen[g[0]] ? ' open' : '') + ' ontoggle="exampleOpen[\'' + g[0] + '\']=this.open"><summary>' + g[1] + ' <span class="example-count">(' + (n ? n + ' of ' + list.length + ' watched' : list.length) + ')</span></summary><div class="example-group-body">' + list.map(btn).join('') + '</div></details>';
   });
   return '<div class="example-list">' + html + '</div>';
 }
@@ -967,7 +1006,11 @@ function exampleStep(delta) {
   var c = caseById(state.example.id);
   var last = c.checkpoints.length + 1;
   state.example.step = Math.max(0, Math.min(last, state.example.step + delta));
-  if (state.example.step === last) logEvent("example_completed", { practice_mode: "example", case_id: c.id });
+  if (state.example.step === last) {
+    logEvent("example_completed", { practice_mode: "example", case_id: c.id });
+    var seen = safeGet(STORE_EX_SEEN, []);
+    if (seen.indexOf(c.id) === -1) { seen.push(c.id); safeSet(STORE_EX_SEEN, seen); }
+  }
   renderPractice();
 }
 function leaveExample() { state.example = null; renderPractice(); }
@@ -1085,11 +1128,7 @@ function critBlock(c, g, meta) {
     '<ul class="criteria-list crit-fallback">' + list.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
 }
 function levelWord(meta, g) {
-  if (g === "unresponsive" || meta.level === "vitals") return "";
-  return meta.level === "red" ? "Red: " : meta.level === "yellow" ? "Yellow: " : "";
-}
-function levelWord(meta, g) {
-  if (g === "unresponsive" || meta.level === "vitals") return "";
+  if (meta.level === "vitals") return "";
   return meta.level === "red" ? "Red: " : meta.level === "yellow" ? "Yellow: " : "";
 }
 /* Rows of answered parts. Runs of three or more routine "No" rows fold into one line so the step being worked on stays near the top; a "Yes" or a wrong answer always stays in view, and the order is never changed. */
@@ -1159,8 +1198,8 @@ function renderCheckpoint(c) {
     html += '<div class="age-ref">High-risk thresholds for <b>' + esc(c.ageBandRef.band) + '</b>: heart rate outside <b>' + esc(c.ageBandRef.hr) + '</b>, respiratory rate outside <b>' + esc(c.ageBandRef.rr) + '</b>.</div>';
   }
 
-  html += '<div class="decision-prompt" style="margin-top:16px;">' + esc(meta.question) + '</div>';
-  html += '<div class="yesno-grid">';
+  html += '<div class="decision-prompt" id="cp-question" style="margin-top:16px;">' + esc(meta.question) + '</div>';
+  html += '<div class="yesno-grid" role="group" aria-labelledby="cp-question">';
   ["yes", "no"].forEach(function (v) {
     var sel = state.cpSelected === v ? " selected" : "";
     var dis = state.cpLocked ? " disabled" : "";
