@@ -1,6 +1,7 @@
 {
   "id": "peds-5",
   "status": "live",
+  "pool": "example",
   "population": "pediatric",
   "title": "7-year-old boy with ear pain",
   "age": "7 years",

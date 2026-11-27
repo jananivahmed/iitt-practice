@@ -1,0 +1,126 @@
+{
+  "id": "n-10",
+  "status": "live",
+  "pool": "practice",
+  "population": "pediatric",
+  "title": "7-month-old boy with a cough",
+  "age": "7 months",
+  "sex": "Male",
+  "domain": "Respiratory",
+  "focusTags": [
+    "pediatric"
+  ],
+  "image": "n-10",
+  "ageBandRef": {
+    "band": "< 1 year",
+    "hr": "90–180 bpm",
+    "rr": "25–50 breaths/min"
+  },
+  "arrival": "A 7-month-old boy is brought in by his mother with a cough for three days.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no"
+    },
+    {
+      "g": "airway_red",
+      "correct": "no"
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "140 bpm"
+      },
+      "correct": "no"
+    },
+    {
+      "g": "disability_red",
+      "correct": "no"
+    },
+    {
+      "g": "other_red",
+      "correct": "no"
+    },
+    {
+      "g": "airway_yellow",
+      "correct": "no"
+    },
+    {
+      "g": "circulation_yellow",
+      "correct": "no"
+    },
+    {
+      "g": "disability_yellow",
+      "correct": "no"
+    },
+    {
+      "g": "other_yellow",
+      "correct": "no"
+    },
+    {
+      "g": "vitals",
+      "chips": {
+        "HR": "140 bpm",
+        "RR": "38 breaths/min",
+        "SpO2": "98%",
+        "Temp": "37.3°C",
+        "AVPU": "A"
+      },
+      "correct": "no"
+    }
+  ],
+  "correct": "green",
+  "keyCriterion": "No red, yellow, or high-risk vital sign criteria met",
+  "feedbackWhy": "This patient does not meet any red or yellow criteria and has no high-risk vital signs. At 7 months he is outside the 8 days to 6 months age band, so his age alone does not meet a yellow criterion. He can safely wait for evaluation in the low-acuity area.",
+  "reassessment": "As with all patients in the waiting area, he should undergo reassessment because his condition can change while waiting. His caregiver should be advised to notify staff if his symptoms worsen.",
+  "needsReview": true,
+  "reviewNote": "CLINICIAN REVIEW REQUIRED: confirm the age boundary, that 7 months is clearly outside '8 days to 6 months'. Age band under 1 year (HR 90-180, RR 25-50). Every value is proposed.",
+  "author": "",
+  "design": {
+    "intendedChallenge": "Green is reached only after every part of the card has been checked. A 7-month-old is just outside the 8 days to 6 months age band, so age alone does not meet a yellow criterion.",
+    "expectedCommonError": "triaging as yellow because he is a young infant.",
+    "criterionType": "GREEN"
+  },
+  "findings": {
+    "unresponsive": {
+      "text": "Awake. Looks around and follows his mother with his eyes."
+    },
+    "airway_red": {
+      "text": "Occasional cough. No stridor. No chest indrawing. No central cyanosis."
+    },
+    "circulation_red": {
+      "text": "Pulse strong. Extremities warm. Capillary refill 2 seconds. No bleeding. Awake and interacting. Eyes not sunken. Skin pinch returns at once. Feeding normally.",
+      "chips": {
+        "HR": "140 bpm"
+      }
+    },
+    "disability_red": {
+      "text": "No convulsions. Awake and interacting. Not confused, restless or irritable. No stiff neck."
+    },
+    "other_red": {
+      "text": "Age 7 months. No trauma, poisoning, threatened limb or snake bite."
+    },
+    "airway_yellow": {
+      "text": "No swelling of the mouth, throat or neck. No wheezing."
+    },
+    "circulation_yellow": {
+      "text": "Feeding normally. No vomiting or diarrhoea. Not pale. Mouth moist."
+    },
+    "disability_yellow": {
+      "text": "Awake and interacting. Not restless or irritable. No severe pain."
+    },
+    "other_yellow": {
+      "text": "Age 7 months. No visible wasting. No swelling of both feet. No rash. No trauma. No known surgical diagnosis."
+    },
+    "vitals": {
+      "chips": {
+        "HR": "140 bpm",
+        "RR": "38 breaths/min",
+        "SpO2": "98%",
+        "Temp": "37.3°C",
+        "AVPU": "A"
+      }
+    }
+  },
+  "findingsReviewed": true
+}

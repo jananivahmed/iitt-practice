@@ -1,6 +1,7 @@
 {
   "id": "REPLACE-with-new-id-e.g.-adult-6",
   "status": "draft",
+  "pool": "practice",
   "population": "adult",
   "title": "REPLACE: short title, e.g. age, sex and presenting problem",
   "age": "REPLACE: e.g. 33 years",

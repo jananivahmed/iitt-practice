@@ -1,0 +1,107 @@
+{
+  "id": "n-08",
+  "status": "live",
+  "pool": "practice",
+  "population": "pediatric",
+  "title": "3-year-old boy with vomiting",
+  "age": "3 years",
+  "sex": "Male",
+  "domain": "Gastrointestinal",
+  "focusTags": [
+    "pediatric"
+  ],
+  "image": "n-08",
+  "ageBandRef": {
+    "band": "1–4 years",
+    "hr": "80–160 bpm",
+    "rr": "20–40 breaths/min"
+  },
+  "arrival": "A 3-year-old boy is brought in by his father with vomiting since yesterday.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no"
+    },
+    {
+      "g": "airway_red",
+      "correct": "no"
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "164 bpm"
+      },
+      "correct": "no"
+    },
+    {
+      "g": "disability_red",
+      "correct": "no"
+    },
+    {
+      "g": "other_red",
+      "correct": "no"
+    },
+    {
+      "g": "airway_yellow",
+      "correct": "no"
+    },
+    {
+      "g": "circulation_yellow",
+      "correct": "yes"
+    }
+  ],
+  "correct": "yellow",
+  "keyCriterion": "Yellow — Circulation: vomits everything",
+  "feedbackWhy": "He has vomited everything he has been given since yesterday, which meets a yellow Circulation criterion. No red criterion is met. His heart rate is also above the high-risk threshold for his age, but the card is worked in order and a yellow criterion is met first, so the category is yellow.",
+  "reassessment": null,
+  "needsReview": true,
+  "reviewNote": "CLINICIAN REVIEW REQUIRED: this case teaches that a yellow criterion decides even when a high-risk vital sign is also present (the card reaches vital signs only after a No at yellow). Confirm this is the intended teaching and that the wording is right. HR 164 is above 160 for 1-4 years. Confirm 'takes sips of water' does not count as drinking poorly. Every value is proposed.",
+  "author": "",
+  "design": {
+    "intendedChallenge": "A yellow criterion decides the category when it is met, even if a high-risk vital sign is also present. The vital signs step is reached only when no red or yellow criterion is met.",
+    "expectedCommonError": "triaging as up-triage because the heart rate is above the age threshold, or as red because the heart rate is high.",
+    "criterionType": "P-Y-CIRC-02"
+  },
+  "findings": {
+    "unresponsive": {
+      "text": "Awake. Looks around the room."
+    },
+    "airway_red": {
+      "text": "No stridor. No chest indrawing. No central cyanosis."
+    },
+    "circulation_red": {
+      "text": "Pulse strong. Extremities warm. Capillary refill 2 seconds. No bleeding. Awake and interacting. Eyes not sunken. Skin pinch returns at once. Takes sips of water when offered.",
+      "chips": {
+        "HR": "164 bpm"
+      }
+    },
+    "disability_red": {
+      "text": "No convulsions. Awake and interacting. Not confused, restless or irritable. No stiff neck."
+    },
+    "other_red": {
+      "text": "No trauma, poisoning, threatened limb, snake bite or scrotal pain."
+    },
+    "airway_yellow": {
+      "text": "No swelling of the mouth, throat or neck. No wheezing."
+    },
+    "circulation_yellow": {
+      "text": "Has vomited everything he has been given since yesterday. No diarrhoea. Not pale."
+    },
+    "disability_yellow": {
+      "text": "Awake and interacting. Not restless or irritable. No severe pain."
+    },
+    "other_yellow": {
+      "text": "No visible wasting. No swelling of both feet. No rash. No trauma. No known surgical diagnosis."
+    },
+    "vitals": {
+      "chips": {
+        "HR": "164 bpm",
+        "RR": "28 breaths/min",
+        "SpO2": "98%",
+        "Temp": "37.6°C",
+        "AVPU": "A"
+      }
+    }
+  },
+  "findingsReviewed": true
+}

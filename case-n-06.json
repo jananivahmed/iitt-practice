@@ -1,0 +1,91 @@
+{
+  "id": "n-06",
+  "status": "live",
+  "pool": "practice",
+  "population": "pediatric",
+  "title": "2-year-old girl with diarrhoea",
+  "age": "2 years",
+  "sex": "Female",
+  "domain": "Gastroenteritis / dehydration",
+  "focusTags": [
+    "pediatric"
+  ],
+  "image": "n-06",
+  "ageBandRef": {
+    "band": "1–4 years",
+    "hr": "80–160 bpm",
+    "rr": "20–40 breaths/min"
+  },
+  "arrival": "A 2-year-old girl is brought in by her mother with diarrhoea for three days.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no"
+    },
+    {
+      "g": "airway_red",
+      "correct": "no"
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "138 bpm"
+      },
+      "correct": "yes"
+    }
+  ],
+  "correct": "red",
+  "keyCriterion": "Red — Circulation: any two of lethargy, sunken eyes, very slow skin pinch, drinks poorly",
+  "feedbackWhy": "She has two of the listed findings together: sunken eyes and drinking poorly. Any two of lethargy, sunken eyes, very slow skin pinch and drinking poorly meet a red Circulation criterion, so she should be moved to the high acuity area immediately.",
+  "reassessment": null,
+  "needsReview": true,
+  "reviewNote": "CLINICIAN REVIEW REQUIRED: confirm that sunken eyes plus drinking poorly are the right two findings, and that her other values (lethargy absent, skin pinch normal) stay on the safe side. Age band 1-4 years (HR 80-160, RR 20-40). Every value is proposed.",
+  "author": "",
+  "design": {
+    "intendedChallenge": "In children, a red Circulation criterion can need two findings together. Either of these findings alone would not be enough, so the learner has to find both.",
+    "expectedCommonError": "triaging as yellow (ongoing diarrhoea or dehydration), which under-triages her.",
+    "criterionType": "P-R-CIRC-05"
+  },
+  "findings": {
+    "unresponsive": {
+      "text": "Awake. Responds to her mother's voice."
+    },
+    "airway_red": {
+      "text": "No stridor. No chest indrawing. No central cyanosis."
+    },
+    "circulation_red": {
+      "text": "Pulse strong. Extremities warm. Capillary refill 2 seconds. No bleeding. Awake and interacting. Eyes look sunken. Skin pinch returns to normal at once. Drinks poorly when offered a cup.",
+      "chips": {
+        "HR": "138 bpm"
+      }
+    },
+    "disability_red": {
+      "text": "No convulsions. Awake and interacting. Not confused, restless or irritable. No stiff neck."
+    },
+    "other_red": {
+      "text": "Age 2 years. No trauma, poisoning, threatened limb or snake bite."
+    },
+    "airway_yellow": {
+      "text": "No swelling of the mouth, throat or neck. No wheezing."
+    },
+    "circulation_yellow": {
+      "text": "Several watery stools today. No vomiting. Drinks poorly when offered a cup. Not pale."
+    },
+    "disability_yellow": {
+      "text": "Awake and interacting. Not restless or irritable. No severe pain."
+    },
+    "other_yellow": {
+      "text": "No visible wasting. No swelling of both feet. No rash. No trauma. No known surgical diagnosis."
+    },
+    "vitals": {
+      "chips": {
+        "HR": "138 bpm",
+        "RR": "26 breaths/min",
+        "SpO2": "98%",
+        "Temp": "37.4°C",
+        "AVPU": "A"
+      }
+    }
+  },
+  "findingsReviewed": true
+}

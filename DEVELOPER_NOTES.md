@@ -200,3 +200,11 @@ Every case in cases.json is now offered as a worked example, grouped Adult / Pae
 
 ## v0.13.3
 - "What this example shows" now uses per-case lines from `exampleShows` (two strings) in each case-*.json, built from keyCriterion and feedbackWhy. The old generic outcome line is only a fallback when a case has no `exampleShows`. New worked-example cases should include it. CLINICIAN REVIEW REQUIRED: adult-2 wording rests on the "violent or aggressive" criterion only.
+
+## v0.14.0: separate case pools, case set 1 loaded
+- Each case has `pool`: `"example"` (used only by Worked Example) or `"practice"` (used by Guided and Triage Practice; also the default if the field is missing). The old 10 cases (adult-1..5, peds-1..5) are `example`. The new set 1 (n-01..n-10, from the "IITT Case Set 1" doc) is `practice`. Helpers in app.js: `practiceCases()`, `exampleCases()`, `isExampleCase()`. The case count stepper, random order, and run restore use the practice pool only.
+- Set 1 cases are `status: live`, `findingsReviewed: true`, but `needsReview: true` with the open clinician points in `reviewNote`. Set `needsReview` to false once those are resolved. `author` is blank.
+- Pictures: add `picture-n-01.jpg` and `portrait-n-01.jpg` (and so on) to the site folder. Until then a case shows no picture (`picSrc()`/`faceSrc()` with a hidden-on-error image) and validate.js only warns for practice cases; a missing picture is still an error for example cases.
+- `design` block on set 1 cases: `intendedChallenge`, `expectedCommonError` and `criterionType` (the criteria inventory ID) come from the approved drafts.
+- Paediatric `ageBandRef` reuses the three bands already authored on the old cases.
+- New cases: copy `case-_template.json`, set `pool`, add the id to cases.json.

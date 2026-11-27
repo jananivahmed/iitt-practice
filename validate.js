@@ -76,13 +76,17 @@ for (const id of listed) {
   for (const k of REQUIRED) if (c[k] === undefined || c[k] === null || c[k] === "") E(`missing required field "${k}"`);
   if (c.id !== id) E(`"id" is "${c.id}" but the file name says "${id}". They must match, and an id must never change once learners have used it`);
   if (c.status && !STATUSES.includes(c.status)) E(`"status" must be one of ${STATUSES.join(", ")} (found "${c.status}")`);
+  if (c.pool !== undefined && !["example", "practice"].includes(c.pool)) E(`"pool" must be example or practice (found "${c.pool}")`);
   if (c.status === "live") liveCount++;
   if (c.population && !POPULATIONS.includes(c.population)) E(`"population" must be adult or pediatric (found "${c.population}")`);
   if (c.correct && !CATEGORIES.includes(c.correct)) E(`"correct" must be one of ${CATEGORIES.join(", ")} (found "${c.correct}")`);
   if (c.focusTags !== undefined && !Array.isArray(c.focusTags)) E('"focusTags" must be a list');
   else for (const t of c.focusTags || []) if (knownTags && !knownTags.includes(t)) W(`focus tag "${t}" is not in tags.json. Add it there first so tags stay consistent`);
   for (const kind of ["cases", "faces"]) {
-    if (c.image && !fs.existsSync(path.join(root, `${kind === "cases" ? "picture" : "portrait"}-${c.image}.jpg`))) E(`picture ${kind === "cases" ? "picture" : "portrait"}-${c.image}.jpg not found`);
+    if (c.image && !fs.existsSync(path.join(root, `${kind === "cases" ? "picture" : "portrait"}-${c.image}.jpg`))) {
+      const msg = `picture ${kind === "cases" ? "picture" : "portrait"}-${c.image}.jpg not found`;
+      if (c.pool === "example") E(msg); else W(msg + ". Until it is added, this case shows no picture");
+    }
   }
   if (Array.isArray(c.checkpoints)) {
     if (!c.checkpoints.length) E("has no checkpoints");

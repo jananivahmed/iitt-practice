@@ -1,0 +1,95 @@
+{
+  "id": "n-07",
+  "status": "live",
+  "pool": "practice",
+  "population": "pediatric",
+  "title": "7-year-old boy feeling unwell",
+  "age": "7 years",
+  "sex": "Male",
+  "domain": "Infection / neurological",
+  "focusTags": [
+    "pediatric"
+  ],
+  "image": "n-07",
+  "ageBandRef": {
+    "band": "5–12 years",
+    "hr": "70–140 bpm",
+    "rr": "10–30 breaths/min"
+  },
+  "arrival": "A 7-year-old boy is brought in by his father after a day of feeling unwell.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no"
+    },
+    {
+      "g": "airway_red",
+      "correct": "no"
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "104 bpm"
+      },
+      "correct": "no"
+    },
+    {
+      "g": "disability_red",
+      "correct": "yes"
+    }
+  ],
+  "correct": "red",
+  "keyCriterion": "Red — Disability: altered mental status (continuously irritable) with stiff neck",
+  "feedbackWhy": "He is continuously irritable, which is an altered mental status, and his neck is stiff. Altered mental status with a stiff neck, hypothermia or fever meets a red Disability criterion, so he should be moved to the high acuity area immediately.",
+  "reassessment": null,
+  "needsReview": true,
+  "reviewNote": "CLINICIAN REVIEW REQUIRED: confirm that continuous irritability counts as altered mental status here, and that AVPU A is right for him. The temperature is normal on purpose so the stiff neck is the second finding. Age band 5-12 years (HR 70-140, RR 10-30). Every value is proposed.",
+  "author": "",
+  "design": {
+    "intendedChallenge": "Altered mental status becomes a red criterion when it comes with a stiff neck, hypothermia or fever. A stiff neck is found only by checking.",
+    "expectedCommonError": "triaging as green or yellow because he is awake, has a normal temperature and has no obvious distress.",
+    "criterionType": "P-R-DIS-02"
+  },
+  "findings": {
+    "unresponsive": {
+      "text": "Awake. Responds when spoken to."
+    },
+    "airway_red": {
+      "text": "No stridor. No chest indrawing. No central cyanosis."
+    },
+    "circulation_red": {
+      "text": "Pulse strong. Extremities warm. Capillary refill 2 seconds. No bleeding. Eyes not sunken. Skin pinch returns at once. Drinking normally.",
+      "chips": {
+        "HR": "104 bpm"
+      }
+    },
+    "disability_red": {
+      "text": "Continuously irritable and difficult to settle. Resists bending his neck forward. No convulsions."
+    },
+    "other_red": {
+      "text": "No trauma, poisoning, threatened limb, snake bite or scrotal pain."
+    },
+    "airway_yellow": {
+      "text": "No swelling of the mouth, throat or neck. No wheezing."
+    },
+    "circulation_yellow": {
+      "text": "Drinking normally. No vomiting or diarrhoea. Not pale. Mouth moist."
+    },
+    "disability_yellow": {
+      "text": "Continuously irritable and difficult to settle. No severe pain reported."
+    },
+    "other_yellow": {
+      "text": "No rash. No trauma. No visible wasting. No swelling of both feet. No headache reported. No known surgical diagnosis."
+    },
+    "vitals": {
+      "chips": {
+        "HR": "104 bpm",
+        "RR": "20 breaths/min",
+        "SpO2": "98%",
+        "Temp": "37.2°C",
+        "AVPU": "A"
+      }
+    }
+  },
+  "findingsReviewed": true
+}

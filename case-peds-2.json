@@ -1,6 +1,7 @@
 {
   "id": "peds-2",
   "status": "live",
+  "pool": "example",
   "population": "pediatric",
   "title": "10-day-old boy with vomiting",
   "age": "10 days",

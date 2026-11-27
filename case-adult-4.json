@@ -1,6 +1,7 @@
 {
   "id": "adult-4",
   "status": "live",
+  "pool": "example",
   "population": "adult",
   "title": "48-year-old woman with abdominal pain",
   "age": "48 years",

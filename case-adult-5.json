@@ -1,6 +1,7 @@
 {
   "id": "adult-5",
   "status": "live",
+  "pool": "example",
   "population": "adult",
   "title": "25-year-old man with a forearm abrasion",
   "age": "25 years",

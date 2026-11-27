@@ -1,0 +1,87 @@
+{
+  "id": "n-01",
+  "status": "live",
+  "pool": "practice",
+  "population": "adult",
+  "title": "34-year-old man feeling unwell",
+  "age": "34 years",
+  "sex": "Male",
+  "domain": "Cardiovascular",
+  "focusTags": [
+    "adult"
+  ],
+  "image": "n-01",
+  "ageBandRef": null,
+  "arrival": "A 34-year-old man presents feeling unwell, with symptoms that began two hours ago.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no"
+    },
+    {
+      "g": "airway_red",
+      "correct": "no"
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "168 bpm"
+      },
+      "correct": "yes"
+    }
+  ],
+  "correct": "red",
+  "keyCriterion": "Red — Circulation: HR >150",
+  "feedbackWhy": "His heart rate is above 150 bpm, which meets a red Circulation criterion. He looks well, but the measured heart rate decides the category, and he should be moved to the high acuity area immediately.",
+  "reassessment": null,
+  "needsReview": true,
+  "reviewNote": "CLINICIAN REVIEW REQUIRED: every value in this draft is proposed and needs confirming, in particular HR 168 bpm with a regular pulse. The case info leaves out palpitations on purpose, so check that it is not misleading.",
+  "author": "",
+  "design": {
+    "intendedChallenge": "A patient who looks well can still meet a red criterion. A heart rate above 150 is found by measuring it, not by looking at the patient.",
+    "expectedCommonError": "triaging him as yellow or green because he looks well.",
+    "criterionType": "A-R-CIRC-04"
+  },
+  "findings": {
+    "unresponsive": {
+      "text": "Alert. Answers questions clearly."
+    },
+    "airway_red": {
+      "text": "Speaks in full sentences. No stridor. No respiratory distress. No central cyanosis."
+    },
+    "circulation_red": {
+      "text": "Pulse felt at the wrist and regular. Capillary refill 2 seconds. No bleeding.",
+      "chips": {
+        "HR": "168 bpm"
+      }
+    },
+    "disability_red": {
+      "text": "No convulsions. Alert with normal mental status. No headache. No stiff neck."
+    },
+    "other_red": {
+      "text": "Age 34. No trauma, poisoning, threatened limb or snake bite. No chest or abdominal pain. Not aggressive."
+    },
+    "airway_yellow": {
+      "text": "No swelling of the mouth, throat or neck. No wheezing."
+    },
+    "circulation_yellow": {
+      "text": "No vomiting or diarrhoea. No ongoing bleeding. Not pale. No fainting. Drinking normally."
+    },
+    "disability_yellow": {
+      "text": "Alert and calm. No weakness. No visual disturbance. No pain."
+    },
+    "other_yellow": {
+      "text": "No rash, deformity, fracture or dislocation. No trauma. No known surgical diagnosis. Passing urine normally. No bite or needlestick exposure."
+    },
+    "vitals": {
+      "chips": {
+        "HR": "168 bpm",
+        "RR": "18 breaths/min",
+        "SpO2": "98%",
+        "Temp": "36.8°C",
+        "AVPU": "A"
+      }
+    }
+  },
+  "findingsReviewed": true
+}

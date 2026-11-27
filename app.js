@@ -10,6 +10,9 @@
    ============================================================ */
 
 var IMAGES = {"adult-1": "picture-adult-1.jpg", "adult-2": "picture-adult-2.jpg", "adult-3": "picture-adult-3.jpg", "adult-4": "picture-adult-4.jpg", "adult-5": "picture-adult-5.jpg", "peds-1": "picture-peds-1.jpg", "peds-2": "picture-peds-2.jpg", "peds-3": "picture-peds-3.jpg", "peds-4": "picture-peds-4.jpg", "peds-5": "picture-peds-5.jpg"};
+/* Pictures follow the file-name rule picture-<image>.jpg / portrait-<image>.jpg. A case without its picture shows no picture instead of a broken one. */
+function picSrc(c) { return IMAGES[c.image] || ("picture-" + c.image + ".jpg"); }
+function faceSrc(c) { return FACE_IMAGES[c.image] || ("portrait-" + c.image + ".jpg"); }
 var FACE_IMAGES = {"adult-1": "portrait-adult-1.jpg", "adult-2": "portrait-adult-2.jpg", "adult-3": "portrait-adult-3.jpg", "adult-4": "portrait-adult-4.jpg", "adult-5": "portrait-adult-5.jpg", "peds-1": "portrait-peds-1.jpg", "peds-2": "portrait-peds-2.jpg", "peds-3": "portrait-peds-3.jpg", "peds-4": "portrait-peds-4.jpg", "peds-5": "portrait-peds-5.jpg"};
 var PDF_REFS = {"adult": "refcard-adult.png", "pediatric": "refcard-pediatric.png", "reference": "refcard-reference.png"};
 var MODE_ICONS = {"example": "ui-mode-example.png", "guided": "ui-mode-guided.png", "triage": "ui-mode-triage.png"};
@@ -288,12 +291,16 @@ function shuffleArray(arr) {
   }
   return arr;
 }
+/* Two pools: cases marked pool "example" are used only in Worked Example; every other case is used in Guided and Triage Practice. */
+function isExampleCase(c) { return !!c && c.pool === "example"; }
+function practiceCases() { return CASES.filter(function (c) { return !isExampleCase(c); }); }
+function exampleCases() { return CASES.filter(isExampleCase); }
 function shuffledCaseOrder() {
-  var ids = CASES.map(function (c) { return c.id; });
+  var ids = practiceCases().map(function (c) { return c.id; });
   return shuffleArray(ids).slice(0, getCaseCount());
 }
 /* How many cases a practice run contains: 1 up to every case available (10 at most). */
-function maxCaseCount() { return Math.max(1, Math.min(10, CASES.length)); }
+function maxCaseCount() { return Math.max(1, Math.min(10, practiceCases().length)); }
 function getCaseCount() {
   var n = parseInt(safeGet(STORE_CASE_COUNT, 5), 10);
   if (isNaN(n)) n = 5;
@@ -661,7 +668,7 @@ function restoreRun() {
   var r = safeGet(STORE_RUN, null);
   if (r && r.email === getLearnerEmail() && r.example && (!r.queue || !r.queue.length) && caseById(r.example.id)) { state.example = r.example; return true; }
   if (!r || r.email !== getLearnerEmail() || !r.queue || !r.queue.length) return false;
-  for (var i = 0; i < r.queue.length; i++) if (!caseById(r.queue[i])) return false;
+  for (var i = 0; i < r.queue.length; i++) if (!caseById(r.queue[i]) || isExampleCase(caseById(r.queue[i]))) return false;
   ["practiceMode", "queue", "qIndex", "phase", "cpIndex", "cpSelected", "cpLocked", "reason", "cpLog", "checked", "gatherSeq", "selected", "confidence", "locked", "caseAttemptId", "caseAttemptStart", "results"].forEach(function (k) {
     if (r[k] !== undefined) state[k] = r[k];
   });
@@ -697,7 +704,7 @@ function renderCaseInfo(c) {
   var pct = Math.round(num / state.queue.length * 100);
   var html = '<div class="card">';
   html += caseHeader(c, num, pct);
-  html += '<img class="case-image" src="' + IMAGES[c.image] + '" alt="Illustration of the patient described in this case" loading="lazy">';
+  html += '<img class="case-image" src="' + picSrc(c) + '" onerror="this.style.display=\'none\'" alt="Illustration of the patient described in this case" loading="lazy">';
   html += '<p class="vignette">' + esc(c.arrival) + '</p>';
   html += '<div class="cta-row"><button class="btn btn-primary" onclick="toggleCaseInfo()">Back to assessment</button></div>';
   html += '</div>';
@@ -705,7 +712,7 @@ function renderCaseInfo(c) {
 }
 function miniImageRow(c, showAgeBand, hideCaseInfoBtn) {
   return '<div class="mini-header flex items-center gap-3 mb-4">' +
-    '<img class="case-image-mini" src="' + FACE_IMAGES[c.image] + '" alt="Portrait of the patient described in this case" loading="lazy">' +
+    '<img class="case-image-mini" src="' + faceSrc(c) + '" onerror="this.style.display=\'none\'" alt="Portrait of the patient described in this case" loading="lazy">' +
     '<div class="case-info-row flex flex-wrap justify-end gap-2 ml-auto">' +
     (showAgeBand && AGE_BAND_VITALS.length ? '<button class="case-info-btn" onclick="openAgeBandVitals()">Age-band vitals</button>' : '') +
     (hideCaseInfoBtn ? '' : '<button class="case-info-btn" onclick="toggleCaseInfo()">Case info</button>') +
@@ -967,7 +974,7 @@ function renderArrival(c) {
   var pct = Math.round((num - 1) / state.queue.length * 100);
   var html = '<div class="card">';
   html += caseHeader(c, num, pct);
-  html += '<img class="case-image" src="' + IMAGES[c.image] + '" alt="Illustration of the patient described in this case" loading="lazy">';
+  html += '<img class="case-image" src="' + picSrc(c) + '" onerror="this.style.display=\'none\'" alt="Illustration of the patient described in this case" loading="lazy">';
   html += '<p class="vignette">' + esc(c.arrival) + '</p>';
   html += '<div class="cta-row"><button class="btn btn-primary" onclick="beginAssessment()">Begin assessment</button></div>';
   html += endSessionRow();
@@ -978,7 +985,7 @@ function renderArrival(c) {
    An unscored walkthrough of one case, built only from the case's own findings,
    checkpoints, criteria and explanation. Step 0 is the arrival, steps 1..n are the
    checkpoints, and the last step is the decision. */
-/* Every case is offered as a worked example, labelled with its overview only (the case title), so the label never gives away the answer. */
+/* Cases marked pool "example" are offered as worked examples, labelled with its overview only (the case title), so the label never gives away the answer. */
 var exampleOpen = {};
 function exampleListHtml() {
   var seen = safeGet(STORE_EX_SEEN, []);
@@ -988,7 +995,7 @@ function exampleListHtml() {
   }
   var html = '';
   [["adult", "Adult cases"], ["pediatric", "Paediatric cases"]].forEach(function (g) {
-    var list = CASES.filter(function (c) { return c.population === g[0]; });
+    var list = exampleCases().filter(function (c) { return c.population === g[0]; });
     if (!list.length) return;
     var n = list.filter(function (c) { return seen.indexOf(c.id) !== -1; }).length;
     html += '<details class="example-group"' + (exampleOpen[g[0]] ? ' open' : '') + ' ontoggle="exampleOpen[\'' + g[0] + '\']=this.open"><summary>' + g[1] + ' <span class="example-count">(' + (n ? n + ' of ' + list.length + ' watched' : list.length) + ')</span></summary><div class="example-group-body">' + list.map(btn).join('') + '</div></details>';
@@ -1027,7 +1034,7 @@ function renderExample() {
   html += '<div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><div class="progress-fill" style="--to:' + (pct / 100) + ';--from:' + (pct / 100) + '"></div></div>';
 
   if (step === 0) {
-    html += '<img class="case-image" src="' + IMAGES[c.image] + '" alt="Illustration of the patient described in this case" loading="lazy">';
+    html += '<img class="case-image" src="' + picSrc(c) + '" onerror="this.style.display=\'none\'" alt="Illustration of the patient described in this case" loading="lazy">';
     html += '<p class="vignette">' + esc(c.arrival) + '</p>';
     html += '<div class="reassess-note how-you-worked"><h4>What you will see</h4><ul>' +
       '<li>The card is worked in order: red criteria, then yellow, then high-risk vital signs.</li>' +
@@ -1806,7 +1813,7 @@ function renderReviewList() {
   CASES.forEach(function (c) {
     var meta = CATEGORY_META[c.correct];
     html += '<div class="review-list-item" onclick="openReview(\'' + c.id + '\')" role="button" tabindex="0">';
-    html += '<img class="review-thumb" src="' + FACE_IMAGES[c.image] + '" alt="">';
+    html += '<img class="review-thumb" src="' + faceSrc(c) + '" onerror="this.style.display=\'none\'" alt="">';
     html += '<div><div class="r-title">' + esc(c.title) + '</div><div class="r-sub">' + (c.population === "adult" ? "Adult" : "Paediatric") + ', ' + meta.label + ', ' + c.checkpoints.length + ' checkpoints</div></div>';
     if (c.needsReview) {
       var listStatus = reviewStatusFor(c.id);
@@ -1844,7 +1851,7 @@ function renderReviewDetail(id) {
     html += '<div class="field-row" style="margin-top:12px; margin-bottom:0;"><label>Resolution notes</label><textarea rows="3" data-case="' + id + '" data-field="review_resolution_notes" onchange="onMetaEdit(this)" placeholder="Add corrections, clarifications, or the reasoning for confirming this as-is...">' + esc(overrides.review_resolution_notes || "") + '</textarea></div>';
     html += '</div>';
   }
-  html += '<img class="case-image" src="' + IMAGES[c.image] + '" alt="">';
+  html += '<img class="case-image" src="' + picSrc(c) + '" onerror="this.style.display=\'none\'" alt="">';
   html += '<h3 class="case-title">' + esc(c.title) + '</h3>';
   html += '<div class="kv"><span><b>Population:</b> ' + (c.population === "adult" ? "Adult" : "Paediatric") + '</span><span><b>Age:</b> ' + esc(c.age) + '</span><span><b>Sex:</b> ' + esc(c.sex) + '</span></div>';
   html += '<div class="kv" style="margin-top:6px;"><span><b>Clinical domain:</b> ' + esc(c.domain) + '</span></div>';
@@ -1931,7 +1938,7 @@ function renderCoverage() {
 
   var html = '<div class="card">';
   html += '<h2 class="section-title">Case bank coverage</h2>';
-  html += '<p class="section-sub">Current coverage across the 10 seed cases, to guide which new cases should be developed next.</p>';
+  html += '<p class="section-sub">Current coverage across all cases in the bank (worked examples and practice cases), to guide which new cases should be developed next.</p>';
 
   html += '<table class="pop-table"><thead><tr><th>Category</th><th>Adult</th><th>Paediatric</th><th>Total</th></tr></thead><tbody>';
   ["red", "yellow", "green", "uptriage"].forEach(function (k) {

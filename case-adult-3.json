@@ -1,6 +1,7 @@
 {
   "id": "adult-3",
   "status": "live",
+  "pool": "example",
   "population": "adult",
   "title": "28-year-old woman, 39 weeks pregnant, who collapsed",
   "age": "28 years",

@@ -1,6 +1,7 @@
 {
   "id": "adult-2",
   "status": "live",
+  "pool": "example",
   "population": "adult",
   "title": "40-year-old man who smells of alcohol",
   "age": "40 years",

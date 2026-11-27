@@ -1,0 +1,107 @@
+{
+  "id": "n-04",
+  "status": "live",
+  "pool": "practice",
+  "population": "adult",
+  "title": "55-year-old woman with a problem in her left hand",
+  "age": "55 years",
+  "sex": "Female",
+  "domain": "Neurological",
+  "focusTags": [
+    "adult"
+  ],
+  "image": "n-04",
+  "ageBandRef": null,
+  "arrival": "A 55-year-old woman presents with a problem in her left hand that began this morning.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no"
+    },
+    {
+      "g": "airway_red",
+      "correct": "no"
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "84 bpm"
+      },
+      "correct": "no"
+    },
+    {
+      "g": "disability_red",
+      "correct": "no"
+    },
+    {
+      "g": "other_red",
+      "correct": "no"
+    },
+    {
+      "g": "airway_yellow",
+      "correct": "no"
+    },
+    {
+      "g": "circulation_yellow",
+      "correct": "no"
+    },
+    {
+      "g": "disability_yellow",
+      "correct": "yes"
+    }
+  ],
+  "correct": "yellow",
+  "keyCriterion": "Yellow — Disability: acute focal neurologic complaint",
+  "feedbackWhy": "She has numbness and tingling in her left hand that began this morning. This is an acute focal neurological complaint, which meets a yellow Disability criterion. No red criterion is met. She should be moved to the clinical treatment area.",
+  "reassessment": null,
+  "needsReview": true,
+  "reviewNote": "CLINICIAN REVIEW REQUIRED: confirm that numbness and tingling in one hand is a good example of an acute focal neurologic complaint, or replace it with a finding you prefer. Every value is proposed.",
+  "author": "",
+  "design": {
+    "intendedChallenge": "An acute focal neurological complaint is a yellow Disability criterion, even in a patient who is alert and has normal vital signs.",
+    "expectedCommonError": "triaging as green because she is alert and well appearing.",
+    "criterionType": "A-Y-DIS-03"
+  },
+  "findings": {
+    "unresponsive": {
+      "text": "Alert. Answers questions clearly."
+    },
+    "airway_red": {
+      "text": "Speaks in full sentences. No stridor. No respiratory distress. No central cyanosis."
+    },
+    "circulation_red": {
+      "text": "Pulse strong. Capillary refill 2 seconds. No bleeding.",
+      "chips": {
+        "HR": "84 bpm"
+      }
+    },
+    "disability_red": {
+      "text": "No convulsions. Alert with normal mental status. No headache. No stiff neck."
+    },
+    "other_red": {
+      "text": "Age 55. No chest or abdominal pain. No trauma, poisoning, threatened limb or snake bite. Not aggressive."
+    },
+    "airway_yellow": {
+      "text": "No swelling of the mouth, throat or neck. No wheezing."
+    },
+    "circulation_yellow": {
+      "text": "No vomiting or diarrhoea. No bleeding or fainting. Not pale. Drinking normally."
+    },
+    "disability_yellow": {
+      "text": "Numbness and tingling in the left hand since this morning. Grip strength normal. Speech clear. No weakness in the other limbs. No visual disturbance. No pain."
+    },
+    "other_yellow": {
+      "text": "No rash, deformity, fracture or dislocation. No trauma. No known surgical diagnosis. Passing urine normally. No bite or needlestick exposure."
+    },
+    "vitals": {
+      "chips": {
+        "HR": "84 bpm",
+        "RR": "16 breaths/min",
+        "SpO2": "98%",
+        "Temp": "36.6°C",
+        "AVPU": "A"
+      }
+    }
+  },
+  "findingsReviewed": true
+}

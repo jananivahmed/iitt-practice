@@ -1,0 +1,122 @@
+{
+  "id": "n-05",
+  "status": "live",
+  "pool": "practice",
+  "population": "adult",
+  "title": "45-year-old man with a cough",
+  "age": "45 years",
+  "sex": "Male",
+  "domain": "Respiratory",
+  "focusTags": [
+    "adult"
+  ],
+  "image": "n-05",
+  "ageBandRef": null,
+  "arrival": "A 45-year-old man presents with a cough for five days.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no"
+    },
+    {
+      "g": "airway_red",
+      "correct": "no"
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "98 bpm"
+      },
+      "correct": "no"
+    },
+    {
+      "g": "disability_red",
+      "correct": "no"
+    },
+    {
+      "g": "other_red",
+      "correct": "no"
+    },
+    {
+      "g": "airway_yellow",
+      "correct": "no"
+    },
+    {
+      "g": "circulation_yellow",
+      "correct": "no"
+    },
+    {
+      "g": "disability_yellow",
+      "correct": "no"
+    },
+    {
+      "g": "other_yellow",
+      "correct": "no"
+    },
+    {
+      "g": "vitals",
+      "chips": {
+        "HR": "98 bpm",
+        "RR": "22 breaths/min",
+        "SpO2": "90%",
+        "Temp": "37.8°C",
+        "AVPU": "A"
+      },
+      "correct": "yes"
+    }
+  ],
+  "correct": "uptriage",
+  "keyCriterion": "High-risk vital sign — SpO2 90% (threshold <92%)",
+  "feedbackWhy": "This patient does not meet any red or yellow criteria. However, his SpO2 is below the high-risk threshold of 92%. He should not be moved directly to the low-acuity or waiting area without immediate review by a supervising clinician.",
+  "reassessment": null,
+  "needsReview": true,
+  "reviewNote": "CLINICIAN REVIEW REQUIRED: confirm SpO2 90% is clinically consistent with RR 22 and no chest indrawing, and that no later value (HR 98, RR 22, Temp 37.8°C) risks a second high-risk vital sign. Every value is proposed.",
+  "author": "",
+  "design": {
+    "intendedChallenge": "A patient with no red or yellow finding can still have a high-risk vital sign. SpO2 is found only by measuring it, at the last step of the card.",
+    "expectedCommonError": "triaging as green because nothing is found until the vital signs step.",
+    "criterionType": "A-V-VIT-07"
+  },
+  "findings": {
+    "unresponsive": {
+      "text": "Alert. Answers questions clearly."
+    },
+    "airway_red": {
+      "text": "Speaks in full sentences. No stridor. No chest indrawing. No central cyanosis."
+    },
+    "circulation_red": {
+      "text": "Pulse strong. Capillary refill 2 seconds. No bleeding.",
+      "chips": {
+        "HR": "98 bpm"
+      }
+    },
+    "disability_red": {
+      "text": "No convulsions. Alert with normal mental status. No headache. No stiff neck."
+    },
+    "other_red": {
+      "text": "Age 45. No chest or abdominal pain. No trauma, poisoning, threatened limb or snake bite. Not aggressive."
+    },
+    "airway_yellow": {
+      "text": "No swelling of the mouth, throat or neck. No wheezing."
+    },
+    "circulation_yellow": {
+      "text": "No vomiting or diarrhoea. No bleeding or fainting. Not pale. Drinking normally."
+    },
+    "disability_yellow": {
+      "text": "Alert and calm. Walking independently. No weakness. No visual disturbance. No pain."
+    },
+    "other_yellow": {
+      "text": "No rash, deformity, fracture or dislocation. No trauma. No known surgical diagnosis. Passing urine normally. No bite or needlestick exposure."
+    },
+    "vitals": {
+      "chips": {
+        "HR": "98 bpm",
+        "RR": "22 breaths/min",
+        "SpO2": "90%",
+        "Temp": "37.8°C",
+        "AVPU": "A"
+      }
+    }
+  },
+  "findingsReviewed": true
+}

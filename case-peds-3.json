@@ -1,6 +1,7 @@
 {
   "id": "peds-3",
   "status": "live",
+  "pool": "example",
   "population": "pediatric",
   "title": "40-day-old girl with seizure",
   "age": "40 days",

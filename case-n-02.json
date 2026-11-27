@@ -1,0 +1,97 @@
+{
+  "id": "n-02",
+  "status": "live",
+  "pool": "practice",
+  "population": "adult",
+  "title": "71-year-old man found unwell at home",
+  "age": "71 years",
+  "sex": "Male",
+  "domain": "General medicine / altered mental status",
+  "focusTags": [
+    "adult"
+  ],
+  "image": "n-02",
+  "ageBandRef": null,
+  "arrival": "A 71-year-old man is brought in by his daughter, who found him unwell at home this morning.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no"
+    },
+    {
+      "g": "airway_red",
+      "correct": "no"
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "88 bpm"
+      },
+      "correct": "no"
+    },
+    {
+      "g": "disability_red",
+      "chips": {
+        "Temp": "35.2°C"
+      },
+      "correct": "yes"
+    }
+  ],
+  "correct": "red",
+  "keyCriterion": "Red — Disability: any two of altered mental status, stiff neck, hypothermia or fever, headache",
+  "feedbackWhy": "He has two of the listed findings together: altered mental status (he is confused) and hypothermia (temperature 35.2°C). Two together meet a red Disability criterion, so he should be moved to the high acuity area immediately.",
+  "reassessment": null,
+  "needsReview": true,
+  "reviewNote": "CLINICIAN REVIEW REQUIRED: confirm that 35.2°C counts as hypothermia on this card (the Disability section gives no number; the vital signs section uses Temp <36°). Confirm AVPU A is right for a confused patient who answers questions. Every value is proposed.",
+  "author": "",
+  "design": {
+    "intendedChallenge": "Some red criteria need two findings together. Confusion alone would be yellow. Confusion together with a low temperature is red, and the second finding has to be found by checking.",
+    "expectedCommonError": "triaging as yellow because confusion alone is a yellow criterion.",
+    "criterionType": "A-R-DIS-02"
+  },
+  "findings": {
+    "unresponsive": {
+      "text": "Awake. Opens his eyes and answers when spoken to."
+    },
+    "airway_red": {
+      "text": "Speaks clearly. No stridor. No respiratory distress. No central cyanosis."
+    },
+    "circulation_red": {
+      "text": "Pulse strong. Capillary refill 2 seconds. No bleeding.",
+      "chips": {
+        "HR": "88 bpm"
+      }
+    },
+    "disability_red": {
+      "text": "Confused. Does not know the day or where he is. No convulsions. No headache. No stiff neck.",
+      "chips": {
+        "Temp": "35.2°C"
+      }
+    },
+    "other_red": {
+      "text": "Age 71. No chest or abdominal pain. No trauma, poisoning, threatened limb or snake bite. Not aggressive."
+    },
+    "airway_yellow": {
+      "text": "No swelling of the mouth, throat or neck. No wheezing."
+    },
+    "circulation_yellow": {
+      "text": "No vomiting or diarrhoea. No bleeding or fainting. Not pale. Drinks when offered a cup."
+    },
+    "disability_yellow": {
+      "text": "Confused but calm. Not agitated. No weakness. No visual disturbance. No pain."
+    },
+    "other_yellow": {
+      "text": "No rash, deformity, fracture or dislocation. No trauma. No known surgical diagnosis. Passing urine normally. No bite or needlestick exposure."
+    },
+    "vitals": {
+      "chips": {
+        "HR": "88 bpm",
+        "RR": "18 breaths/min",
+        "SpO2": "96%",
+        "Temp": "35.2°C",
+        "AVPU": "A"
+      }
+    }
+  },
+  "findingsReviewed": true
+}

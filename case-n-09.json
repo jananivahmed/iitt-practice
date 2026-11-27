@@ -1,0 +1,126 @@
+{
+  "id": "n-09",
+  "status": "live",
+  "pool": "practice",
+  "population": "pediatric",
+  "title": "18-month-old girl with a runny nose",
+  "age": "18 months",
+  "sex": "Female",
+  "domain": "Respiratory",
+  "focusTags": [
+    "pediatric"
+  ],
+  "image": "n-09",
+  "ageBandRef": {
+    "band": "1–4 years",
+    "hr": "80–160 bpm",
+    "rr": "20–40 breaths/min"
+  },
+  "arrival": "An 18-month-old girl is brought in by her mother with a runny nose for two days.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no"
+    },
+    {
+      "g": "airway_red",
+      "correct": "no"
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "128 bpm"
+      },
+      "correct": "no"
+    },
+    {
+      "g": "disability_red",
+      "correct": "no"
+    },
+    {
+      "g": "other_red",
+      "correct": "no"
+    },
+    {
+      "g": "airway_yellow",
+      "correct": "no"
+    },
+    {
+      "g": "circulation_yellow",
+      "correct": "no"
+    },
+    {
+      "g": "disability_yellow",
+      "correct": "no"
+    },
+    {
+      "g": "other_yellow",
+      "correct": "no"
+    },
+    {
+      "g": "vitals",
+      "chips": {
+        "HR": "128 bpm",
+        "RR": "46 breaths/min",
+        "SpO2": "97%",
+        "Temp": "37.6°C",
+        "AVPU": "A"
+      },
+      "correct": "yes"
+    }
+  ],
+  "correct": "uptriage",
+  "keyCriterion": "High-risk vital sign — RR 46 breaths/min (threshold >40 for ages 1–4 years)",
+  "feedbackWhy": "This patient does not meet any red or yellow criteria. However, her respiratory rate is above the high-risk threshold of 40 breaths/min for children aged 1–4 years. She should not be moved directly to the low-acuity or waiting area without immediate review by a supervising clinician. The supervising clinician or local protocol should determine her final triage category.",
+  "reassessment": null,
+  "needsReview": true,
+  "reviewNote": "CLINICIAN REVIEW REQUIRED: confirm RR 46 is consistent with no chest indrawing and a runny nose only. Age band 1-4 years (HR 80-160, RR 20-40). Every value is proposed.",
+  "author": "",
+  "design": {
+    "intendedChallenge": "A child can look well and meet no red or yellow criterion yet have a high-risk vital sign for her age. The respiratory rate must be compared with the age band.",
+    "expectedCommonError": "triaging as green because nothing is found before the vital signs step.",
+    "criterionType": "P-V-VIT-09"
+  },
+  "findings": {
+    "unresponsive": {
+      "text": "Awake. Looks around and reaches for her mother."
+    },
+    "airway_red": {
+      "text": "No stridor. No chest indrawing. No central cyanosis."
+    },
+    "circulation_red": {
+      "text": "Pulse strong. Extremities warm. Capillary refill 2 seconds. No bleeding. Awake and interacting. Eyes not sunken. Skin pinch returns at once. Drinking normally.",
+      "chips": {
+        "HR": "128 bpm"
+      }
+    },
+    "disability_red": {
+      "text": "No convulsions. Awake and interacting. Not confused, restless or irritable. No stiff neck."
+    },
+    "other_red": {
+      "text": "No trauma, poisoning, threatened limb or snake bite."
+    },
+    "airway_yellow": {
+      "text": "No swelling of the mouth, throat or neck. No wheezing."
+    },
+    "circulation_yellow": {
+      "text": "Drinking and feeding normally. No vomiting or diarrhoea. Not pale. Mouth moist."
+    },
+    "disability_yellow": {
+      "text": "Awake and interacting. Not restless or irritable. No severe pain."
+    },
+    "other_yellow": {
+      "text": "No visible wasting. No swelling of both feet. No rash. No trauma. No known surgical diagnosis."
+    },
+    "vitals": {
+      "chips": {
+        "HR": "128 bpm",
+        "RR": "46 breaths/min",
+        "SpO2": "97%",
+        "Temp": "37.6°C",
+        "AVPU": "A"
+      }
+    }
+  },
+  "findingsReviewed": true
+}

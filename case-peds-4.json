@@ -1,6 +1,7 @@
 {
   "id": "peds-4",
   "status": "live",
+  "pool": "example",
   "population": "pediatric",
   "title": "4-year-old girl with abdominal pain",
   "age": "4 years",

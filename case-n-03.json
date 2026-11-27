@@ -1,0 +1,103 @@
+{
+  "id": "n-03",
+  "status": "live",
+  "pool": "practice",
+  "population": "adult",
+  "title": "62-year-old man feeling dizzy",
+  "age": "62 years",
+  "sex": "Male",
+  "domain": "General medicine / syncope",
+  "focusTags": [
+    "adult"
+  ],
+  "image": "n-03",
+  "ageBandRef": null,
+  "arrival": "A 62-year-old man presents feeling dizzy since this morning.",
+  "checkpoints": [
+    {
+      "g": "unresponsive",
+      "correct": "no"
+    },
+    {
+      "g": "airway_red",
+      "correct": "no"
+    },
+    {
+      "g": "circulation_red",
+      "chips": {
+        "HR": "112 bpm"
+      },
+      "correct": "no"
+    },
+    {
+      "g": "disability_red",
+      "correct": "no"
+    },
+    {
+      "g": "other_red",
+      "correct": "no"
+    },
+    {
+      "g": "airway_yellow",
+      "correct": "no"
+    },
+    {
+      "g": "circulation_yellow",
+      "correct": "yes"
+    }
+  ],
+  "correct": "yellow",
+  "keyCriterion": "Yellow — Circulation: recent fainting (no red criteria)",
+  "feedbackWhy": "He fainted earlier today. Recent fainting meets a yellow Circulation criterion. No red criterion is met: capillary refill is 3 seconds, which is not more than 3 seconds, and his heart rate is below 150. He should be moved to the clinical treatment area.",
+  "reassessment": null,
+  "needsReview": true,
+  "reviewNote": "CLINICIAN REVIEW REQUIRED: capillary refill of exactly 3 seconds is deliberately just short of the red threshold (>3 sec); confirm this near-miss is acceptable. Confirm that fainting once this morning counts as recent fainting. Every value is proposed.",
+  "author": "",
+  "design": {
+    "intendedChallenge": "Recent fainting is a yellow Circulation criterion. A value just short of a red threshold does not meet the red criterion, so each value has to be compared with the card.",
+    "expectedCommonError": "triaging as red because he fainted and his capillary refill is borderline, or as green because he is alert.",
+    "criterionType": "A-Y-CIRC-05"
+  },
+  "findings": {
+    "unresponsive": {
+      "text": "Alert. Answers questions clearly."
+    },
+    "airway_red": {
+      "text": "Speaks in full sentences. No stridor. No respiratory distress. No central cyanosis."
+    },
+    "circulation_red": {
+      "text": "Pulse felt at the wrist. Capillary refill 3 seconds. No bleeding.",
+      "chips": {
+        "HR": "112 bpm"
+      }
+    },
+    "disability_red": {
+      "text": "No convulsions. Alert with normal mental status. No headache. No stiff neck."
+    },
+    "other_red": {
+      "text": "Age 62. No chest or abdominal pain. No trauma, poisoning, threatened limb or snake bite. Not aggressive."
+    },
+    "airway_yellow": {
+      "text": "No swelling of the mouth, throat or neck. No wheezing."
+    },
+    "circulation_yellow": {
+      "text": "Fainted once this morning and recovered within a minute. Not pale. No vomiting or diarrhoea. No ongoing bleeding. Drinking normally."
+    },
+    "disability_yellow": {
+      "text": "Alert and calm. No weakness. No visual disturbance. No pain."
+    },
+    "other_yellow": {
+      "text": "No rash, deformity, fracture or dislocation. No trauma. No known surgical diagnosis. Passing urine normally. No bite or needlestick exposure."
+    },
+    "vitals": {
+      "chips": {
+        "HR": "112 bpm",
+        "RR": "18 breaths/min",
+        "SpO2": "97%",
+        "Temp": "36.7°C",
+        "AVPU": "A"
+      }
+    }
+  },
+  "findingsReviewed": true
+}

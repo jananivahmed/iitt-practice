@@ -1,6 +1,7 @@
 {
   "id": "adult-1",
   "status": "live",
+  "pool": "example",
   "population": "adult",
   "title": "33-year-old woman with difficulty breathing",
   "age": "33 years",
